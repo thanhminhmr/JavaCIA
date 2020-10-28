@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+  ~
+  ~ This program is free software; you can redistribute it and/or
+  ~ modify it under the terms of the GNU Lesser General Public
+  ~ License as published by the Free Software Foundation; either
+  ~ version 3 of the License, or (at your option) any later version.
+  ~
+  ~ This program is distributed in the hope that it will be useful,
+  ~ but WITHOUT ANY WARRANTY; without even the implied warranty of
+  ~ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  ~ Lesser General Public License for more details.
+  ~
+  ~ You should have received a copy of the GNU Lesser General Public License
+  ~ along with this program; if not, write to the Free Software Foundation,
+  ~ Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+  -->
+
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<packaging>jar</packaging>
+
+	<groupId>mrmathami.cia.java</groupId>
+	<artifactId>mrmathami.cia.java.jdt</artifactId>
+	<version>1.0.0</version>
+
+	<dependencies>
+		<dependency>
+			<groupId>mrmathami</groupId>
+			<artifactId>mrmathami.utils</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>mrmathami.cia.java</groupId>
+			<artifactId>mrmathami.cia.java.core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>mrmathami.external</groupId>
+			<artifactId>org.eclipse.jdt.core</artifactId>
+			<version>3.23.0-fat</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<directory>${project.basedir}/build/target-${project.build.finalName}</directory>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>versions-maven-plugin</artifactId>
+				<version>2.8.1</version>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.2.1</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>false</addMavenDescriptor>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
+				<configuration>
+					<source>11</source>
+					<target>11</target>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>3.0.0-M1</version>
+				<executions>
+					<execution>
+						<id>install-file</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<file>${project.build.directory}/${project.build.finalName}.jar</file>
+							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
+
+							<pomFile>${project.basedir}/pom-no-build.xml</pomFile>
+
+							<localRepositoryPath>repository</localRepositoryPath>
+						</configuration>
+					</execution>
+					<execution>
+						<id>install-local</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+						<configuration>
+							<file>${project.build.directory}/${project.build.finalName}.jar</file>
+							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
+
+							<pomFile>${project.basedir}/pom-no-build.xml</pomFile>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+	</properties>
+
+	<repositories>
+		<repository>
+			<id>my-repo</id>
+			<name>MrMaThaMi personal Repo</name>
+			<url>https://raw.github.com/thanhminhmr/repository</url>
+		</repository>
+	</repositories>
+</project>
