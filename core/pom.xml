@@ -119,7 +119,7 @@
 		<repository>
 			<id>my-repo</id>
 			<name>MrMaThaMi personal Repo</name>
-			<url>https://raw.github.com/thanhminhmr/repository</url>
+			<url>https://raw.githubusercontent.com/thanhminhmr/repository/main/</url>
 		</repository>
 	</repositories>
 </project>

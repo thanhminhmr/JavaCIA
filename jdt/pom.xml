@@ -44,6 +44,12 @@
 			<artifactId>org.eclipse.jdt.core</artifactId>
 			<version>3.23.0-fat</version>
 		</dependency>
+		<dependency>
+			<groupId>org.jetbrains</groupId>
+			<artifactId>annotations</artifactId>
+			<version>RELEASE</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -131,7 +137,7 @@
 		<repository>
 			<id>my-repo</id>
 			<name>MrMaThaMi personal Repo</name>
-			<url>https://raw.github.com/thanhminhmr/repository</url>
+			<url>https://raw.githubusercontent.com/thanhminhmr/repository/main/</url>
 		</repository>
 	</repositories>
 </project>
