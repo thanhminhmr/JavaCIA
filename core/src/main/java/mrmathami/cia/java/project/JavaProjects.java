@@ -22,6 +22,7 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
+import mrmathami.utils.Pair;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -50,7 +51,7 @@ public final class JavaProjects {
 
 	@Nonnull
 	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
-			@Nonnull Map<Path, List<Path>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException {
 		return getInstance().createProjectSnapshot(snapshotName, javaSources, classPaths, dependencyWeightTable);
 	}

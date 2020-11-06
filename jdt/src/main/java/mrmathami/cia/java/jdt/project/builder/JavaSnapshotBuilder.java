@@ -20,13 +20,14 @@ package mrmathami.cia.java.jdt.project.builder;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.project.ProjectSnapshot;
+import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
-import mrmathami.cia.java.jdt.project.ProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjectSnapshot;
+import mrmathami.utils.Pair;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -41,9 +42,9 @@ public final class JavaSnapshotBuilder {
 
 
 	@Nonnull
-	public static JavaProjectSnapshot build(@Nonnull String snapshotName, @Nonnull Map<Path, List<Path>> javaSources,
-			@Nonnull List<Path> classPaths, @Nonnull JavaDependencyWeightTable dependencyWeightMap)
-			throws JavaCiaException {
+	public static JavaProjectSnapshot build(@Nonnull String snapshotName,
+			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull JavaDependencyWeightTable dependencyWeightMap) throws JavaCiaException {
 
 		final JavaRootNode rootNode = JavaSnapshotParser.build(javaSources, classPaths);
 

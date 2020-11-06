@@ -7,6 +7,7 @@ import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotModification;
 import mrmathami.cia.java.project.JavaProjects;
+import mrmathami.utils.Pair;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -45,10 +46,10 @@ public class X {
 
 		final long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotA = JavaProjects.createProjectSnapshot("JSON-java-before",
-				Map.of(javaSourcePathA, fileNamesA), List.of(), DEPENDENCY_WEIGHT_TABLE);
+				Map.of("main", Pair.immutableOf(javaSourcePathA, fileNamesA)), List.of(), DEPENDENCY_WEIGHT_TABLE);
 		final long timeParseA = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotB = JavaProjects.createProjectSnapshot("JSON-java-after",
-				Map.of(javaSourcePathB, fileNamesB), List.of(), DEPENDENCY_WEIGHT_TABLE);
+				Map.of("main", Pair.immutableOf(javaSourcePathB, fileNamesB)), List.of(), DEPENDENCY_WEIGHT_TABLE);
 		final long timeParseB = System.nanoTime();
 
 		final String jsonA = projectSnapshotA.getRootNode().toJson();

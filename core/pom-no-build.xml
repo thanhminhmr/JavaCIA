@@ -43,4 +43,12 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
+	<dependencies>
+		<dependency>
+			<groupId>mrmathami</groupId>
+			<artifactId>mrmathami.utils</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+	</dependencies>
 </project>

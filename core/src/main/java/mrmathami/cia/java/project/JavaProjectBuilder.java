@@ -21,17 +21,20 @@ package mrmathami.cia.java.project;
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
+import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 public interface JavaProjectBuilder {
 
 	@Nonnull
-	JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName, @Nonnull Map<Path, List<Path>> javaSources,
-			@Nonnull List<Path> classPaths, @Nonnull JavaDependencyWeightTable dependencyWeightTable)
-			throws JavaCiaException;
+	JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
+			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException;
 
 	@Nonnull
 	JavaProjectSnapshotModification createSnapshotModifications(@Nonnull String comparisonName,

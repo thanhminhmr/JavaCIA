@@ -27,8 +27,11 @@ import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectBuilder;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotModification;
+import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -37,7 +40,7 @@ public final class ProjectBuilder implements JavaProjectBuilder {
 	@Nonnull
 	@Override
 	public JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
-			@Nonnull Map<Path, List<Path>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException {
 		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable);
 	}
