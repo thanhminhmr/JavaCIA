@@ -232,7 +232,7 @@ final class JavaNodes {
 
 		// add to node set
 		assert nodeSet != null;
-		for (AbstractNode node = packageNode; !packageNode.isRoot(); node = node.getParent()) {
+		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
 			nodeSet.add(node);
 		}
 
