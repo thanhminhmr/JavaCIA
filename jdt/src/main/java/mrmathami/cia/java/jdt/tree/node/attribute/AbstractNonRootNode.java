@@ -20,7 +20,6 @@ package mrmathami.cia.java.jdt.tree.node.attribute;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.jdt.Utilities;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
 
@@ -38,7 +37,7 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 
 	public AbstractNonRootNode(@Nonnull AbstractNode parent, @Nonnull String simpleName) {
 		this.parent = parent;
-		this.simpleName = Utilities.normalizeSimpleName(simpleName);
+		this.simpleName = normalizeSimpleName(simpleName);
 		this.uniqueName = this.qualifiedName = parent.isRoot()
 				? this.simpleName
 				: parent.getQualifiedName() + '.' + this.simpleName;
@@ -47,13 +46,45 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 
 	public AbstractNonRootNode(@Nonnull AbstractNode parent, @Nonnull String simpleName, @Nonnull String uniqueNameSuffix) {
 		this.parent = parent;
-		this.simpleName = Utilities.normalizeSimpleName(simpleName);
+		this.simpleName = normalizeSimpleName(simpleName);
 		this.uniqueName = (
 				this.qualifiedName = parent.isRoot()
 						? this.simpleName
 						: parent.getQualifiedName() + '.' + this.simpleName
 		) + uniqueNameSuffix;
 		this.root = parent.getRoot();
+	}
+
+
+	@Nonnull
+	private static String normalizeSimpleName(@Nonnull String name) {
+		final int length = name.length();
+		assert length > 0 : "Invalid node name!";
+		final StringBuilder builder = new StringBuilder(name.length());
+		final char[] chars = name.toCharArray();
+		int i = 0;
+		do {
+			final char c1 = chars[i++];
+			assert Character.isLowSurrogate(c1) : "Invalid node name!";
+			final char c2;
+			final int cp;
+			if (Character.isHighSurrogate(c1)) {
+				c2 = chars[i++];
+				assert !Character.isLowSurrogate(c2) : "Invalid node name!";
+				cp = Character.toCodePoint(c1, c2);
+			} else {
+				c2 = 0;
+				cp = c1;
+			}
+			if (!Character.isIdentifierIgnorable(cp)) {
+				assert (builder.length() <= 0 || Character.isJavaIdentifierPart(cp))
+						&& Character.isJavaIdentifierStart(cp) : "Invalid node name!";
+				builder.append(c1);
+				if (c2 != 0) builder.append(c2);
+			}
+		} while (i < length);
+		assert builder.length() > 0 : "Invalid node name!";
+		return builder.toString();
 	}
 
 

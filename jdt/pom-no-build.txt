@@ -23,11 +23,11 @@
 	<packaging>jar</packaging>
 
 	<groupId>mrmathami.cia.java</groupId>
-	<artifactId>mrmathami.cia.java.core</artifactId>
+	<artifactId>mrmathami.cia.java.jdt</artifactId>
 	<version>1.0.0</version>
 
-	<name>Java CIA API</name>
-	<description>API for Java Change Impact Analysis.</description>
+	<name>Java CIA Implementation</name>
+	<description>Implementation for Java Change Impact Analysis.</description>
 
 	<developers>
 		<developer>
@@ -43,4 +43,24 @@
 			<distribution>repo</distribution>
 		</license>
 	</licenses>
+
+	<dependencies>
+		<dependency>
+			<groupId>mrmathami</groupId>
+			<artifactId>mrmathami.utils</artifactId>
+			<version>1.0.1</version>
+		</dependency>
+
+		<dependency>
+			<groupId>mrmathami.cia.java</groupId>
+			<artifactId>mrmathami.cia.java.core</artifactId>
+			<version>1.0.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jdt</groupId>
+			<artifactId>org.eclipse.jdt.core</artifactId>
+			<version>3.23.0</version>
+		</dependency>
+	</dependencies>
 </project>

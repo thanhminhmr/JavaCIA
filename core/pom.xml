@@ -87,7 +87,7 @@
 							<file>${project.build.directory}/${project.build.finalName}.jar</file>
 							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
 
-							<pomFile>${project.basedir}/pom-no-build.xml</pomFile>
+							<pomFile>${project.basedir}/pom-no-build.txt</pomFile>
 
 							<localRepositoryPath>repository</localRepositoryPath>
 						</configuration>
@@ -102,7 +102,7 @@
 							<file>${project.build.directory}/${project.build.finalName}.jar</file>
 							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
 
-							<pomFile>${project.basedir}/pom-no-build.xml</pomFile>
+							<pomFile>${project.basedir}/pom-no-build.txt</pomFile>
 						</configuration>
 					</execution>
 				</executions>

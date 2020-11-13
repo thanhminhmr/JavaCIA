@@ -26,19 +26,15 @@ import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import static mrmathami.cia.java.jdt.Utilities.DEPENDENCY_TYPES;
-
 public final class DependencyWeightTable implements JavaDependencyWeightTable, Serializable {
 
 	private static final long serialVersionUID = -1L;
-
-	@Nonnull private static final double[] WEIGHTS_ZEROES = new double[DEPENDENCY_TYPES.length];
 
 	@Nonnull private final double[] weights;
 
 
 	public DependencyWeightTable(@Nonnull double[] weights) {
-		assert weights.length == DEPENDENCY_TYPES.length : "Invalid length for weights.";
+		assert weights.length == JavaDependency.valueList.size() : "Invalid length for weights.";
 		this.weights = weights;
 	}
 
@@ -57,7 +53,7 @@ public final class DependencyWeightTable implements JavaDependencyWeightTable, S
 		if (object instanceof JavaDependencyWeightTable) {
 			final JavaDependencyWeightTable dependency = (JavaDependencyWeightTable) object;
 			for (int i = 0; i < weights.length; i++) {
-				if (dependency.getWeight(DEPENDENCY_TYPES[i]) != weights[i]) return false;
+				if (dependency.getWeight(JavaDependency.valueList.get(i)) != weights[i]) return false;
 			}
 		}
 		return false;
@@ -79,20 +75,16 @@ public final class DependencyWeightTable implements JavaDependencyWeightTable, S
 
 	public void toString(@Nonnull StringBuilder builder) {
 		final double[] weights = this.weights;
-		if (Arrays.equals(weights, WEIGHTS_ZEROES)) {
-			builder.append("{}");
-		} else {
-			builder.append("{ ");
-			boolean innerNext = false;
-			for (int i = 0; i < weights.length; i++) {
-				if (weights[i] != 0) {
-					builder.append(innerNext ? ", \"" : "\"")
-							.append(DEPENDENCY_TYPES[i]).append("\": ").append(weights[i]);
-					innerNext = true;
-				}
+		builder.append('{');
+		boolean innerNext = false;
+		for (int i = 0; i < weights.length; i++) {
+			if (weights[i] != 0) {
+				builder.append(innerNext ? ", \"" : " \"")
+						.append(JavaDependency.valueList.get(i)).append("\": ").append(weights[i]);
+				innerNext = true;
 			}
-			builder.append(" }");
 		}
+		builder.append(innerNext ? " }" : "}");
 	}
 
 }

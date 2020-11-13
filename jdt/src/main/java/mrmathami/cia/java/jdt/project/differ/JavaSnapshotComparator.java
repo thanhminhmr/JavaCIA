@@ -20,13 +20,13 @@ package mrmathami.cia.java.jdt.project.differ;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.project.ProjectSnapshotComparison;
+import mrmathami.cia.java.project.JavaProjectSnapshot;
+import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
-import mrmathami.cia.java.jdt.project.ProjectSnapshotModification;
-import mrmathami.cia.java.project.JavaProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjectSnapshotModification;
 import mrmathami.utils.Pair;
 
 import java.util.ArrayList;
@@ -41,16 +41,14 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static mrmathami.cia.java.jdt.Utilities.DEPENDENCY_TYPES;
+public final class JavaSnapshotComparator {
 
-public final class JavaSnapshotDiffer {
-
-	private JavaSnapshotDiffer() {
+	private JavaSnapshotComparator() {
 	}
 
 
 	@Nonnull
-	public static JavaProjectSnapshotModification compare(@Nonnull String comparisonName,
+	public static ProjectSnapshotComparison compare(@Nonnull String comparisonName,
 			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
 			@Nonnull JavaDependencyWeightTable impactWeightMap) throws JavaCiaException {
 		final JavaRootNode previousRootNode = previousSnapshot.getRootNode();
@@ -63,12 +61,12 @@ public final class JavaSnapshotDiffer {
 
 		compareRootNodes(previousRootNode, currentRootNode, addedNodes, removedNodes, changedNodes, unchangedNodes);
 
-		final double[] dependencyImpacts = new double[DEPENDENCY_TYPES.length];
-		for (final JavaDependency type : DEPENDENCY_TYPES) {
+		final double[] dependencyImpacts = new double[JavaDependency.valueList.size()];
+		for (final JavaDependency type : JavaDependency.valueList) {
 			dependencyImpacts[type.ordinal()] = impactWeightMap.getWeight(type);
 		}
 
-		return new ProjectSnapshotModification(comparisonName, previousSnapshot, currentSnapshot,
+		return new ProjectSnapshotComparison(comparisonName, previousSnapshot, currentSnapshot,
 				addedNodes, removedNodes, changedNodes, unchangedNodes, dependencyImpacts,
 				calculateNodeImpacts(dependencyImpacts, currentRootNode, addedNodes, changedNodes));
 	}

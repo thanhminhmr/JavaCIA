@@ -16,62 +16,46 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.project;
+package mrmathami.cia.java.jdt;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.project.Project;
+import mrmathami.cia.java.jdt.project.builder.JavaSnapshotBuilder;
+import mrmathami.cia.java.jdt.project.differ.JavaSnapshotComparator;
+import mrmathami.cia.java.project.JavaProject;
+import mrmathami.cia.java.project.JavaProjectSnapshot;
+import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
+import mrmathami.utils.Pair;
 
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
-public final class JavaProjects {
+public final class ProjectBuilders {
 
-	@Nullable private static final JavaProjectBuilder INSTANCE = loadInstance();
-
-
-	@Nullable
-	private static JavaProjectBuilder loadInstance() {
-		for (final JavaProjectBuilder builder : ServiceLoader.load(JavaProjectBuilder.class)) {
-			return builder;
-		}
-		return null;
+	private ProjectBuilders() {
 	}
 
 	@Nonnull
-	private static JavaProjectBuilder getInstance() throws JavaCiaException {
-		if (INSTANCE != null) return INSTANCE;
-		throw new JavaCiaException("Cannot find an implementation for JavaProjectBuilder!");
+	public static JavaProject createProject(@Nonnull String name) {
+		return new Project(name);
 	}
-
 
 	@Nonnull
 	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
-			@Nonnull Map<Path, List<Path>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException {
-		return getInstance().createProjectSnapshot(snapshotName, javaSources, classPaths, dependencyWeightTable);
+		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable);
 	}
 
 	@Nonnull
-	public static JavaProjectSnapshotModification createSnapshotModifications(@Nonnull String comparisonName,
+	public static JavaProjectSnapshotComparison createProjectSnapshotComparison(@Nonnull String comparisonName,
 			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
 			@Nonnull JavaDependencyWeightTable impactWeightTable) throws JavaCiaException {
-		return getInstance()
-				.createSnapshotModifications(comparisonName, previousSnapshot, currentSnapshot, impactWeightTable);
+		return JavaSnapshotComparator.compare(comparisonName, previousSnapshot, currentSnapshot, impactWeightTable);
 	}
 
-	@Nonnull
-	public static JavaProject createProject(@Nonnull String projectName,
-			@Nonnull List<? extends JavaProjectSnapshot> snapshots,
-			@Nonnull List<? extends JavaProjectSnapshotModification> modifications) throws JavaCiaException {
-		return getInstance().createProject(projectName, snapshots, modifications);
-	}
-
-
-	private JavaProjects() {
-	}
 
 }

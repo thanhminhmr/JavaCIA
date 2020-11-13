@@ -1,10 +1,10 @@
 package mrmathami.cia.java.jdt;
 
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.cia.java.project.JavaProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjects;
+import mrmathami.utils.Pair;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,7 +33,10 @@ public class Y {
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Path jdtPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\jdt\\src\\main\\java");
 		final List<Path> jdtFiles = getFileList(new ArrayList<>(), jdtPath);
-		final Map<Path, List<Path>> javaSources = Map.of(corePath, coreFiles, jdtPath, jdtFiles);
+		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
+				"core", Pair.immutableOf(corePath, coreFiles),
+				"jdt", Pair.immutableOf(jdtPath, jdtFiles)
+		);
 
 		final List<Path> classPaths = List.of(
 				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\jdt\\org.eclipse.jdt.core\\3.22.0\\org.eclipse.jdt.core-3.22.0.jar"),
@@ -42,7 +45,7 @@ public class Y {
 		);
 
 		long timeStart = System.nanoTime();
-		final JavaProjectSnapshot projectSnapshot = JavaProjects.createProjectSnapshot("before",
+		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
 				javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE);
 		long timeParseA = System.nanoTime();
 

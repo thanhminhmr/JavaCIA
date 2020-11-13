@@ -26,19 +26,15 @@ import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import java.io.Serializable;
 import java.util.Arrays;
 
-import static mrmathami.cia.java.jdt.Utilities.DEPENDENCY_TYPES;
-
 public final class DependencyCountTable implements JavaDependencyCountTable, Serializable {
 
 	private static final long serialVersionUID = -1L;
-
-	@Nonnull private static final int[] COUNTS_ZEROES = new int[DEPENDENCY_TYPES.length];
 
 	@Nonnull private final int[] counts;
 
 
 	public DependencyCountTable(@Nonnull int[] counts) {
-		assert counts.length == DEPENDENCY_TYPES.length : "Invalid length for counts.";
+		assert counts.length == JavaDependency.valueList.size() : "Invalid length for counts.";
 		this.counts = counts;
 	}
 
@@ -57,7 +53,7 @@ public final class DependencyCountTable implements JavaDependencyCountTable, Ser
 		if (object instanceof JavaDependencyCountTable) {
 			final JavaDependencyCountTable dependency = (JavaDependencyCountTable) object;
 			for (int i = 0; i < counts.length; i++) {
-				if (dependency.getCount(DEPENDENCY_TYPES[i]) != counts[i]) return false;
+				if (dependency.getCount(JavaDependency.valueList.get(i)) != counts[i]) return false;
 			}
 		}
 		return false;
@@ -79,20 +75,16 @@ public final class DependencyCountTable implements JavaDependencyCountTable, Ser
 
 	public void toString(@Nonnull StringBuilder builder) {
 		final int[] counts = this.counts;
-		if (Arrays.equals(counts, COUNTS_ZEROES)) {
-			builder.append("{}");
-		} else {
-			builder.append("{ ");
-			boolean innerNext = false;
-			for (int i = 0; i < counts.length; i++) {
-				if (counts[i] != 0) {
-					builder.append(innerNext ? ", \"" : "\"")
-							.append(DEPENDENCY_TYPES[i]).append("\": ").append(counts[i]);
-					innerNext = true;
-				}
+		builder.append('{');
+		boolean innerNext = false;
+		for (int i = 0; i < counts.length; i++) {
+			if (counts[i] != 0) {
+				builder.append(innerNext ? ", \"" : " \"")
+						.append(JavaDependency.valueList.get(i)).append("\": ").append(counts[i]);
+				innerNext = true;
 			}
-			builder.append(" }");
 		}
+		builder.append(innerNext ? " }" : "}");
 	}
 
 }

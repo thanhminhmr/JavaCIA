@@ -1,12 +1,12 @@
 package mrmathami.cia.java.jdt;
 
 import mrmathami.cia.java.JavaCiaException;
-import mrmathami.cia.java.tree.dependency.JavaDependency;
-import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjectSnapshotModification;
-import mrmathami.cia.java.project.JavaProjects;
+import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
+import mrmathami.cia.java.tree.dependency.JavaDependency;
+import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
+import mrmathami.utils.Pair;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -44,11 +44,11 @@ public class X {
 		final List<Path> fileNamesB = getFileList(new ArrayList<>(), javaSourcePathB);
 
 		final long timeStart = System.nanoTime();
-		final JavaProjectSnapshot projectSnapshotA = JavaProjects.createProjectSnapshot("JSON-java-before",
-				Map.of(javaSourcePathA, fileNamesA), List.of(), DEPENDENCY_WEIGHT_TABLE);
+		final JavaProjectSnapshot projectSnapshotA = ProjectBuilders.createProjectSnapshot("JSON-java-before",
+				Map.of("main", Pair.immutableOf(javaSourcePathA, fileNamesA)), List.of(), DEPENDENCY_WEIGHT_TABLE);
 		final long timeParseA = System.nanoTime();
-		final JavaProjectSnapshot projectSnapshotB = JavaProjects.createProjectSnapshot("JSON-java-after",
-				Map.of(javaSourcePathB, fileNamesB), List.of(), DEPENDENCY_WEIGHT_TABLE);
+		final JavaProjectSnapshot projectSnapshotB = ProjectBuilders.createProjectSnapshot("JSON-java-after",
+				Map.of("main", Pair.immutableOf(javaSourcePathB, fileNamesB)), List.of(), DEPENDENCY_WEIGHT_TABLE);
 		final long timeParseB = System.nanoTime();
 
 		final String jsonA = projectSnapshotA.getRootNode().toJson();
@@ -61,12 +61,14 @@ public class X {
 		System.out.printf("Parse B time: %s\n", (timeParseB - timeParseA) / 1000000.0);
 
 		final long timeCompareStart = System.nanoTime();
-		final JavaProjectSnapshotModification snapshotModifications = JavaProjects.createSnapshotModifications(
+		final JavaProjectSnapshotComparison snapshotComparison = ProjectBuilders.createProjectSnapshotComparison(
 				"compare", projectSnapshotA, projectSnapshotB, DEPENDENCY_IMPACT_TABLE);
 		final long timeCompareFinish = System.nanoTime();
 
-		final JavaProject javaProject = JavaProjects.createProject(
-				"JSON-java", List.of(projectSnapshotA, projectSnapshotB), List.of(snapshotModifications));
+		final JavaProject javaProject = ProjectBuilders.createProject("JSON-java");
+		javaProject.addSnapshot(projectSnapshotA);
+		javaProject.addSnapshot(projectSnapshotB);
+		javaProject.addSnapshotComparison(snapshotComparison);
 
 		try (final ObjectOutputStream objectOutputStream
 				= new ObjectOutputStream(Files.newOutputStream(Path.of("..\\test\\JSON-java.proj")))) {
@@ -75,7 +77,7 @@ public class X {
 
 		System.out.printf("Compare time: %s\n", (timeCompareFinish - timeCompareStart) / 1000000.0);
 
-		System.out.println(snapshotModifications);
+		System.out.println(snapshotComparison);
 //		}
 	}
 

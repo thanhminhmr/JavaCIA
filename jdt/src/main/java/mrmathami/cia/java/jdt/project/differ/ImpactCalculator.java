@@ -28,8 +28,6 @@ import java.util.BitSet;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
-import static mrmathami.cia.java.jdt.Utilities.DEPENDENCY_TYPES;
-
 final class ImpactCalculator implements Callable<double[]> {
 
 	@Nonnull private final BitSet pathSet;
@@ -56,7 +54,7 @@ final class ImpactCalculator implements Callable<double[]> {
 
 			double linkWeight = 1.0;
 			final JavaDependencyCountTable nodeDependency = entry.getValue();
-			for (final JavaDependency dependency : DEPENDENCY_TYPES) {
+			for (final JavaDependency dependency : JavaDependency.valueList) {
 				final int count = nodeDependency.getCount(dependency);
 				if (count > 0) {
 					linkWeight *= Math.pow(1.0 - dependencyImpacts[dependency.ordinal()], count);

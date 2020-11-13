@@ -25,7 +25,7 @@ import mrmathami.utils.Pair;
 
 import java.util.Set;
 
-public interface JavaProjectSnapshotModification {
+public interface JavaProjectSnapshotComparison {
 
 	@Nonnull
 	String getName();

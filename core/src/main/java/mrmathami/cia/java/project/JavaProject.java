@@ -19,8 +19,13 @@
 package mrmathami.cia.java.project;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
+import mrmathami.utils.Pair;
 
+import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 public interface JavaProject {
 
@@ -31,6 +36,28 @@ public interface JavaProject {
 	List<? extends JavaProjectSnapshot> getSnapshots();
 
 	@Nonnull
-	List<? extends JavaProjectSnapshotModification> getSnapshotModifications();
+	List<? extends JavaProjectSnapshotComparison> getSnapshotComparisons();
+
+	@Nonnull
+	JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName,
+			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException;
+
+	@Nonnull
+	JavaProjectSnapshotComparison createSnapshotComparison(@Nonnull String comparisonName,
+			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
+			@Nonnull JavaDependencyWeightTable impactWeightTable) throws JavaCiaException;
+
+	boolean containsSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
+
+	boolean containsSnapshotComparison(@Nonnull JavaProjectSnapshotComparison snapshotComparison);
+
+	boolean addSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
+
+	boolean addSnapshotComparison(@Nonnull JavaProjectSnapshotComparison snapshotComparison);
+
+	boolean removeSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
+
+	boolean removeSnapshotComparison(@Nonnull JavaProjectSnapshotComparison snapshotComparison);
 
 }
