@@ -1,10 +1,9 @@
 package mrmathami.cia.java.jdt;
 
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.cia.java.project.JavaProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjects;
 import mrmathami.utils.Pair;
 
 import java.io.IOException;
@@ -46,7 +45,7 @@ public class Y {
 		);
 
 		long timeStart = System.nanoTime();
-		final JavaProjectSnapshot projectSnapshot = JavaProjects.createProjectSnapshot("before",
+		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
 				javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE);
 		long timeParseA = System.nanoTime();
 

@@ -2,7 +2,6 @@ package mrmathami.cia.java.jdt.project.builder;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.ClassNode;
@@ -12,38 +11,21 @@ import mrmathami.cia.java.jdt.tree.node.MethodNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.jdt.tree.type.ReferenceType;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
-import mrmathami.utils.Pair;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 
-import static mrmathami.cia.java.jdt.Utilities.DEPENDENCY_TYPES;
-
 final class JavaDependencies {
-
-	@Nonnull private final JavaNodes nodes;
 
 	@Nonnull private final Map<AbstractNode, Map<AbstractNode, int[]>> nodeDependencies = new IdentityHashMap<>();
 	@Nonnull private final Map<AbstractNode, Map<IBinding, int[]>> delayedDependencies = new IdentityHashMap<>();
@@ -52,11 +34,6 @@ final class JavaDependencies {
 	@Nonnull private final Set<AbstractNode> delayedOverrideProcessedNode = new HashSet<>();
 	@Nonnull private final Map<AbstractNode, List<MethodNode>> delayedOverrideChildMethodsMap = new IdentityHashMap<>();
 	@Nonnull private final Map<MethodNode, List<MethodNode>> delayedMethodOverridesMap = new IdentityHashMap<>();
-
-
-	JavaDependencies(@Nonnull JavaNodes nodes) {
-		this.nodes = nodes;
-	}
 
 
 	void postProcessing(@Nonnull Map<IBinding, AbstractNode> bindingNodeMap) {
@@ -214,7 +191,6 @@ final class JavaDependencies {
 			}
 		}
 		for (final MethodNode childMethodOverride : childMethodOverrides) {
-//			childMethod.addDependencyTo(childMethodOverride, JavaDependency.OVERRIDE);
 			createDependencyToNode(childMethod, childMethodOverride, JavaDependency.OVERRIDE);
 		}
 	}
@@ -225,7 +201,7 @@ final class JavaDependencies {
 
 	@Nonnull
 	private static <R> int[] internalCreateDependencyCounts(@Nullable R any) {
-		return new int[DEPENDENCY_TYPES.length];
+		return new int[JavaDependency.valueList.size()];
 	}
 
 	//region Main Dependency

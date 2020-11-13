@@ -72,7 +72,7 @@ import java.util.Set;
 final class JavaNodes {
 
 	@Nonnull private final CodeFormatter codeFormatter;
-	@Nonnull private final JavaDependencies dependencies = new JavaDependencies(this);
+	@Nonnull private final JavaDependencies dependencies = new JavaDependencies();
 	@Nonnull private final JavaAnnotates annotates = new JavaAnnotates(dependencies);
 	@Nonnull private final JavaTypes types = new JavaTypes(dependencies, annotates);
 

@@ -33,8 +33,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
 
-import static mrmathami.cia.java.jdt.Utilities.DEPENDENCY_TYPES;
-
 public final class JavaSnapshotBuilder {
 
 	private JavaSnapshotBuilder() {
@@ -42,14 +40,14 @@ public final class JavaSnapshotBuilder {
 
 
 	@Nonnull
-	public static JavaProjectSnapshot build(@Nonnull String snapshotName,
+	public static ProjectSnapshot build(@Nonnull String snapshotName,
 			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightMap) throws JavaCiaException {
 
 		final JavaRootNode rootNode = JavaSnapshotParser.build(javaSources, classPaths);
 
-		final double[] dependencyWeights = new double[DEPENDENCY_TYPES.length];
-		for (final JavaDependency type : DEPENDENCY_TYPES) {
+		final double[] dependencyWeights = new double[JavaDependency.valueList.size()];
+		for (final JavaDependency type : JavaDependency.valueList) {
 			dependencyWeights[type.ordinal()] = dependencyWeightMap.getWeight(type);
 		}
 
@@ -64,7 +62,7 @@ public final class JavaSnapshotBuilder {
 		for (final JavaNode node : allNodes) {
 			double nodeWeight = 0.0;
 			for (final JavaDependencyCountTable nodeDependency : node.getDependencyFrom().values()) {
-				for (final JavaDependency dependency : DEPENDENCY_TYPES) {
+				for (final JavaDependency dependency : JavaDependency.valueList) {
 					nodeWeight += dependencyWeights[dependency.ordinal()]
 							* nodeDependency.getCount(dependency);
 				}

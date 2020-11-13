@@ -23,14 +23,14 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.jdt.tree.dependency.DependencyWeightTable;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjectSnapshotModification;
+import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.collections.ImmutableOrderedSet;
 import mrmathami.utils.Pair;
 
 import java.io.Serializable;
 import java.util.Set;
 
-public final class ProjectSnapshotModification implements JavaProjectSnapshotModification, Serializable {
+public final class ProjectSnapshotComparison implements JavaProjectSnapshotComparison, Serializable {
 
 	private static final long serialVersionUID = -1L;
 
@@ -48,7 +48,7 @@ public final class ProjectSnapshotModification implements JavaProjectSnapshotMod
 	@Nullable private NodeWeightTable nodeImpactTable;
 
 
-	public ProjectSnapshotModification(@Nonnull String name,
+	public ProjectSnapshotComparison(@Nonnull String name,
 			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
 			@Nonnull Set<JavaNode> removedNodes, @Nonnull Set<JavaNode> addedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> changedNodes,

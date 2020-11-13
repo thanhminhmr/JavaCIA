@@ -40,9 +40,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>mrmathami.external</groupId>
+			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.core</artifactId>
-			<version>3.23.0-fat</version>
+			<version>3.23.0</version>
 		</dependency>
 	</dependencies>
 
@@ -99,7 +99,7 @@
 							<file>${project.build.directory}/${project.build.finalName}.jar</file>
 							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
 
-							<pomFile>${project.basedir}/pom-no-build.xml</pomFile>
+							<pomFile>${project.basedir}/pom-no-build.txt</pomFile>
 
 							<localRepositoryPath>repository</localRepositoryPath>
 						</configuration>
@@ -114,7 +114,7 @@
 							<file>${project.build.directory}/${project.build.finalName}.jar</file>
 							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
 
-							<pomFile>${project.basedir}/pom-no-build.xml</pomFile>
+							<pomFile>${project.basedir}/pom-no-build.txt</pomFile>
 						</configuration>
 					</execution>
 				</executions>

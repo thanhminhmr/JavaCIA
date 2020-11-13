@@ -58,9 +58,9 @@
 		</dependency>
 
 		<dependency>
-			<groupId>mrmathami.external</groupId>
+			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.core</artifactId>
-			<version>3.23.0-fat</version>
+			<version>3.23.0</version>
 		</dependency>
 	</dependencies>
 </project>
