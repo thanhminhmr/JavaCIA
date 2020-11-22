@@ -45,10 +45,10 @@ public class X {
 
 		final long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotA = ProjectBuilders.createProjectSnapshot("JSON-java-before",
-				Map.of("main", Pair.immutableOf(javaSourcePathA, fileNamesA)), List.of(), DEPENDENCY_WEIGHT_TABLE);
+				Map.of("main", Pair.immutableOf(javaSourcePathA, fileNamesA)), List.of(), DEPENDENCY_WEIGHT_TABLE, true);
 		final long timeParseA = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotB = ProjectBuilders.createProjectSnapshot("JSON-java-after",
-				Map.of("main", Pair.immutableOf(javaSourcePathB, fileNamesB)), List.of(), DEPENDENCY_WEIGHT_TABLE);
+				Map.of("main", Pair.immutableOf(javaSourcePathB, fileNamesB)), List.of(), DEPENDENCY_WEIGHT_TABLE, true);
 		final long timeParseB = System.nanoTime();
 
 		final String jsonA = projectSnapshotA.getRootNode().toJson();

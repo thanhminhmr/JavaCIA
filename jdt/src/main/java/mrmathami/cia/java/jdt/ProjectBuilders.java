@@ -46,8 +46,8 @@ public final class ProjectBuilders {
 	@Nonnull
 	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
 			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException {
-		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable);
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
+		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable, enableRecovery);
 	}
 
 	@Nonnull
@@ -56,6 +56,5 @@ public final class ProjectBuilders {
 			@Nonnull JavaDependencyWeightTable impactWeightTable) throws JavaCiaException {
 		return JavaSnapshotComparator.compare(comparisonName, previousSnapshot, currentSnapshot, impactWeightTable);
 	}
-
 
 }

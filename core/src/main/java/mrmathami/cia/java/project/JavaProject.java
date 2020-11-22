@@ -38,11 +38,30 @@ public interface JavaProject {
 	@Nonnull
 	List<? extends JavaProjectSnapshotComparison> getSnapshotComparisons();
 
+	/**
+	 * Create a snapshot of the current project.
+	 *
+	 * @param snapshotName snapshot name
+	 * @param javaSources source name map to their root folder and list of source files
+	 * @param classPaths list of dependency libraries
+	 * @param dependencyWeightTable dependency weight table
+	 * @param enableRecovery create unknown types for missing import instead of throw error
+	 * @return the snapshot
+	 * @throws JavaCiaException some error occur during the creation of the snapshot
+	 */
 	@Nonnull
 	JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName,
 			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException;
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException;
 
+	/**
+	 * @param comparisonName comparison name
+	 * @param previousSnapshot the old snapshot
+	 * @param currentSnapshot the new snapshot
+	 * @param impactWeightTable impact weight table
+	 * @return the comparison
+	 * @throws JavaCiaException some error occur during the creation of the comparison
+	 */
 	@Nonnull
 	JavaProjectSnapshotComparison createSnapshotComparison(@Nonnull String comparisonName,
 			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,

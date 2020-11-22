@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Y {
+public class Z {
 	public static final JavaDependencyWeightTable DEPENDENCY_WEIGHT_TABLE = JavaDependencyWeightTable.of(Map.of(
 			JavaDependency.USE, 1.0,
 			JavaDependency.MEMBER, 1.0,
@@ -29,13 +29,10 @@ public class Y {
 
 //		CodeFormatter
 
-		final Path corePath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\core\\src\\main\\java");
-		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
-		final Path jdtPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\jdt\\src\\main\\java");
-		final List<Path> jdtFiles = getFileList(new ArrayList<>(), jdtPath);
+		final Path inputPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\test\\test_recovery");
+		final List<Path> inputFiles = getFileList(new ArrayList<>(), inputPath);
 		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
-				"core", Pair.immutableOf(corePath, coreFiles),
-				"jdt", Pair.immutableOf(jdtPath, jdtFiles)
+				"input", Pair.immutableOf(inputPath, inputFiles)
 		);
 
 		final List<Path> classPaths = List.of(
@@ -51,7 +48,7 @@ public class Y {
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();
 
-		Files.write(corePath.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
+		Files.write(inputPath.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);
 	}
