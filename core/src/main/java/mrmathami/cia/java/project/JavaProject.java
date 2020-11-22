@@ -45,7 +45,7 @@ public interface JavaProject {
 	 * @param javaSources source name map to their root folder and list of source files
 	 * @param classPaths list of dependency libraries
 	 * @param dependencyWeightTable dependency weight table
-	 * @param enableRecovery create unknown types for missing import instead of throw error
+	 * @param enableRecovery create unknown types and skip unknown method calls
 	 * @return the snapshot
 	 * @throws JavaCiaException some error occur during the creation of the snapshot
 	 */
