@@ -19,13 +19,13 @@
 package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
+import mrmathami.cia.java.jdt.tree.annotate.Annotate;
+import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.cia.java.tree.type.JavaType;
-import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
-import mrmathami.cia.java.jdt.tree.annotate.Annotate;
-import mrmathami.cia.java.jdt.tree.type.AbstractType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -33,7 +33,7 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -63,7 +63,7 @@ public final class RootNode extends AbstractNode implements JavaRootNode {
 	}
 
 	public void freeze() {
-		final Map<String, List<AbstractIdentifiedEntity>> map = new HashMap<>();
+		final Map<String, List<AbstractIdentifiedEntity>> map = new LinkedHashMap<>();
 		internalFreeze(map);
 
 		final List<AbstractIdentifiedEntity> allNodes = map.get(JavaNode.ID_CLASS);

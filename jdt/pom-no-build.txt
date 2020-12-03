@@ -24,7 +24,7 @@
 
 	<groupId>mrmathami.cia.java</groupId>
 	<artifactId>mrmathami.cia.java.jdt</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1</version>
 
 	<name>Java CIA Implementation</name>
 	<description>Implementation for Java Change Impact Analysis.</description>
@@ -54,7 +54,7 @@
 		<dependency>
 			<groupId>mrmathami.cia.java</groupId>
 			<artifactId>mrmathami.cia.java.core</artifactId>
-			<version>1.0.0</version>
+			<version>1.0.1</version>
 		</dependency>
 
 		<dependency>

@@ -25,6 +25,7 @@ import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
@@ -67,18 +68,17 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 
 	@Nonnull
-	static JavaRootNode build(@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			boolean enableRecovery) throws JavaCiaException {
+	static JavaRootNode build(@Nonnull List<Triple<String, Path, List<Path>>> javaSources,
+			@Nonnull List<Path> classPaths, boolean enableRecovery) throws JavaCiaException {
 
 		final List<String> classPathList = new ArrayList<>(classPaths.size() + javaSources.size());
 		final List<String> projectFileList = new ArrayList<>();
 		final Map<String, String> sourceNameMap = new HashMap<>();
 		try {
-			for (final Map.Entry<String, Pair<Path, List<Path>>> entry : javaSources.entrySet()) {
-				final String sourceName = entry.getKey();
-				final Pair<Path, List<Path>> pair = entry.getValue();
-				classPathList.add(pair.getA().toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
-				for (final Path projectFilePath : pair.getB()) {
+			for (final Triple<String, Path, List<Path>> triple : javaSources) {
+				final String sourceName = triple.getA();
+				classPathList.add(triple.getB().toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
+				for (final Path projectFilePath : triple.getC()) {
 					final String projectFileString = projectFilePath.toRealPath(LinkOption.NOFOLLOW_LINKS).toString();
 					projectFileList.add(projectFileString);
 					sourceNameMap.put(projectFileString, sourceName);

@@ -4,7 +4,7 @@ import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -33,15 +33,15 @@ public class Y {
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Path jdtPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\jdt\\src\\main\\java");
 		final List<Path> jdtFiles = getFileList(new ArrayList<>(), jdtPath);
-		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
-				"core", Pair.immutableOf(corePath, coreFiles),
-				"jdt", Pair.immutableOf(jdtPath, jdtFiles)
+		final List<Triple<String, Path, List<Path>>> javaSources = List.of(
+				Triple.immutableOf("core", corePath, coreFiles),
+				Triple.immutableOf("jdt", jdtPath, jdtFiles)
 		);
 
 		final List<Path> classPaths = List.of(
-//				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\jdt\\org.eclipse.jdt.core\\3.22.0\\org.eclipse.jdt.core-3.22.0.jar"),
-//				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\platform\\org.eclipse.text\\3.10.200\\org.eclipse.text-3.10.200.jar"),
-//				Path.of("C:\\Users\\Meo\\.m2\\repository\\mrmathami\\utils\\1.0.0\\utils-1.0.0.jar")
+				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\jdt\\org.eclipse.jdt.core\\3.23.0\\org.eclipse.jdt.core-3.23.0.jar"),
+				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\platform\\org.eclipse.text\\3.10.300\\org.eclipse.text-3.10.300.jar"),
+				Path.of("C:\\Users\\Meo\\.m2\\repository\\mrmathami\\mrmathami.utils\\1.0.1\\mrmathami.utils-1.0.1.jar")
 		);
 
 		long timeStart = System.nanoTime();

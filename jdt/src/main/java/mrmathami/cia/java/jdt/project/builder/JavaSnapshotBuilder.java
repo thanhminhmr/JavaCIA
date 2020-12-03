@@ -27,6 +27,7 @@ import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -40,7 +41,7 @@ public final class JavaSnapshotBuilder {
 
 	@Nonnull
 	public static ProjectSnapshot build(@Nonnull String snapshotName,
-			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightMap, boolean enableRecovery) throws JavaCiaException {
 
 		final JavaRootNode rootNode = JavaSnapshotParser.build(javaSources, classPaths, enableRecovery);

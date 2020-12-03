@@ -5,6 +5,7 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,23 +28,15 @@ public class Z {
 	public static void main(String[] args) throws JavaCiaException, IOException {
 //		System.in.read();
 
-//		CodeFormatter
-
 		final Path inputPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\test\\test_recovery");
 		final List<Path> inputFiles = getFileList(new ArrayList<>(), inputPath);
-		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
-				"input", Pair.immutableOf(inputPath, inputFiles)
-		);
-
-		final List<Path> classPaths = List.of(
-//				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\jdt\\org.eclipse.jdt.core\\3.22.0\\org.eclipse.jdt.core-3.22.0.jar"),
-//				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\platform\\org.eclipse.text\\3.10.200\\org.eclipse.text-3.10.200.jar"),
-//				Path.of("C:\\Users\\Meo\\.m2\\repository\\mrmathami\\utils\\1.0.0\\utils-1.0.0.jar")
+		final List<Triple<String, Path, List<Path>>> javaSources = List.of(
+				Triple.immutableOf("input", inputPath, inputFiles)
 		);
 
 		long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
-				javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true);
+				javaSources, List.of(), DEPENDENCY_WEIGHT_TABLE, true);
 		long timeParseA = System.nanoTime();
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();
