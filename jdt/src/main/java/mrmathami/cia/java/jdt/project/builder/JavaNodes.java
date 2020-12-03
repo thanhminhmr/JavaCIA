@@ -1,3 +1,21 @@
+/*
+ * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 3 of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public License
+ * along with this program; if not, write to the Free Software Foundation,
+ * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 package mrmathami.cia.java.jdt.project.builder;
 
 import mrmathami.annotations.Nonnull;
@@ -72,6 +90,8 @@ import java.util.Set;
 final class JavaNodes {
 
 	@Nonnull private final CodeFormatter codeFormatter;
+	private final boolean enableRecovery;
+
 	@Nonnull private final JavaDependencies dependencies = new JavaDependencies();
 	@Nonnull private final JavaAnnotates annotates = new JavaAnnotates(dependencies);
 	@Nonnull private final JavaTypes types = new JavaTypes(dependencies, annotates);
@@ -89,16 +109,17 @@ final class JavaNodes {
 
 	@Nonnull private final List<Pair<ASTNode, AbstractNode>> delayedDependencyWalkers = new LinkedList<>();
 
+	@Nullable private Set<AbstractNode> perFileNodeSet;
 
-	@Nullable private Set<AbstractNode> nodeSet;
 
-	JavaNodes(@Nonnull CodeFormatter formatter) {
+	JavaNodes(@Nonnull CodeFormatter formatter, boolean enableRecovery) {
 		this.codeFormatter = formatter;
+		this.enableRecovery = enableRecovery;
 	}
 
-	void build(@Nonnull Set<AbstractNode> nodeSet, @Nonnull CompilationUnit compilationUnit)
+	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull CompilationUnit compilationUnit)
 			throws JavaCiaException {
-		this.nodeSet = nodeSet;
+		this.perFileNodeSet = perFileNodeSet;
 
 		final PackageDeclaration packageDeclaration = compilationUnit.getPackage();
 		if (packageDeclaration != null) {
@@ -117,7 +138,7 @@ final class JavaNodes {
 			}
 		}
 
-		this.nodeSet = null;
+		this.perFileNodeSet = null;
 	}
 
 	@Nonnull
@@ -161,6 +182,7 @@ final class JavaNodes {
 			throw new JavaCiaException("Cannot format source code!", e);
 		}
 	}
+
 
 	//region Modifier
 
@@ -231,9 +253,9 @@ final class JavaNodes {
 		}
 
 		// add to node set
-		assert nodeSet != null;
+		assert perFileNodeSet != null;
 		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
-			nodeSet.add(node);
+			perFileNodeSet.add(node);
 		}
 
 		return packageNode;
@@ -292,8 +314,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(classNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(classNode);
 
 		internalParseClassTypeBinding(classNode, typeBinding, typeDeclaration.bodyDeclarations());
 	}
@@ -346,8 +368,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, interfaceNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(interfaceNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(interfaceNode);
 
 		// put binding map
 		bindingNodeMap.put(typeBinding, interfaceNode);
@@ -386,8 +408,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, enumNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(enumNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(enumNode);
 
 		// put binding map
 		bindingNodeMap.put(typeBinding, enumNode);
@@ -433,8 +455,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(fieldNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(fieldNode);
 
 		internalEnumConstantOrFieldVariableBinding(fieldNode, variableBinding);
 
@@ -494,8 +516,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(classNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(classNode);
 
 		internalParseClassTypeBinding(classNode, typeBinding, anonymousClassDeclaration.bodyDeclarations());
 	}
@@ -512,8 +534,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, annotationNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(annotationNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(annotationNode);
 
 		// put binding map
 		bindingNodeMap.put(annotationBinding, annotationNode);
@@ -547,8 +569,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(methodNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(methodNode);
 
 		// put binding map
 		bindingNodeMap.put(annotationMemberBinding, methodNode);
@@ -590,8 +612,8 @@ final class JavaNodes {
 				dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
 				// add to node set
-				assert nodeSet != null;
-				nodeSet.add(fieldNode);
+				assert perFileNodeSet != null;
+				perFileNodeSet.add(fieldNode);
 
 				internalEnumConstantOrFieldVariableBinding(fieldNode, variableBinding);
 
@@ -603,8 +625,8 @@ final class JavaNodes {
 					final InitializerNode initializerNode = pair.getA();
 
 					// add to node set
-					assert nodeSet != null;
-					nodeSet.add(initializerNode);
+					assert perFileNodeSet != null;
+					perFileNodeSet.add(initializerNode);
 
 					final List<InitializerNode.InitializerImpl> initializerList = pair.getB();
 					initializerList.add(new InitializerNode.FieldInitializerImpl(fieldNode,
@@ -626,8 +648,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, initializerNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(initializerNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(initializerNode);
 
 		// put delayed initializer body
 		final Block initializerBody = initializer.getBody();
@@ -680,8 +702,8 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
 		// add to node set
-		assert nodeSet != null;
-		nodeSet.add(methodNode);
+		assert perFileNodeSet != null;
+		perFileNodeSet.add(methodNode);
 
 		// create parameter proper types
 		for (final ITypeBinding parameterTypeBinding : parameterTypeBindings) {
@@ -773,44 +795,48 @@ final class JavaNodes {
 			@Override
 			public boolean visit(@Nonnull SuperConstructorInvocation node) {
 				final IMethodBinding binding = node.resolveConstructorBinding();
-				if (binding == null) {
-					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on constructor invocation!");
-					return false;
+				if (binding != null) {
+					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				} else if (!enableRecovery) {
+					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super constructor invocation!");
 				}
-				return createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				return false;
 			}
 
 			@Override
 			public boolean visit(@Nonnull ConstructorInvocation node) {
 				final IMethodBinding binding = node.resolveConstructorBinding();
-				if (binding == null) {
+				if (binding != null) {
+					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				} else if (!enableRecovery) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on constructor invocation!");
-					return false;
 				}
-				return createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				return false;
 			}
 
 			@Override
 			public boolean visit(@Nonnull SuperMethodInvocation node) {
 				final IMethodBinding binding = node.resolveMethodBinding();
-				if (binding == null) {
-					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on method invocation!");
-					return false;
+				if (binding != null) {
+					createDependencyFromInvocation(binding,node.typeArguments(), node.arguments());
+				} else if (!enableRecovery) {
+					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super method invocation!");
 				}
-				return createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				return false;
 			}
 
 			@Override
 			public boolean visit(@Nonnull MethodInvocation node) {
 				final IMethodBinding binding = node.resolveMethodBinding();
-				if (binding == null) {
+				if (binding != null) {
+					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				} else if (!enableRecovery) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on method invocation!");
-					return false;
 				}
-				return createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
+				return false;
 			}
 
-			private boolean createDependencyFromInvocation(@Nonnull IMethodBinding binding,
+			private void createDependencyFromInvocation(@Nonnull IMethodBinding binding,
 					@Nonnull List<?> typeArguments, @Nonnull List<?> arguments) {
 				dependencies.createDelayDependency(javaNode,
 						JavaDependencies.getOriginMethodBinding(binding), JavaDependency.INVOCATION);
@@ -820,13 +846,12 @@ final class JavaNodes {
 				for (final Object object : arguments) {
 					if (object instanceof Expression) ((Expression) object).accept(this);
 				}
-				return false;
 			}
 
 			@Override
 			public boolean visit(@Nonnull SimpleName node) {
 				final IBinding binding = node.resolveBinding();
-				if (binding == null) {
+				if (binding == null && !enableRecovery) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on simple name!");
 					return false;
 				}

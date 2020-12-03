@@ -25,6 +25,7 @@ import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
@@ -59,25 +60,25 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nullable private JavaCiaException exception;
 
 
-	private JavaSnapshotParser(@Nonnull Map<String, String> sourceNameMap, @Nonnull CodeFormatter codeFormatter) {
+	private JavaSnapshotParser(@Nonnull Map<String, String> sourceNameMap, @Nonnull CodeFormatter codeFormatter,
+			boolean enableRecovery) {
 		this.sourceNameMap = sourceNameMap;
-		this.nodes = new JavaNodes(codeFormatter);
+		this.nodes = new JavaNodes(codeFormatter, enableRecovery);
 	}
 
 
 	@Nonnull
-	static JavaRootNode build(@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths)
-			throws JavaCiaException {
+	static JavaRootNode build(@Nonnull List<Triple<String, Path, List<Path>>> javaSources,
+			@Nonnull List<Path> classPaths, boolean enableRecovery) throws JavaCiaException {
 
 		final List<String> classPathList = new ArrayList<>(classPaths.size() + javaSources.size());
 		final List<String> projectFileList = new ArrayList<>();
 		final Map<String, String> sourceNameMap = new HashMap<>();
 		try {
-			for (final Map.Entry<String, Pair<Path, List<Path>>> entry : javaSources.entrySet()) {
-				final String sourceName = entry.getKey();
-				final Pair<Path, List<Path>> pair = entry.getValue();
-				classPathList.add(pair.getA().toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
-				for (final Path projectFilePath : pair.getB()) {
+			for (final Triple<String, Path, List<Path>> triple : javaSources) {
+				final String sourceName = triple.getA();
+				classPathList.add(triple.getB().toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
+				for (final Path projectFilePath : triple.getC()) {
 					final String projectFileString = projectFilePath.toRealPath(LinkOption.NOFOLLOW_LINKS).toString();
 					projectFileList.add(projectFileString);
 					sourceNameMap.put(projectFileString, sourceName);
@@ -96,12 +97,12 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		final String[] classPathArray = classPathList.toArray(EMPTY);
 
-		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceNameMap);
+		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceNameMap, enableRecovery);
 	}
 
 	@Nonnull
 	private static JavaRootNode parse(@Nonnull String[] sourcePathArray, @Nonnull String[] sourceEncodingArray,
-			@Nonnull String[] classPathArray, @Nonnull Map<String, String> sourceNameMap)
+			@Nonnull String[] classPathArray, @Nonnull Map<String, String> sourceNameMap, boolean enableRecovery)
 			throws JavaCiaException {
 
 		final ASTParser astParser = ASTParser.newParser(AST.JLS14);
@@ -110,13 +111,13 @@ final class JavaSnapshotParser extends FileASTRequestor {
 		astParser.setCompilerOptions(options);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setResolveBindings(true);
-		astParser.setBindingsRecovery(true);
+		astParser.setBindingsRecovery(enableRecovery);
 		astParser.setEnvironment(classPathArray, null, null, true);
 
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "65536");
 
 		final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING);
-		final JavaSnapshotParser parser = new JavaSnapshotParser(sourceNameMap, codeFormatter);
+		final JavaSnapshotParser parser = new JavaSnapshotParser(sourceNameMap, codeFormatter, enableRecovery);
 		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 
 		// TODO: add source name info to tree
@@ -129,9 +130,9 @@ final class JavaSnapshotParser extends FileASTRequestor {
 		try {
 			final String sourceName = sourceNameMap.get(sourcePath);
 			if (sourceName == null) throw new JavaCiaException("Unknown source path!");
-			final Set<AbstractNode> nodeSet
+			final Set<AbstractNode> perFileNodeSet
 					= sourceNodeMap.computeIfAbsent(sourceName, JavaSnapshotParser::createLinkedHashSet);
-			nodes.build(nodeSet, compilationUnit);
+			nodes.build(perFileNodeSet, compilationUnit);
 		} catch (JavaCiaException exception) {
 			this.exception = exception;
 		}

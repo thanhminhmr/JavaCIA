@@ -28,6 +28,7 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.nio.file.Path;
 import java.util.List;
@@ -45,9 +46,9 @@ public final class ProjectBuilders {
 
 	@Nonnull
 	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
-			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException {
-		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable);
+			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
+		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable, enableRecovery);
 	}
 
 	@Nonnull
@@ -56,6 +57,5 @@ public final class ProjectBuilders {
 			@Nonnull JavaDependencyWeightTable impactWeightTable) throws JavaCiaException {
 		return JavaSnapshotComparator.compare(comparisonName, previousSnapshot, currentSnapshot, impactWeightTable);
 	}
-
 
 }

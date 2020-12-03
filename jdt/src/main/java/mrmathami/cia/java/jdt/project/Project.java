@@ -27,9 +27,11 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 
 import java.io.Serializable;
 import java.nio.file.Path;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -68,22 +70,22 @@ public final class Project implements JavaProject, Serializable {
 	@Nonnull
 	@Override
 	public List<ProjectSnapshot> getSnapshots() {
-		return snapshots;
+		return Collections.unmodifiableList(snapshots);
 	}
 
 	@Nonnull
 	@Override
 	public List<ProjectSnapshotComparison> getSnapshotComparisons() {
-		return snapshotComparisons;
+		return Collections.unmodifiableList(snapshotComparisons);
 	}
 
 	@Nonnull
 	@Override
 	public JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName,
-			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable) throws JavaCiaException {
+			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
 		final ProjectSnapshot snapshot = JavaSnapshotBuilder.build(
-				snapshotName, javaSources, classPaths, dependencyWeightTable);
+				snapshotName, javaSources, classPaths, dependencyWeightTable, enableRecovery);
 		snapshots.add(snapshot);
 		return snapshot;
 	}
