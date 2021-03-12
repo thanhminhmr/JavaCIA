@@ -38,8 +38,10 @@ public class X {
 //		System.in.read();
 //
 //		for (int i = 0; i < 10; i++) {
-		final Path javaSourcePathA = Path.of("..\\test\\JSON-java-before\\src\\main\\java");
-		final Path javaSourcePathB = Path.of("..\\test\\JSON-java\\src\\main\\java");
+//		final Path javaSourcePathA = Path.of("..\\test\\JSON-java-before\\src\\main\\java");
+//		final Path javaSourcePathB = Path.of("..\\test\\JSON-java\\src\\main\\java");
+		final Path javaSourcePathA = Path.of("D:\\test-weight-1806\\test1\\src\\src");
+		final Path javaSourcePathB = Path.of("D:\\test-weight-1806\\test1\\new\\src\\src");
 		final List<Path> fileNamesA = getFileList(new ArrayList<>(), javaSourcePathA);
 		final List<Path> fileNamesB = getFileList(new ArrayList<>(), javaSourcePathB);
 
@@ -71,13 +73,13 @@ public class X {
 		javaProject.addSnapshotComparison(snapshotComparison);
 
 		try (final ObjectOutputStream objectOutputStream
-				= new ObjectOutputStream(Files.newOutputStream(Path.of("..\\test\\JSON-java.proj")))) {
+				= new ObjectOutputStream(Files.newOutputStream(Path.of("jdt\\src\\test\\JSON-java.proj")))) {
 			objectOutputStream.writeObject(javaProject);
 		}
 
 		System.out.printf("Compare time: %s\n", (timeCompareFinish - timeCompareStart) / 1000000.0);
 
-		System.out.println(snapshotComparison);
+		System.out.println(snapshotComparison.getName());
 //		}
 	}
 

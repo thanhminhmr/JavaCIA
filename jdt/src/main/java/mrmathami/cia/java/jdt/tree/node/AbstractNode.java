@@ -25,6 +25,8 @@ import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.collections.ImmutableOrderedMap;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -165,11 +167,18 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 		return internalAddChild(new MethodNode(this, simpleName, parameters));
 	}
 
+
 	@Nonnull
 	public final PackageNode createChildPackage(@Nonnull String simpleName) {
 		assertNonFrozen();
 		asPackageContainer();
 		return internalAddChild(new PackageNode(this, simpleName));
+	}
+	@Nonnull
+	public final XMLNode createChildXMlNode(@Nonnull String simpleName, String textContent, NodeList children, NamedNodeMap listAttributes) {
+		assertNonFrozen();
+		asXMLContainer();
+		return internalAddChild(new XMLNode( simpleName, this, textContent, children, listAttributes));
 	}
 
 	//endregion Node Container
@@ -221,6 +230,7 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 			next = true;
 		}
 	}
+
 
 	@Override
 	protected void internalToJsonEnd(@Nonnull StringBuilder builder, @Nonnull String indentation) {

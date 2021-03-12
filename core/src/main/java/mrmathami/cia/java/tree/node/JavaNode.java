@@ -22,14 +22,7 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
-import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
-import mrmathami.cia.java.tree.node.container.JavaFieldContainer;
-import mrmathami.cia.java.tree.node.container.JavaInitializerContainer;
-import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
-import mrmathami.cia.java.tree.node.container.JavaMethodContainer;
-import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
+import mrmathami.cia.java.tree.node.container.*;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -72,7 +65,7 @@ public interface JavaNode extends JavaIdentifiedEntity {
 	List<? extends JavaNode> getChildren();
 
 	@Nonnull
-	String getSimpleName();
+	String getNodeName();
 
 	@Nonnull
 	String getQualifiedName();
@@ -138,6 +131,10 @@ public interface JavaNode extends JavaIdentifiedEntity {
 	@Nonnull
 	default JavaPackageNode asPackageNode() throws ClassCastException {
 		throw new ClassCastException("Not a JavaPackageNode!");
+	}
+	@Nonnull
+	default JavaXMLNode asXMLNode() throws ClassCastException {
+		throw new ClassCastException("Not a JavaXMLNode!");
 	}
 
 	@Nonnull
@@ -294,6 +291,25 @@ public interface JavaNode extends JavaIdentifiedEntity {
 	}
 
 	//endregion Method Container
+
+	//region XML Container
+
+	@Nonnull
+	default List<? extends JavaXMLNode> getChildXMLNodes(@Nonnull List<JavaXMLNode> xmlNodes) {
+		return xmlNodes;
+	}
+
+	@Nonnull
+	default List<? extends JavaXMLNode> getChildXMLNodes() {
+		return List.of();
+	}
+
+	@Nonnull
+	default JavaXMLContainer asXMLContainer() throws ClassCastException {
+		throw new ClassCastException("Not a JavaXMLContainer");
+	}
+
+	//end region XML Container
 
 	//region Package Container
 

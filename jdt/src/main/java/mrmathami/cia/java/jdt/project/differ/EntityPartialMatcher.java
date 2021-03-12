@@ -54,7 +54,7 @@ enum EntityPartialMatcher {
 			assert entity instanceof JavaNode;
 			final JavaNode node = (JavaNode) entity;
 			int matchCode = node.getEntityClass().hashCode();
-			matchCode = matchCode * 31 + node.getSimpleName().hashCode();
+			matchCode = matchCode * 31 + node.getNodeName().hashCode();
 			matchCode = matchCode * 31 + node.getQualifiedName().hashCode();
 			matchCode = matchCode * 31 + node.getUniqueName().hashCode();
 			return matchCode * 31 + (identicalMatch ? node.getDependencyToNodes().size() : -1);
@@ -67,7 +67,7 @@ enum EntityPartialMatcher {
 			final JavaNode nodeA = (JavaNode) entityA, nodeB = (JavaNode) entityB;
 
 			if (!nodeA.getEntityClass().equals(nodeB.getEntityClass())
-					|| !nodeA.getSimpleName().equals(nodeB.getSimpleName())
+					|| !nodeA.getNodeName().equals(nodeB.getNodeName())
 					|| !nodeA.getQualifiedName().equals(nodeB.getQualifiedName())
 					|| !nodeA.getUniqueName().equals(nodeB.getUniqueName())
 					|| !nodeA.isRoot() && !nodeB.isRoot()

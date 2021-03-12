@@ -44,6 +44,22 @@
 			<artifactId>org.eclipse.jdt.core</artifactId>
 			<version>3.23.0</version>
 		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.xmlunit/xmlunit-core -->
+		<dependency>
+			<groupId>org.xmlunit</groupId>
+			<artifactId>xmlunit-core</artifactId>
+			<version>2.6.2</version>
+			<scope>compile</scope>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.xmlunit/xmlunit-legacy -->
+		<dependency>
+			<groupId>org.xmlunit</groupId>
+			<artifactId>xmlunit-legacy</artifactId>
+			<version>2.6.2</version>
+			<scope>compile</scope>
+		</dependency>
 	</dependencies>
 
 	<build>

@@ -3,16 +3,7 @@ package mrmathami.cia.java.jdt.project.builder;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
-import mrmathami.cia.java.jdt.tree.node.AbstractNode;
-import mrmathami.cia.java.jdt.tree.node.AnnotationNode;
-import mrmathami.cia.java.jdt.tree.node.ClassNode;
-import mrmathami.cia.java.jdt.tree.node.EnumNode;
-import mrmathami.cia.java.jdt.tree.node.FieldNode;
-import mrmathami.cia.java.jdt.tree.node.InitializerNode;
-import mrmathami.cia.java.jdt.tree.node.InterfaceNode;
-import mrmathami.cia.java.jdt.tree.node.MethodNode;
-import mrmathami.cia.java.jdt.tree.node.PackageNode;
-import mrmathami.cia.java.jdt.tree.node.RootNode;
+import mrmathami.cia.java.jdt.tree.node.*;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.JavaModifier;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
@@ -24,42 +15,18 @@ import mrmathami.cia.java.tree.node.container.JavaInitializerContainer;
 import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
 import mrmathami.cia.java.tree.node.container.JavaMethodContainer;
 import mrmathami.utils.Pair;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConstructorInvocation;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
-import org.eclipse.jdt.core.dom.EnumDeclaration;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.Initializer;
-import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
-import org.eclipse.jdt.core.dom.Modifier;
-import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
-import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.w3c.dom.Node;
+import org.w3c.dom.traversal.DocumentTraversal;
+import org.w3c.dom.traversal.NodeFilter;
+import org.w3c.dom.traversal.TreeWalker;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -121,6 +88,39 @@ final class JavaNodes {
 		}
 
 		this.perFileNodeSet = null;
+	}
+	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull org.w3c.dom.Document document, String pathFile) throws JavaCiaException {
+		this.perFileNodeSet = perFileNodeSet;
+		DocumentTraversal traversal = (DocumentTraversal) document;
+		PackageNode packageNode = createPackageNodeFromPath(pathFile);
+
+		TreeWalker walker = traversal.createTreeWalker(document.getDocumentElement(),
+				NodeFilter.SHOW_ELEMENT, null, true);
+
+		XMLNode rootNode = packageNode.createChildXMlNode(document.getDocumentElement().getNodeName(), document.getDocumentElement().getTextContent(), document.getDocumentElement().getChildNodes(),
+				document.getDocumentElement().getAttributes());
+
+		traverseLevel(walker, rootNode, false);
+
+		dependencies.createDependencyToNode(packageNode, rootNode, JavaDependency.MEMBER);
+		perFileNodeSet.add(rootNode);
+
+		this.perFileNodeSet = null;
+	}
+
+	private static void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild) {
+		Node currentNode = walker.getCurrentNode();
+		if (!isFirstChild) {
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, parent, true);
+			}
+		} else {
+			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(),currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, xmlNode, true);
+			}
+		}
+		walker.setCurrentNode(currentNode);
 	}
 
 	@Nonnull
@@ -243,6 +243,98 @@ final class JavaNodes {
 		return packageNode;
 	}
 
+	@Nonnull
+	private PackageNode createPackageNodeFromPath(@Nonnull String path) {
+		int startPackageIndex = path.indexOf("src\\");
+		String simplePath = path.substring(startPackageIndex);
+		String[] pathComponent = simplePath.split("\\\\");
+		// remove name of file
+		// remove src component
+		String[] nameComponent = new String[pathComponent.length - 2];
+		if (nameComponent.length >= 0) System.arraycopy(pathComponent, 1, nameComponent, 0, nameComponent.length);
+		final Pair<PackageNode, IPackageBinding> oldPair = packageNodeMap.get(nameComponent[nameComponent.length - 1]);
+		final Pair<PackageNode, IPackageBinding> pair = oldPair != null
+				? oldPair
+				: internalCreatePackagePairFromNameComponents(nameComponent);
+		PackageNode packageNode = pair.getA();
+		/*IPackageBinding packageBinding = createPackageBinding(nameComponent);
+		if (pair.getB() == null) {
+			pair.setB(packageBinding);
+			packageNode.setAnnotates(annotates.createAnnotatesFromAnnotationBindings(packageBinding.getAnnotations(),
+					packageNode, JavaDependency.USE));
+		}*/
+		System.out.println("packageNode " + packageNode);
+		assert perFileNodeSet != null;
+		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
+			perFileNodeSet.add(node);
+		}
+		return packageNode;
+	}
+
+	private IPackageBinding createPackageBinding(String[] nameComponent) {
+		IPackageBinding packageBinding = new IPackageBinding() {
+			@Override
+			public String getName() {
+				return nameComponent[nameComponent.length - 1];
+			}
+
+			@Override
+			public boolean isUnnamed() {
+				return false;
+			}
+
+			@Override
+			public String[] getNameComponents() {
+				return nameComponent;
+			}
+
+			@Override
+			public IAnnotationBinding[] getAnnotations() {
+				return new IAnnotationBinding[0];
+			}
+
+			@Override
+			public int getKind() {
+				return 0;
+			}
+
+			@Override
+			public int getModifiers() {
+				return 0;
+			}
+
+			@Override
+			public boolean isDeprecated() {
+				return false;
+			}
+
+			@Override
+			public boolean isRecovered() {
+				return false;
+			}
+
+			@Override
+			public boolean isSynthetic() {
+				return false;
+			}
+
+			@Override
+			public IJavaElement getJavaElement() {
+				return null;
+			}
+
+			@Override
+			public String getKey() {
+				return null;
+			}
+
+			@Override
+			public boolean isEqualTo(IBinding iBinding) {
+				return false;
+			}
+		};
+		return packageBinding;
+	}
 	//endregion Package
 
 	//region Parser

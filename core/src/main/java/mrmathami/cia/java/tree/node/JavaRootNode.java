@@ -20,11 +20,7 @@ package mrmathami.cia.java.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
-import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
-import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
-import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
+import mrmathami.cia.java.tree.node.container.*;
 import mrmathami.cia.java.tree.type.JavaType;
 
 import java.util.List;
@@ -32,7 +28,7 @@ import java.util.NoSuchElementException;
 
 public interface JavaRootNode extends JavaNode,
 		JavaPackageContainer, JavaAnnotationContainer, JavaClassContainer,
-		JavaEnumContainer, JavaInterfaceContainer {
+		JavaEnumContainer, JavaInterfaceContainer, JavaXMLContainer {
 
 	@Nonnull String OBJECT_CLASS = "JavaRootNode";
 
@@ -70,7 +66,7 @@ public interface JavaRootNode extends JavaNode,
 
 	@Nonnull
 	@Override
-	default String getSimpleName() {
+	default String getNodeName() {
 		return "{ROOT}";
 	}
 

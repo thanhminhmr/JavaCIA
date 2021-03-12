@@ -185,7 +185,7 @@ final class JavaAnnotates {
 	}
 
 	@Nonnull
-	List<Annotate> createAnnotatesFromAnnotationBindings(@Nonnull IAnnotationBinding[] annotationBindings,
+	List<Annotate>  createAnnotatesFromAnnotationBindings(@Nonnull IAnnotationBinding[] annotationBindings,
 			@Nonnull AbstractNode dependencySourceNode, @Nonnull JavaDependency dependencyType)
 			throws JavaCiaException {
 		if (annotationBindings.length == 0) return List.of(); // unnecessary, but nice to have
