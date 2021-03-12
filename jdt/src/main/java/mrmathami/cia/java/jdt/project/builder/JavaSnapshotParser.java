@@ -52,165 +52,153 @@ import java.util.Set;
 
 final class JavaSnapshotParser extends FileASTRequestor {
 
-    @Nonnull
-    private static final String[] EMPTY = new String[0];
+	@Nonnull
+	private static final String[] EMPTY = new String[0];
 
-    @Nonnull
-    private final Map<String, String> sourceNameMap;
-    @Nonnull
-    private final JavaNodes nodes;
+	@Nonnull
+	private final Map<String, String> sourceNameMap;
+	@Nonnull
+	private final JavaNodes nodes;
 
-    @Nonnull
-    private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
+	@Nonnull
+	private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
 
-    @Nullable
-    private JavaCiaException exception;
+	@Nullable
+	private JavaCiaException exception;
 
-    private JavaSnapshotParser(@Nonnull Map<String, String> sourceNameMap, @Nonnull CodeFormatter codeFormatter,
-                               boolean enableRecovery) {
-        this.sourceNameMap = sourceNameMap;
-        this.nodes = new JavaNodes(codeFormatter, enableRecovery);
-    }
+	private JavaSnapshotParser(@Nonnull Map<String, String> sourceNameMap, @Nonnull CodeFormatter codeFormatter,
+			boolean enableRecovery) {
+		this.sourceNameMap = sourceNameMap;
+		this.nodes = new JavaNodes(codeFormatter, enableRecovery);
+	}
 
 
-    @Nonnull
-    static JavaRootNode build(@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-                              boolean enableRecovery) throws JavaCiaException {
+	@Nonnull
+	static JavaRootNode build(@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
+			boolean enableRecovery) throws JavaCiaException {
 
-        final List<String> classPathList = new ArrayList<>(classPaths.size() + javaSources.size());
-        final List<String> projectFileList = new ArrayList<>();
-        final Map<String, String> sourceNameMap = new HashMap<>();
-        try {
-            for (final Map.Entry<String, Pair<Path, List<Path>>> entry : javaSources.entrySet()) {
-                final String sourceName = entry.getKey();
-                final Pair<Path, List<Path>> pair = entry.getValue();
-                classPathList.add(pair.getA().toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
-                for (final Path projectFilePath : pair.getB()) {
-                    final String projectFileString = projectFilePath.toRealPath(LinkOption.NOFOLLOW_LINKS).toString();
-                    projectFileList.add(projectFileString);
-                    sourceNameMap.put(projectFileString, sourceName);
-                }
-            }
-            for (final Path classPath : classPaths) {
-                classPathList.add(classPath.toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
-            }
-        } catch (IOException exception) {
-            throw new JavaCiaException("Cannot access source files or class paths!", exception);
-        }
-        final String[] sourcePathArray = projectFileList.toArray(EMPTY);
+		final List<String> classPathList = new ArrayList<>(classPaths.size() + javaSources.size());
+		final List<String> projectFileList = new ArrayList<>();
+		final Map<String, String> sourceNameMap = new HashMap<>();
+		try {
+			for (final Map.Entry<String, Pair<Path, List<Path>>> entry : javaSources.entrySet()) {
+				final String sourceName = entry.getKey();
+				final Pair<Path, List<Path>> pair = entry.getValue();
+				classPathList.add(pair.getA().toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
+				for (final Path projectFilePath : pair.getB()) {
+					final String projectFileString = projectFilePath.toRealPath(LinkOption.NOFOLLOW_LINKS).toString();
+					projectFileList.add(projectFileString);
+					sourceNameMap.put(projectFileString, sourceName);
+				}
+			}
+			for (final Path classPath : classPaths) {
+				classPathList.add(classPath.toRealPath(LinkOption.NOFOLLOW_LINKS).toString());
+			}
+		} catch (IOException exception) {
+			throw new JavaCiaException("Cannot access source files or class paths!", exception);
+		}
+		final String[] sourcePathArray = projectFileList.toArray(EMPTY);
 
-        final String[] sourceEncodingArray = new String[sourcePathArray.length];
-        Arrays.fill(sourceEncodingArray, StandardCharsets.UTF_8.name());
+		final String[] sourceEncodingArray = new String[sourcePathArray.length];
+		Arrays.fill(sourceEncodingArray, StandardCharsets.UTF_8.name());
 
-        final String[] classPathArray = classPathList.toArray(EMPTY);
+		final String[] classPathArray = classPathList.toArray(EMPTY);
 
-        return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceNameMap, enableRecovery);
-    }
+		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceNameMap, enableRecovery);
+	}
 
-    @Nonnull
-    private static JavaRootNode parse(@Nonnull String[] sourcePathArray, @Nonnull String[] sourceEncodingArray,
-                                      @Nonnull String[] classPathArray, @Nonnull Map<String, String> sourceNameMap, boolean enableRecovery)
-            throws JavaCiaException {
+	@Nonnull
+	private static JavaRootNode parse(@Nonnull String[] sourcePathArray, @Nonnull String[] sourceEncodingArray,
+			@Nonnull String[] classPathArray, @Nonnull Map<String, String> sourceNameMap, boolean enableRecovery)
+			throws JavaCiaException {
 
-        final ASTParser astParser = ASTParser.newParser(AST.JLS14);
-        final Map<String, String> options = JavaCore.getOptions();
-        JavaCore.setComplianceOptions(JavaCore.VERSION_14, options);
-        astParser.setCompilerOptions(options);
-        astParser.setKind(ASTParser.K_COMPILATION_UNIT);
-        astParser.setResolveBindings(true);
-        astParser.setBindingsRecovery(enableRecovery);
-        astParser.setEnvironment(classPathArray, null, null, true);
+		final ASTParser astParser = ASTParser.newParser(AST.JLS14);
+		final Map<String, String> options = JavaCore.getOptions();
+		JavaCore.setComplianceOptions(JavaCore.VERSION_14, options);
+		astParser.setCompilerOptions(options);
+		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
+		astParser.setResolveBindings(true);
+		astParser.setBindingsRecovery(enableRecovery);
+		astParser.setEnvironment(classPathArray, null, null, true);
 
-        options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "65536");
+		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "65536");
 
-        final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING);
-        final JavaSnapshotParser parser = new JavaSnapshotParser(sourceNameMap, codeFormatter, enableRecovery);
-        astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
+		final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING);
+		final JavaSnapshotParser parser = new JavaSnapshotParser(sourceNameMap, codeFormatter, enableRecovery);
+		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 
-        // TODO: add source name info to tree
-        return parser.postProcessing();
-    }
+		// TODO: add source name info to tree
+		return parser.postProcessing();
+	}
 
-    @Override
-    public void acceptAST(@Nonnull String sourcePath, @Nonnull CompilationUnit compilationUnit) {
-        if (exception != null) return;
-        try {
-            final String sourceName = sourceNameMap.get(sourcePath);
-            if (sourceName == null) throw new JavaCiaException("Unknown source path!");
-            final Set<AbstractNode> perFileNodeSet
-                    = sourceNodeMap.computeIfAbsent(sourceName, JavaSnapshotParser::createLinkedHashSet);
-            //for xml file
-            if (sourcePath.endsWith(".xml")) {
-                Document doc = parseXML(sourcePath);
-                nodes.build(perFileNodeSet, doc, sourcePath);
-            } else {
-                nodes.build(perFileNodeSet, compilationUnit);
-            }
+	@Override
+	public void acceptAST(@Nonnull String sourcePath, @Nonnull CompilationUnit compilationUnit) {
+		if (exception != null) return;
+		try {
+			final String sourceName = sourceNameMap.get(sourcePath);
+			if (sourceName == null) throw new JavaCiaException("Unknown source path!");
+			final Set<AbstractNode> perFileNodeSet
+					= sourceNodeMap.computeIfAbsent(sourceName, JavaSnapshotParser::createLinkedHashSet);
+			//for xml file
+			if (sourcePath.endsWith(".xml")) {
+				Document doc = parseXML(sourcePath);
+				nodes.build(perFileNodeSet, doc, sourcePath);
+			} else {
+				nodes.build(perFileNodeSet, compilationUnit);
+			}
 
-        } catch (JavaCiaException exception) {
-            this.exception = exception;
-        } catch (SAXException | IOException | ParserConfigurationException e) {
-            e.printStackTrace();
-        }
-    }
+		} catch (JavaCiaException exception) {
+			this.exception = exception;
+		} catch (SAXException | IOException | ParserConfigurationException e) {
+			e.printStackTrace();
+		}
+	}
 
-    private static Document parseXML(String sourcePath) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-        dbf.setNamespaceAware(true);
-        dbf.setIgnoringComments(true);
-        dbf.setCoalescing(true);
-        dbf.setIgnoringElementContentWhitespace(true);
-        DocumentBuilder db = dbf.newDocumentBuilder();
-        Document doc = db.parse(Paths.get(sourcePath).toFile());
-        doc.normalizeDocument();
-//        Element root = doc.getDocumentElement();
-//		System.out.println("doc " + doc);
+	private static Document parseXML(String sourcePath) throws ParserConfigurationException, IOException, SAXException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		dbf.setIgnoringComments(true);
+		dbf.setCoalescing(true);
+		dbf.setIgnoringElementContentWhitespace(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(Paths.get(sourcePath).toFile());
+		doc.normalizeDocument();
+		return doc;
+	}
 
-//        System.out.println("root: " + root.getTagName() + "\tlength: " + root.getChildNodes().getLength());
-//        for (int i = 0; i < root.getChildNodes().getLength(); i++) {
-//            System.out.println(i + ": ");
-//            System.out.println("Local name: " + root.getChildNodes().item(i).getLocalName());
-//            System.out.println("Node name: " + root.getChildNodes().item(i).getNodeName());
-//            System.out.println("Node value: " + root.getChildNodes().item(i).getNodeValue());
-//            System.out.println("Name space uri: " + root.getChildNodes().item(i).getNamespaceURI());
-//            System.out.println("Parent node: " + root.getChildNodes().item(i).getParentNode().getNodeName());
-//        }
-        return doc;
-    }
+	@Nonnull
+	private RootNode postProcessing() throws JavaCiaException {
+		if (exception != null) throw exception;
+		return nodes.postprocessing();
+	}
 
-    @Nonnull
-    private RootNode postProcessing() throws JavaCiaException {
-        if (exception != null) throw exception;
-        return nodes.postprocessing();
-    }
+	//region Misc
 
-    //region Misc
+	@Nonnull
+	static <A, B, R> Pair<A, B> createMutablePair(@Nullable R any) {
+		return Pair.mutableOf(null, null);
+	}
 
-    @Nonnull
-    static <A, B, R> Pair<A, B> createMutablePair(@Nullable R any) {
-        return Pair.mutableOf(null, null);
-    }
+	@Nonnull
+	static <A, R> List<A> createArrayList(@Nullable R any) {
+		return new ArrayList<>();
+	}
 
-    @Nonnull
-    static <A, R> List<A> createArrayList(@Nullable R any) {
-        return new ArrayList<>();
-    }
+	@Nonnull
+	static <A, B, R> Map<A, B> createHashMap(@Nullable R any) {
+		return new HashMap<>();
+	}
 
-    @Nonnull
-    static <A, B, R> Map<A, B> createHashMap(@Nullable R any) {
-        return new HashMap<>();
-    }
+	@Nonnull
+	static <A, B, R> Map<A, B> createIdentityHashMap(@Nullable R any) {
+		return new IdentityHashMap<>();
+	}
 
-    @Nonnull
-    static <A, B, R> Map<A, B> createIdentityHashMap(@Nullable R any) {
-        return new IdentityHashMap<>();
-    }
+	@Nonnull
+	static <A, R> Set<A> createLinkedHashSet(@Nullable R any) {
+		return new LinkedHashSet<>();
+	}
 
-    @Nonnull
-    static <A, R> Set<A> createLinkedHashSet(@Nullable R any) {
-        return new LinkedHashSet<>();
-    }
-
-    //endregion Misc
+	//endregion Misc
 
 }

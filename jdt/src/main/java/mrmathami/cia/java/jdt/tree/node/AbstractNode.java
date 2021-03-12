@@ -174,11 +174,12 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 		asPackageContainer();
 		return internalAddChild(new PackageNode(this, simpleName));
 	}
+
 	@Nonnull
 	public final XMLNode createChildXMlNode(@Nonnull String simpleName, String textContent, NodeList children, NamedNodeMap listAttributes) {
 		assertNonFrozen();
 		asXMLContainer();
-		return internalAddChild(new XMLNode( simpleName, this, textContent, children, listAttributes));
+		return internalAddChild(new XMLNode(simpleName, this, textContent, children, listAttributes));
 	}
 
 	//endregion Node Container

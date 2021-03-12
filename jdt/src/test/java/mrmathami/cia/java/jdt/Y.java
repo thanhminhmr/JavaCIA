@@ -39,7 +39,7 @@ public class Y {
 //		);
 
 		//final Path corePath = Path.of("D:\\project\\LearningStruts\\src\\mrmathami\\struts2\\model");
-		final Path corePath = Path.of("D:\\project\\LearningStruts\\src\\mrmathami\\struts2\\model\\dao");
+		final Path corePath = Path.of("D:\\project\\MyBatis Collection\\LearningStruts\\src");
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
 				"core", Pair.immutableOf(corePath, coreFiles)

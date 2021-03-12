@@ -89,6 +89,7 @@ final class JavaNodes {
 
 		this.perFileNodeSet = null;
 	}
+
 	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull org.w3c.dom.Document document, String pathFile) throws JavaCiaException {
 		this.perFileNodeSet = perFileNodeSet;
 		DocumentTraversal traversal = (DocumentTraversal) document;
@@ -115,7 +116,7 @@ final class JavaNodes {
 				traverseLevel(walker, parent, true);
 			}
 		} else {
-			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(),currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
 			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
 				traverseLevel(walker, xmlNode, true);
 			}
@@ -892,7 +893,7 @@ final class JavaNodes {
 			public boolean visit(@Nonnull SuperMethodInvocation node) {
 				final IMethodBinding binding = node.resolveMethodBinding();
 				if (binding != null) {
-					createDependencyFromInvocation(binding,node.typeArguments(), node.arguments());
+					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
 				} else if (!enableRecovery) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super method invocation!");
 				}
