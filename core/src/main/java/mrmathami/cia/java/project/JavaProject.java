@@ -22,7 +22,10 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -52,7 +55,7 @@ public interface JavaProject {
 	@Nonnull
 	JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName,
 			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException;
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery, Path configurationPath) throws JavaCiaException, ParserConfigurationException, SAXException, IOException;
 
 	/**
 	 * @param comparisonName comparison name

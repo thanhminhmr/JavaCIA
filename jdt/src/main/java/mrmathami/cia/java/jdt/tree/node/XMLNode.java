@@ -103,5 +103,6 @@ public final class XMLNode extends AbstractNode implements JavaXMLNode {
 		return listAttributes;
 	}
 
+
 	//endregion Jsonify
 }

@@ -23,6 +23,7 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
+import mrmathami.cia.java.jdt.tree.node.XMLNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.utils.Pair;
 import org.eclipse.jdt.core.JavaCore;
@@ -40,7 +41,6 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -63,6 +63,8 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nonnull
 	private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
 
+	private static Map<String, XMLNode> mapXMlDependency = new HashMap<>();
+
 	@Nullable
 	private JavaCiaException exception;
 
@@ -72,10 +74,9 @@ final class JavaSnapshotParser extends FileASTRequestor {
 		this.nodes = new JavaNodes(codeFormatter, enableRecovery);
 	}
 
-
 	@Nonnull
 	static JavaRootNode build(@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			boolean enableRecovery) throws JavaCiaException {
+			boolean enableRecovery, Path configurationPath) throws JavaCiaException {
 
 		final List<String> classPathList = new ArrayList<>(classPaths.size() + javaSources.size());
 		final List<String> projectFileList = new ArrayList<>();
@@ -104,12 +105,12 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		final String[] classPathArray = classPathList.toArray(EMPTY);
 
-		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceNameMap, enableRecovery);
+		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceNameMap, enableRecovery, configurationPath);
 	}
 
 	@Nonnull
 	private static JavaRootNode parse(@Nonnull String[] sourcePathArray, @Nonnull String[] sourceEncodingArray,
-			@Nonnull String[] classPathArray, @Nonnull Map<String, String> sourceNameMap, boolean enableRecovery)
+			@Nonnull String[] classPathArray, @Nonnull Map<String, String> sourceNameMap, boolean enableRecovery, Path configuration)
 			throws JavaCiaException {
 
 		final ASTParser astParser = ASTParser.newParser(AST.JLS14);
@@ -125,11 +126,53 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING);
 		final JavaSnapshotParser parser = new JavaSnapshotParser(sourceNameMap, codeFormatter, enableRecovery);
+
+		parser.acceptXMlConfig(configuration, sourcePathArray, mapXMlDependency);
+		parser.acceptXMlMapper(mapXMlDependency);
+
 		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 
 		// TODO: add source name info to tree
 		return parser.postProcessing();
 	}
+
+	public void acceptXMlConfig(@Nonnull Path sourcePath, @Nonnull String[] sourcePathArray, Map<String, XMLNode> mapXMlDependency) {
+		if (exception != null) return;
+		try {
+			Document doc = parseXML(sourcePath);
+			nodes.build(doc, sourcePathArray, mapXMlDependency, sourcePath);
+		} catch (ParserConfigurationException | IOException | SAXException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void acceptXMlMapper(Map<String, XMLNode> mapXMlDependency) {
+		List<String> listMapperPaths = new ArrayList<>();
+		for (String path : mapXMlDependency.keySet()) {
+			if (path.endsWith(".xml") && path.contains("\\")) {
+				System.out.println("mapper file path: " + path);
+				listMapperPaths.add(path);
+			}
+		}
+		for (String path : listMapperPaths) {
+			if (exception != null) return;
+			try {
+				final String sourceName = sourceNameMap.get(path);
+				if (sourceName == null) throw new JavaCiaException("Unknown source path!");
+				final Set<AbstractNode> perFileNodeSet
+						= sourceNodeMap.computeIfAbsent(sourceName, JavaSnapshotParser::createLinkedHashSet);
+
+				Document doc = parseXML(Path.of(path));
+				nodes.build(perFileNodeSet, doc, path, mapXMlDependency);
+
+			} catch (JavaCiaException javaCiaException) {
+				exception = javaCiaException;
+			} catch (ParserConfigurationException | IOException | SAXException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	@Override
 	public void acceptAST(@Nonnull String sourcePath, @Nonnull CompilationUnit compilationUnit) {
@@ -139,29 +182,32 @@ final class JavaSnapshotParser extends FileASTRequestor {
 			if (sourceName == null) throw new JavaCiaException("Unknown source path!");
 			final Set<AbstractNode> perFileNodeSet
 					= sourceNodeMap.computeIfAbsent(sourceName, JavaSnapshotParser::createLinkedHashSet);
+
 			//for xml file
-			if (sourcePath.endsWith(".xml")) {
-				Document doc = parseXML(sourcePath);
+			if (sourcePath.endsWith(".xml") && !mapXMlDependency.containsKey(sourcePath)) {
+				Document doc = parseXML(Path.of(sourcePath));
 				nodes.build(perFileNodeSet, doc, sourcePath);
+				//for java file
 			} else {
-				nodes.build(perFileNodeSet, compilationUnit);
+				nodes.build(perFileNodeSet, compilationUnit, mapXMlDependency);
 			}
 
 		} catch (JavaCiaException exception) {
 			this.exception = exception;
-		} catch (SAXException | IOException | ParserConfigurationException e) {
+		} catch (ParserConfigurationException | IOException | SAXException e) {
 			e.printStackTrace();
 		}
 	}
 
-	private static Document parseXML(String sourcePath) throws ParserConfigurationException, IOException, SAXException {
+
+	private static Document parseXML(Path sourcePath) throws ParserConfigurationException, IOException, SAXException {
 		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 		dbf.setNamespaceAware(true);
 		dbf.setIgnoringComments(true);
 		dbf.setCoalescing(true);
 		dbf.setIgnoringElementContentWhitespace(true);
 		DocumentBuilder db = dbf.newDocumentBuilder();
-		Document doc = db.parse(Paths.get(sourcePath).toFile());
+		Document doc = db.parse(sourcePath.toFile());
 		doc.normalizeDocument();
 		return doc;
 	}
@@ -171,6 +217,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 		if (exception != null) throw exception;
 		return nodes.postprocessing();
 	}
+
 
 	//region Misc
 

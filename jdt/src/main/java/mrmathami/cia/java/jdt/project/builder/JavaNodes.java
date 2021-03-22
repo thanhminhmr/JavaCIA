@@ -23,11 +23,14 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
+import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.TreeWalker;
 
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -44,8 +47,6 @@ final class JavaNodes {
 	@Nonnull private final JavaDependencies dependencies = new JavaDependencies();
 	@Nonnull private final JavaAnnotates annotates = new JavaAnnotates(dependencies);
 	@Nonnull private final JavaTypes types = new JavaTypes(dependencies, annotates);
-
-
 	@Nonnull private final RootNode rootNode = new RootNode();
 	@Nonnull private final Map<String, Pair<PackageNode, IPackageBinding>> packageNodeMap = new HashMap<>();
 
@@ -59,6 +60,7 @@ final class JavaNodes {
 	@Nonnull private final List<Pair<ASTNode, AbstractNode>> delayedDependencyWalkers = new LinkedList<>();
 
 	@Nullable private Set<AbstractNode> perFileNodeSet;
+	private Map<String, XMLNode> mapXMlDependency;
 
 
 	JavaNodes(@Nonnull CodeFormatter formatter, boolean enableRecovery) {
@@ -66,9 +68,10 @@ final class JavaNodes {
 		this.enableRecovery = enableRecovery;
 	}
 
-	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull CompilationUnit compilationUnit)
+	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull CompilationUnit compilationUnit, Map<String, XMLNode> mapXMlDependency)
 			throws JavaCiaException {
 		this.perFileNodeSet = perFileNodeSet;
+		this.mapXMlDependency = mapXMlDependency;
 
 		final PackageDeclaration packageDeclaration = compilationUnit.getPackage();
 		if (packageDeclaration != null) {
@@ -86,11 +89,11 @@ final class JavaNodes {
 				}
 			}
 		}
-
 		this.perFileNodeSet = null;
 	}
 
-	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull org.w3c.dom.Document document, String pathFile) throws JavaCiaException {
+	//for xml file in src
+	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull org.w3c.dom.Document document, String pathFile) {
 		this.perFileNodeSet = perFileNodeSet;
 		DocumentTraversal traversal = (DocumentTraversal) document;
 		PackageNode packageNode = createPackageNodeFromPath(pathFile);
@@ -122,6 +125,151 @@ final class JavaNodes {
 			}
 		}
 		walker.setCurrentNode(currentNode);
+	}
+
+	//for mapper file
+	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull org.w3c.dom.Document document, String pathFile, Map<String, XMLNode> mapXMlDependency) {
+		this.perFileNodeSet = perFileNodeSet;
+
+		DocumentTraversal traversal = (DocumentTraversal) document;
+		PackageNode packageNode = createPackageNodeFromPath(pathFile);
+
+		TreeWalker walker = traversal.createTreeWalker(document.getDocumentElement(),
+				NodeFilter.SHOW_ELEMENT, null, true);
+
+		XMLNode rootNode = packageNode.createChildXMlNode(document.getDocumentElement().getNodeName(), document.getDocumentElement().getTextContent(), document.getDocumentElement().getChildNodes(),
+				document.getDocumentElement().getAttributes());
+
+		String namespace = document.getDocumentElement().getAttribute("namespace");
+		if (namespace.contains(".")) {
+			mapXMlDependency.put(namespace, rootNode);
+			traverseLevel(walker, rootNode, false, mapXMlDependency);
+		} else {
+			traverseLevel(walker, rootNode, false, mapXMlDependency, namespace);
+		}
+
+		dependencies.createDependencyToNode(packageNode, rootNode, JavaDependency.MEMBER);
+		perFileNodeSet.add(rootNode);
+
+		dependencies.createDependencyToNode(mapXMlDependency.get(pathFile), rootNode, JavaDependency.USE);
+		this.perFileNodeSet = null;
+	}
+
+	private void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild, Map<String, XMLNode> mapXMlDependency) {
+		Node currentNode = walker.getCurrentNode();
+		if (!isFirstChild) {
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, parent, true, mapXMlDependency);
+			}
+		} else {
+			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			NamedNodeMap listAttributes = xmlNode.getAttributes();
+			for (int i = 0; i < listAttributes.getLength(); i++) {
+				if (listAttributes.item(i).getNodeName().equals("parameterType") || listAttributes.item(i).getNodeName().equals("resultType")) {
+					if (mapXMlDependency.containsKey(listAttributes.item(i).getNodeValue())) {
+						dependencies.createDependencyToNode(xmlNode, mapXMlDependency.get(listAttributes.item(i).getNodeValue()), JavaDependency.USE);
+					}
+				}
+			}
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, xmlNode, true, mapXMlDependency);
+			}
+		}
+		walker.setCurrentNode(currentNode);
+	}
+
+	private void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild, Map<String, XMLNode> mapXMlDependency, String namespace) {
+		Node currentNode = walker.getCurrentNode();
+		if (!isFirstChild) {
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, parent, true, mapXMlDependency, namespace);
+			}
+		} else {
+			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			NamedNodeMap listAttributes = xmlNode.getAttributes();
+			for (int i = 0; i < listAttributes.getLength(); i++) {
+				if (listAttributes.item(i).getNodeName().equals("parameterType") || listAttributes.item(i).getNodeName().equals("resultType")) {
+					if (mapXMlDependency.containsKey(listAttributes.item(i).getNodeValue())) {
+						dependencies.createDependencyToNode(xmlNode, mapXMlDependency.get(listAttributes.item(i).getNodeValue()), JavaDependency.USE);
+					}
+				} else if (listAttributes.item(i).getNodeName().equals("id")) {
+					mapXMlDependency.put(namespace + "." + listAttributes.item(i).getNodeValue(), xmlNode);
+				}
+			}
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, xmlNode, true, mapXMlDependency, namespace);
+			}
+		}
+		walker.setCurrentNode(currentNode);
+	}
+
+	//for configuration is not in src
+	void build(org.w3c.dom.Document document, @Nonnull String[] sourcePathArray, Map<String, XMLNode> mapXMLDependency, Path sourcePath) {
+		XMLNode rootXMLNode = rootNode.createChildXMlNode(document.getDocumentElement().getNodeName(), document.getDocumentElement().getTextContent(),
+				document.getDocumentElement().getChildNodes(), document.getDocumentElement().getAttributes());
+		mapXMLDependency.put(String.valueOf(sourcePath.getFileName()), rootXMLNode);
+
+		DocumentTraversal traversal = (DocumentTraversal) document;
+		TreeWalker walker = traversal.createTreeWalker(document.getDocumentElement(),
+				NodeFilter.SHOW_ELEMENT, null, true);
+		traverseLevel(walker, rootXMLNode, false, sourcePathArray, mapXMLDependency);
+		dependencies.createDependencyToNode(rootNode, rootXMLNode, JavaDependency.MEMBER);
+	}
+
+	private static void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild, String[] sourcePathArray, Map<String, XMLNode> mapXMLDependency) {
+		Node currentNode = walker.getCurrentNode();
+		if (!isFirstChild) {
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, parent, true, sourcePathArray, mapXMLDependency);
+			}
+		} else {
+			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			if (xmlNode.getNodeName().equals("typeAlias")) {
+				NamedNodeMap listAttributes = xmlNode.getAttributes();
+				for (int i = 0; i < listAttributes.getLength(); i++) {
+					if (listAttributes.item(i).getNodeName().equals("alias")) {
+						mapXMLDependency.putIfAbsent(listAttributes.item(i).getNodeValue(), xmlNode);
+					} else if (listAttributes.item(i).getNodeName().equals("type")) {
+						mapXMLDependency.putIfAbsent(listAttributes.item(i).getNodeValue(), xmlNode);
+					}
+				}
+			} else if (xmlNode.getNodeName().equals("mapper")) {
+				NamedNodeMap listAttributes = xmlNode.getAttributes();
+				for (int i = 0; i < listAttributes.getLength(); i++) {
+					if (listAttributes.item(i).getNodeName().equals("resource")) {
+						String value = listAttributes.item(i).getNodeValue();
+						String path = convertResourceToPath(sourcePathArray, value);
+						mapXMLDependency.putIfAbsent(path, xmlNode);
+					}
+				}
+			}
+			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
+				traverseLevel(walker, xmlNode, true, sourcePathArray, mapXMLDependency);
+			}
+		}
+		walker.setCurrentNode(currentNode);
+	}
+
+
+	public static String convertResourceToPath(@Nonnull String[] sourcePathArray, String resource) {
+		String fullPath = "";
+		for (String sourcePath : sourcePathArray) {
+			String[] temp = resource.split("/");
+			boolean sign = true;
+			for (String s : temp) {
+				if (!sourcePath.contains(s)) {
+					sign = false;
+				}
+			}
+			if (sign) {
+				fullPath = sourcePath;
+			}
+		}
+		return fullPath;
+	}
+
+	public RootNode getRootNode() {
+		return rootNode;
 	}
 
 	@Nonnull
@@ -388,12 +536,17 @@ final class JavaNodes {
 		final ClassNode classNode = parentNode.createChildClass(typeBinding.getName(), typeBinding.getBinaryName());
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
+		if (mapXMlDependency.containsKey(classNode.getBinaryName())) {
+			dependencies.createDependencyToNode(mapXMlDependency.get(classNode.getBinaryName()), classNode, JavaDependency.USE);
+		}
+
 		// add to node set
 		assert perFileNodeSet != null;
 		perFileNodeSet.add(classNode);
 
 		internalParseClassTypeBinding(classNode, typeBinding, typeDeclaration.bodyDeclarations());
 	}
+
 
 	private void internalParseClassTypeBinding(@Nonnull ClassNode classNode, @Nonnull ITypeBinding typeBinding,
 			@Nonnull List<?> bodyDeclarations) throws JavaCiaException {
@@ -441,6 +594,10 @@ final class JavaNodes {
 		final InterfaceNode interfaceNode = parentNode
 				.createChildInterface(typeBinding.getName(), typeBinding.getBinaryName());
 		dependencies.createDependencyToNode(parentNode, interfaceNode, JavaDependency.MEMBER);
+
+		if (mapXMlDependency.containsKey(interfaceNode.getBinaryName())) {
+			dependencies.createDependencyToNode(mapXMlDependency.get(interfaceNode.getBinaryName()), interfaceNode, JavaDependency.USE);
+		}
 
 		// add to node set
 		assert perFileNodeSet != null;
@@ -814,6 +971,12 @@ final class JavaNodes {
 		if (methodDeclarationBody != null) {
 			methodNode.setBodyBlock(
 					format(methodDeclarationBody.toString(), CodeFormatter.K_STATEMENTS));
+			for (String key : mapXMlDependency.keySet()) {
+				if (key.contains(".") && methodNode.getBodyBlock().contains(key)) {
+					System.out.println("key: " + key);
+					dependencies.createDependencyToNode(methodNode, mapXMlDependency.get(key), JavaDependency.USE);
+				}
+			}
 			walkDeclaration(methodDeclarationBody, methodNode, methodNode);
 		}
 	}

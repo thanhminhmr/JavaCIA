@@ -27,7 +27,10 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Collections;
@@ -82,9 +85,9 @@ public final class Project implements JavaProject, Serializable {
 	@Override
 	public JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName,
 			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery, Path configurationPath) throws JavaCiaException, ParserConfigurationException, SAXException, IOException {
 		final ProjectSnapshot snapshot = JavaSnapshotBuilder.build(
-				snapshotName, javaSources, classPaths, dependencyWeightTable, enableRecovery);
+				snapshotName, javaSources, classPaths, dependencyWeightTable, enableRecovery, configurationPath);
 		snapshots.add(snapshot);
 		return snapshot;
 	}

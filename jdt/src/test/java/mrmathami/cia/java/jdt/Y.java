@@ -5,7 +5,9 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -23,11 +25,10 @@ public class Y {
 			JavaDependency.INVOCATION, 4.0,
 			JavaDependency.OVERRIDE, 1.0
 	));
+	private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
+	//private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML+interface\\mybatis-example-2\\resources\\SqlMapConfig.xml");
 
-	public static void main(String[] args) throws JavaCiaException, IOException {
-//		System.in.read();
-
-//		CodeFormatter
+	public static void main(String[] args) throws JavaCiaException, IOException, ParserConfigurationException, SAXException {
 
 //		final Path corePath = Path.of("D:\\project\\JavaCIA\\core\\src\\main\\java");
 //		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
@@ -38,8 +39,8 @@ public class Y {
 //				"jdt", Pair.immutableOf(jdtPath, jdtFiles)
 //		);
 
-		//final Path corePath = Path.of("D:\\project\\LearningStruts\\src\\mrmathami\\struts2\\model");
-		final Path corePath = Path.of("D:\\project\\MyBatis Collection\\LearningStruts\\src");
+		final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
+		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML+interface\\mybatis-example-2\\src");
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
 				"core", Pair.immutableOf(corePath, coreFiles)
@@ -61,7 +62,7 @@ public class Y {
 
 		long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
-				javaSources, List.of(), DEPENDENCY_WEIGHT_TABLE, true);
+				javaSources, List.of(), DEPENDENCY_WEIGHT_TABLE, true, configurationPath);
 		long timeParseA = System.nanoTime();
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();
