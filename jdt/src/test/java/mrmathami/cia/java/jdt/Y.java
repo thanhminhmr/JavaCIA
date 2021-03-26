@@ -25,7 +25,8 @@ public class Y {
 			JavaDependency.INVOCATION, 4.0,
 			JavaDependency.OVERRIDE, 1.0
 	));
-	private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
+	private static final Path configurationPath = Path.of("");
+	//private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
 	//private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML+interface\\mybatis-example-2\\resources\\SqlMapConfig.xml");
 
 	public static void main(String[] args) throws JavaCiaException, IOException, ParserConfigurationException, SAXException {
@@ -39,7 +40,8 @@ public class Y {
 //				"jdt", Pair.immutableOf(jdtPath, jdtFiles)
 //		);
 
-		final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
+		final Path corePath = Path.of("D:\\project\\MyBatis Collection\\LearningStruts\\src");
+		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
 		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML+interface\\mybatis-example-2\\src");
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
