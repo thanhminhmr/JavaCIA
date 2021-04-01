@@ -25,7 +25,6 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
 import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.TreeWalker;
@@ -246,7 +245,7 @@ final class JavaNodes {
 					}
 				} else if (listAttributes.item(i).getNodeName().equals("id") && !xmlNode.getNodeName().equals("resultMap")) {
 					String value = listAttributes.item(i).getNodeValue();
-					putInMap(mapXMlDependency, "\"" + namespace + "." + value + "\"", xmlNode);
+					putInMap(mapXMlDependency, namespace + "." + value, xmlNode);
 				}
 			}
 			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
@@ -323,6 +322,7 @@ final class JavaNodes {
 			for (String s : temp) {
 				if (!sourcePath.contains(s)) {
 					sign = false;
+					break;
 				}
 			}
 			if (sign) {
@@ -470,12 +470,6 @@ final class JavaNodes {
 				? oldPair
 				: internalCreatePackagePairFromNameComponents(nameComponent);
 		PackageNode packageNode = pair.getA();
-		/*IPackageBinding packageBinding = createPackageBinding(nameComponent);
-		if (pair.getB() == null) {
-			pair.setB(packageBinding);
-			packageNode.setAnnotates(annotates.createAnnotatesFromAnnotationBindings(packageBinding.getAnnotations(),
-					packageNode, JavaDependency.USE));
-		}*/
 		System.out.println("packageNode " + packageNode);
 		assert perFileNodeSet != null;
 		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
@@ -484,70 +478,6 @@ final class JavaNodes {
 		return packageNode;
 	}
 
-	private IPackageBinding createPackageBinding(String[] nameComponent) {
-		IPackageBinding packageBinding = new IPackageBinding() {
-			@Override
-			public String getName() {
-				return nameComponent[nameComponent.length - 1];
-			}
-
-			@Override
-			public boolean isUnnamed() {
-				return false;
-			}
-
-			@Override
-			public String[] getNameComponents() {
-				return nameComponent;
-			}
-
-			@Override
-			public IAnnotationBinding[] getAnnotations() {
-				return new IAnnotationBinding[0];
-			}
-
-			@Override
-			public int getKind() {
-				return 0;
-			}
-
-			@Override
-			public int getModifiers() {
-				return 0;
-			}
-
-			@Override
-			public boolean isDeprecated() {
-				return false;
-			}
-
-			@Override
-			public boolean isRecovered() {
-				return false;
-			}
-
-			@Override
-			public boolean isSynthetic() {
-				return false;
-			}
-
-			@Override
-			public IJavaElement getJavaElement() {
-				return null;
-			}
-
-			@Override
-			public String getKey() {
-				return null;
-			}
-
-			@Override
-			public boolean isEqualTo(IBinding iBinding) {
-				return false;
-			}
-		};
-		return packageBinding;
-	}
 	//endregion Package
 
 	//region Parser
@@ -1039,14 +969,6 @@ final class JavaNodes {
 		if (methodDeclarationBody != null) {
 			methodNode.setBodyBlock(
 					format(methodDeclarationBody.toString(), CodeFormatter.K_STATEMENTS));
-			for (String key : mapXMlDependency.keySet()) {
-				if (key.contains(".") && methodNode.getBodyBlock().contains(key)) {
-					System.out.println("key: " + key);
-					for (int i = 0; i < mapXMlDependency.get(key).size(); i++) {
-						dependencies.createDependencyToNode(methodNode, mapXMlDependency.get(key).get(i), JavaDependency.USE);
-					}
-				}
-			}
 			walkDeclaration(methodDeclarationBody, methodNode, methodNode);
 		}
 	}
@@ -1135,6 +1057,21 @@ final class JavaNodes {
 
 			@Override
 			public boolean visit(@Nonnull MethodInvocation node) {
+				Expression expression = node.getExpression();
+				if (expression instanceof SimpleName) {
+					IVariableBinding iVariableBinding = (IVariableBinding) visitFromSimpleName((SimpleName) expression);
+					if (iVariableBinding != null) {
+						ITypeBinding iTypeBinding = iVariableBinding.getType();
+						String binaryName = iTypeBinding.getBinaryName();
+						if (binaryName.equals("SqlSession")) {
+							createDependencyFromInvocation(node);
+						}
+					} else {
+						if (((SimpleName) expression).getIdentifier().equals("Resources")) {
+							createDependencyFromInvocation(node);
+						}
+					}
+				}
 				final IMethodBinding binding = node.resolveMethodBinding();
 				if (binding != null) {
 					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
@@ -1142,6 +1079,44 @@ final class JavaNodes {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on method invocation!");
 				}
 				return false;
+			}
+
+			private void createDependencyFromInvocation(@Nonnull MethodInvocation node) {
+				List<?> listArgument = node.arguments();
+				String argumentValue = null;
+				for (Object argument : listArgument) {
+					if (argument instanceof StringLiteral) {
+						argumentValue = ((StringLiteral) argument).getLiteralValue();
+					} else if (argument instanceof QualifiedName) {
+						IVariableBinding iBinding = (IVariableBinding) ((QualifiedName) argument).getName().resolveBinding();
+						IVariableBinding variableBinding = iBinding.getVariableDeclaration();
+						argumentValue = (String) variableBinding.getConstantValue();
+					}
+				}
+				if (argumentValue != null && mapXMlDependency.containsKey(argumentValue)) {
+					for (int i = 0; i < mapXMlDependency.get(argumentValue).size(); i++) {
+						dependencies.createDependencyToNode(javaNode, mapXMlDependency.get(argumentValue).get(i), JavaDependency.USE);
+					}
+				}
+			}
+
+			private IBinding visitFromSimpleName(SimpleName simpleName) {
+				final IBinding binding = simpleName.resolveBinding();
+				if (binding == null && !enableRecovery) {
+					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on simple name!");
+				}
+				final IBinding originalBinding = binding instanceof ITypeBinding
+						? JavaDependencies.getOriginTypeBinding((ITypeBinding) binding)
+						: binding instanceof IMethodBinding
+						? JavaDependencies.getOriginMethodBinding((IMethodBinding) binding)
+						: binding instanceof IVariableBinding
+						? JavaDependencies.getOriginVariableBinding((IVariableBinding) binding)
+						: null;
+
+				if (originalBinding != null) {
+					dependencies.createDelayDependency(javaNode, originalBinding, JavaDependency.USE);
+				}
+				return originalBinding;
 			}
 
 			private void createDependencyFromInvocation(@Nonnull IMethodBinding binding,
@@ -1185,7 +1160,6 @@ final class JavaNodes {
 			public boolean visit(@Nonnull AnonymousClassDeclaration node) {
 				return false;
 			}
-
 		});
 		if (exceptionProxy[0] != null) throw exceptionProxy[0];
 	}

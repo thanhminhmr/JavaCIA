@@ -34,7 +34,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-import javax.print.Doc;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -64,7 +63,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nonnull
 	private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
 
-	private static Map<String, List<XMLNode>> mapXMlDependency = new HashMap<>();
+	private static final Map<String, List<XMLNode>> mapXMlDependency = new HashMap<>();
 
 	@Nullable
 	private JavaCiaException exception;
@@ -135,7 +134,6 @@ final class JavaSnapshotParser extends FileASTRequestor {
 			parser.acceptXMlConfig(configuration, sourcePathArray, mapXMlDependency);
 			parser.acceptXMlMapper(mapXMlDependency);
 		}
-		mapXMlDependency.size();
 
 		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 
@@ -186,6 +184,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 			}
 		}
 	}
+
 	public void acceptXMlMapper(Map<String, List<XMLNode>> mapXMlDependency) {
 		List<String> listMapperPaths = new ArrayList<>();
 		for (String path : mapXMlDependency.keySet()) {
@@ -223,10 +222,10 @@ final class JavaSnapshotParser extends FileASTRequestor {
 			final Set<AbstractNode> perFileNodeSet
 					= sourceNodeMap.computeIfAbsent(sourceName, JavaSnapshotParser::createLinkedHashSet);
 
-			//for xml file is not a mapper file
+			//for xml file except mapper file and configuration file
 			if (sourcePath.endsWith(".xml") && !mapXMlDependency.containsKey(sourcePath)) {
-				/*Document doc = parseXML(Path.of(sourcePath));
-				nodes.build(perFileNodeSet, doc, sourcePath);*/
+				Document doc = parseXML(Path.of(sourcePath));
+				nodes.build(perFileNodeSet, doc, sourcePath);
 				//for java file
 			} else {
 				nodes.build(perFileNodeSet, compilationUnit, mapXMlDependency);
@@ -234,6 +233,8 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		} catch (JavaCiaException exception) {
 			this.exception = exception;
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			e.printStackTrace();
 		}
 	}
 
