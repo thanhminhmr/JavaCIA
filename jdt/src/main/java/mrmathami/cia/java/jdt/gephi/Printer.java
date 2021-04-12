@@ -4,36 +4,45 @@ import mrmathami.cia.java.jdt.gephi.model.EdgeGephi;
 import mrmathami.cia.java.jdt.gephi.model.NodeGephi;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.node.JavaNode;
-import mrmathami.cia.java.tree.node.JavaRootNode;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class Printer {
 	public String writeGephi(JavaProjectSnapshot projectSnapshot) {
-		JavaRootNode rootNode = projectSnapshot.getRootNode();
-		List<? extends JavaNode> nodeList = rootNode.getAllNodes();
-		List<NodeGephi> nodeGephiList = new ArrayList<>();
+		List<? extends JavaNode> nodeList = projectSnapshot.getRootNode().getAllNodes();
+		HashMap<JavaNode, Set<? extends JavaNode>> dependencyToMap = new HashMap<>();
 		for (JavaNode node : nodeList) {
-			NodeGephi nodeGephi = new NodeGephi(node.getId(), node.getNodeName(), NodeGephi.Type.UNCHANGE);
-			nodeGephiList.add(nodeGephi);
+			Set<? extends JavaNode> dependencyToNodes = node.getDependencyToNodes();
+			dependencyToMap.put(node, dependencyToNodes);
 		}
+		List<NodeGephi> nodeGephiList = new ArrayList<>();
+		List<EdgeGephi> edgeGephiList = new ArrayList<>();
+		int count = 0;
+		for (Map.Entry<JavaNode, Set<? extends JavaNode>> entry : dependencyToMap.entrySet()) {
+			NodeGephi nodeGephi = new NodeGephi(entry.getKey().getId(), entry.getKey().getNodeName(), NodeGephi.Type.UNCHANGE);
+			nodeGephiList.add(nodeGephi);
+			Set<? extends JavaNode> value = entry.getValue();
+			for (JavaNode javaNode : value) {
+				EdgeGephi edgeGephi = new EdgeGephi(count, entry.getKey().getId(), javaNode.getId());
+				count++;
+				edgeGephiList.add(edgeGephi);
+			}
+		}
+
 		final String open = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
 				"<gexf xmlns=\"http://www.gexf.net/1.3\" version=\"1.3\" xmlns:viz=\"http://www.gexf.net/1.3/viz\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xsi:schemaLocation=\"http://www.gexf.net/1.3 http://www.gexf.net/1.3/gexf.xsd\">" +
 				"\n<graph defaultedgetype=\"directed\" mode=\"static\">\n";
-		NodeGephi nodeGephi1 = new NodeGephi(0, "classA", NodeGephi.Type.UNCHANGE);
-		NodeGephi nodeGephi2 = new NodeGephi(1, "classB", NodeGephi.Type.UNCHANGE);
-		NodeGephi nodeGephi3 = new NodeGephi(2, "classC", NodeGephi.Type.UNCHANGE);
 
-		EdgeGephi edgeGephi1 = new EdgeGephi("0", "0", "1");
-		EdgeGephi edgeGephi2 = new EdgeGephi("1", "1", "2");
-
-		String listNode = writeListNodes(Arrays.asList(nodeGephi1, nodeGephi2, nodeGephi3));
-		String listEdge = writeListEdges(Arrays.asList(edgeGephi1, edgeGephi2));
+		String listNode = writeListNodes(nodeGephiList);
+		String listEdge = writeListEdges(edgeGephiList);
 
 		return open + listNode + listEdge + "\n</graph>\n" + "</gexf>";
 	}
+
 	public String writeListNodes(List<NodeGephi> nodeGephiList) {
 		StringBuilder result = new StringBuilder("\t<nodes>");
 		for (NodeGephi node : nodeGephiList) {
@@ -52,8 +61,4 @@ public class Printer {
 		return result.toString();
 	}
 
-	public static void main(String[] args) {
-		Printer printer = new Printer();
-		//System.out.println(printer.writeGephi());
-	}
 }

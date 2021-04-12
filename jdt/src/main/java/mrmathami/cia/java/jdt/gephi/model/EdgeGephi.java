@@ -1,11 +1,11 @@
 package mrmathami.cia.java.jdt.gephi.model;
 
 public class EdgeGephi {
-	private String id;
-	private String source;
-	private String target;
+	private int id;
+	private int source;
+	private int target;
 
-	public EdgeGephi(String id, String source, String target) {
+	public EdgeGephi(int id, int source, int target) {
 		this.id = id;
 		this.source = source;
 		this.target = target;

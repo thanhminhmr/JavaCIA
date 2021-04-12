@@ -1,6 +1,7 @@
 package mrmathami.cia.java.jdt;
 
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.gephi.Printer;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
@@ -27,6 +28,7 @@ public class Y {
 	));
 	//private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
 	private static final Path configurationPath = Path.of("");
+
 	public static void main(String[] args) throws JavaCiaException, IOException, ParserConfigurationException, SAXException {
 		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
 		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\myBatisExample\\src");
@@ -49,7 +51,8 @@ public class Y {
 
 		Files.write(corePath.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
 
-		//Files.write(corePath.resolve("gephi.gexf"), open.getBytes(StandardCharsets.UTF_8));*/
+		Printer printer = new Printer();
+		Files.write(corePath.resolve("gephi.gexf"), printer.writeGephi(projectSnapshot).getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);
 	}
