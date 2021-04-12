@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class Y {
+public class Run {
 	public static final JavaDependencyWeightTable DEPENDENCY_WEIGHT_TABLE = JavaDependencyWeightTable.of(Map.of(
 			JavaDependency.USE, 1.0,
 			JavaDependency.MEMBER, 1.0,
@@ -26,11 +26,20 @@ public class Y {
 			JavaDependency.OVERRIDE, 1.0
 	));
 	//private static final Path configurationPath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
-	private static final Path configurationPath = Path.of("");
+	private static Path configurationPath = null;
+
 	public static void main(String[] args) throws JavaCiaException, IOException, ParserConfigurationException, SAXException {
-		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
-		//final Path corePath = Path.of("D:\\project\\MyBatis Collection\\myBatisExample\\src");
-		final Path corePath = Path.of("D:\\project\\MyBatis Collection\\myBatisExample\\src");
+		Path corePath = null;
+		String output = "";
+		if (args.length < 3) {
+			configurationPath = Path.of("");
+			corePath = Path.of(args[0]);
+			output = args[1];
+		} else if (args.length == 3) {
+			configurationPath = Path.of(args[0]);
+			corePath = Path.of(args[1]);
+			output = args[2];
+		}
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Map<String, Pair<Path, List<Path>>> javaSources = Map.of(
 				"core", Pair.immutableOf(corePath, coreFiles)
@@ -47,9 +56,7 @@ public class Y {
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();
 
-		Files.write(corePath.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
-
-		//Files.write(corePath.resolve("gephi.gexf"), open.getBytes(StandardCharsets.UTF_8));*/
+		Files.write(Path.of(output + "output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);
 	}

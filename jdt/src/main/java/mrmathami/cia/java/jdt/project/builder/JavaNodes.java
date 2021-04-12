@@ -15,7 +15,6 @@ import mrmathami.cia.java.tree.node.container.JavaInitializerContainer;
 import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
 import mrmathami.cia.java.tree.node.container.JavaMethodContainer;
 import mrmathami.utils.Pair;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jface.text.BadLocationException;
@@ -29,6 +28,7 @@ import org.w3c.dom.traversal.DocumentTraversal;
 import org.w3c.dom.traversal.NodeFilter;
 import org.w3c.dom.traversal.TreeWalker;
 
+import java.io.File;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +38,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.regex.Pattern;
 
 final class JavaNodes {
 
@@ -112,7 +113,7 @@ final class JavaNodes {
 		this.perFileNodeSet = null;
 	}
 
-	private static void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild) {
+	private void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild) {
 		Node currentNode = walker.getCurrentNode();
 		if (!isFirstChild) {
 			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
@@ -120,6 +121,7 @@ final class JavaNodes {
 			}
 		} else {
 			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			dependencies.createDependencyToNode(parent, xmlNode, JavaDependency.MEMBER);
 			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
 				traverseLevel(walker, xmlNode, true);
 			}
@@ -167,6 +169,7 @@ final class JavaNodes {
 			}
 		} else {
 			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			dependencies.createDependencyToNode(parent, xmlNode, JavaDependency.MEMBER);
 			NamedNodeMap listAttributes = xmlNode.getAttributes();
 			if (xmlNode.getNodeName().equals("select")) {
 				for (int i = 0; i < listAttributes.getLength(); i++) {
@@ -212,6 +215,7 @@ final class JavaNodes {
 			}
 		} else {
 			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			dependencies.createDependencyToNode(parent, xmlNode, JavaDependency.MEMBER);
 			NamedNodeMap listAttributes = xmlNode.getAttributes();
 			if (xmlNode.getNodeName().equals("select")) {
 				for (int i = 0; i < listAttributes.getLength(); i++) {
@@ -270,7 +274,7 @@ final class JavaNodes {
 		dependencies.createDependencyToNode(rootNode, rootXMLNode, JavaDependency.MEMBER);
 	}
 
-	private static void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild, String[] sourcePathArray, Map<String, List<XMLNode>> mapXMLDependency) {
+	private void traverseLevel(TreeWalker walker, XMLNode parent, boolean isFirstChild, String[] sourcePathArray, Map<String, List<XMLNode>> mapXMLDependency) {
 		Node currentNode = walker.getCurrentNode();
 		if (!isFirstChild) {
 			for (Node n = walker.firstChild(); n != null; n = walker.nextSibling()) {
@@ -278,6 +282,7 @@ final class JavaNodes {
 			}
 		} else {
 			XMLNode xmlNode = parent.createChildXMlNode(currentNode.getNodeName(), currentNode.getTextContent(), currentNode.getChildNodes(), currentNode.getAttributes());
+			dependencies.createDependencyToNode(parent, xmlNode, JavaDependency.MEMBER);
 			if (xmlNode.getNodeName().equals("typeAlias")) {
 				NamedNodeMap listAttributes = xmlNode.getAttributes();
 				for (int i = 0; i < listAttributes.getLength(); i++) {
@@ -362,6 +367,7 @@ final class JavaNodes {
 
 		// freeze root node
 		rootNode.freeze();
+		mapXMlDependency.clear();
 		return rootNode;
 	}
 
@@ -458,9 +464,10 @@ final class JavaNodes {
 
 	@Nonnull
 	private PackageNode createPackageNodeFromPath(@Nonnull String path) {
-		int startPackageIndex = path.indexOf("src\\");
+		int startPackageIndex = path.indexOf("src" + File.separator);
 		String simplePath = path.substring(startPackageIndex);
-		String[] pathComponent = simplePath.split("\\\\");
+		String pattern = Pattern.quote(System.getProperty("file.separator"));
+		String[] pathComponent = simplePath.split(pattern);
 		// remove name of file
 		// remove src component
 		String[] nameComponent = new String[pathComponent.length - 2];
@@ -1059,14 +1066,17 @@ final class JavaNodes {
 			public boolean visit(@Nonnull MethodInvocation node) {
 				Expression expression = node.getExpression();
 				if (expression instanceof SimpleName) {
-					IVariableBinding iVariableBinding = (IVariableBinding) visitFromSimpleName((SimpleName) expression);
-					if (iVariableBinding != null) {
-						ITypeBinding iTypeBinding = iVariableBinding.getType();
-						String binaryName = iTypeBinding.getBinaryName();
-						if (binaryName.equals("SqlSession")) {
-							createDependencyFromInvocation(node);
+					IBinding expressionBinding = visitFromSimpleName((SimpleName) expression);
+					if (expressionBinding instanceof IVariableBinding) {
+						IVariableBinding iVariableBinding = (IVariableBinding) visitFromSimpleName((SimpleName) expression);
+						if (iVariableBinding != null) {
+							ITypeBinding iTypeBinding = iVariableBinding.getType();
+							String binaryName = iTypeBinding.getBinaryName();
+							if (binaryName.equals("SqlSession")) {
+								createDependencyFromInvocation(node);
+							}
 						}
-					} else {
+					} else if (expressionBinding == null) {
 						if (((SimpleName) expression).getIdentifier().equals("Resources")) {
 							createDependencyFromInvocation(node);
 						}

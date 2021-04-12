@@ -226,8 +226,8 @@ final class JavaSnapshotParser extends FileASTRequestor {
 			if (sourcePath.endsWith(".xml") && !mapXMlDependency.containsKey(sourcePath)) {
 				Document doc = parseXML(Path.of(sourcePath));
 				nodes.build(perFileNodeSet, doc, sourcePath);
-				//for java file
 			} else {
+				//for java file
 				nodes.build(perFileNodeSet, compilationUnit, mapXMlDependency);
 			}
 

@@ -108,7 +108,6 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 	}
 
 	@Nonnull
-	@Override
 	public final String getNodeName() {
 		return simpleName;
 	}

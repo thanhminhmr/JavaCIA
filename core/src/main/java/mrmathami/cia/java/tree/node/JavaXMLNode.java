@@ -22,6 +22,7 @@ public interface JavaXMLNode extends JavaNode, JavaXMLContainer {
 		return this;
 	}
 
+
 	@Nonnull
 	String getTextContent();
 

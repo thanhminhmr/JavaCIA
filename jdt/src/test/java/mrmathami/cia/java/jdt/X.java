@@ -40,14 +40,16 @@ public class X {
 //		System.in.read();
 //
 //		for (int i = 0; i < 10; i++) {
-//		final Path javaSourcePathA = Path.of("..\\test\\JSON-java-before\\src\\main\\java");
-//		final Path javaSourcePathB = Path.of("..\\test\\JSON-java\\src\\main\\java");
-		final Path javaSourcePathA = Path.of("D:\\test-weight-1806\\test1\\src\\src");
-		final Path javaSourcePathB = Path.of("D:\\test-weight-1806\\test1\\new\\src\\src");
+		//final Path javaSourcePathA = Path.of("D:\\test-weight-1806\\test1\\src\\src");
+		//final Path javaSourcePathB = Path.of("D:\\test-weight-1806\\test1\\new\\src\\src");
+		final Path javaSourcePathA = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
+		final Path javaSourcePathB = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\new\\mybatis-example-1\\src");
 		final List<Path> fileNamesA = getFileList(new ArrayList<>(), javaSourcePathA);
 		final List<Path> fileNamesB = getFileList(new ArrayList<>(), javaSourcePathB);
-		final Path configurationPathA = Path.of("");
-		final Path configurationPathB = Path.of("");
+		final Path configurationPathA = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
+		//final Path configurationPathA = Path.of("");
+		final Path configurationPathB = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\new\\mybatis-example-1\\resources\\SqlMapConfig.xml");
+		//final Path configurationPathB = Path.of("");
 
 		final long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotA = ProjectBuilders.createProjectSnapshot("JSON-java-before",
@@ -75,6 +77,7 @@ public class X {
 		javaProject.addSnapshot(projectSnapshotA);
 		javaProject.addSnapshot(projectSnapshotB);
 		javaProject.addSnapshotComparison(snapshotComparison);
+
 
 		try (final ObjectOutputStream objectOutputStream
 				= new ObjectOutputStream(Files.newOutputStream(Path.of("jdt\\src\\test\\JSON-java.proj")))) {

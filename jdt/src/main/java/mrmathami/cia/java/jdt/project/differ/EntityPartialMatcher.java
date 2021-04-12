@@ -20,8 +20,10 @@ package mrmathami.cia.java.jdt.project.differ;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
+import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import mrmathami.cia.java.tree.node.JavaClassNode;
 import mrmathami.cia.java.tree.node.JavaEnumNode;
@@ -30,6 +32,7 @@ import mrmathami.cia.java.tree.node.JavaInitializerNode;
 import mrmathami.cia.java.tree.node.JavaInterfaceNode;
 import mrmathami.cia.java.tree.node.JavaMethodNode;
 import mrmathami.cia.java.tree.node.JavaNode;
+import mrmathami.cia.java.tree.node.JavaXMLNode;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
@@ -39,6 +42,7 @@ import mrmathami.cia.java.tree.type.JavaSimpleType;
 import mrmathami.cia.java.tree.type.JavaSyntheticType;
 import mrmathami.cia.java.tree.type.JavaType;
 import mrmathami.utils.Pair;
+import org.w3c.dom.NamedNodeMap;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -93,6 +97,56 @@ enum EntityPartialMatcher {
 				final Pair<EntityWrapper, JavaDependencyCountTable> pair = Pair.immutableOf(wrapper, entry.getValue());
 				final int[] countWrapper = map.get(pair);
 				if (countWrapper == null || --countWrapper[0] < 0) return false;
+			}
+			return true;
+		}
+	},
+	XML_NODE(JavaXMLNode.class) {
+		@Override
+		protected int partialMatchCode(JavaIdentifiedEntity entity, boolean identicalMatch) {
+
+			assert entity instanceof JavaXMLNode;
+			final JavaXMLNode node = (JavaXMLNode) entity;
+//			System.out.println("-----------"+ node.getNodeName() +"-------------");
+//			int matchCode = identicalMatch ? node.getNodeName() != null ? 1 : 0 : -1;
+//			System.out.println(matchCode);
+//			matchCode = matchCode * 31 + node.getAttributes().hashCode();
+//			System.out.println("attribute hashcode " + node.getAttributes().hashCode());
+//			System.out.println(matchCode);
+//			matchCode = matchCode * 31 + node.getTextContent().hashCode();
+//			System.out.println(matchCode);
+//			System.out.println(matchCode * 31 + (node.getChildNodes() != null ? 1 : 0));
+//			return matchCode * 31 + (node.getChildNodes() != null ? 1 : 0);
+
+			int matchCode = node.getEntityClass().hashCode();
+			matchCode = matchCode * 31 + node.getNodeName().hashCode();
+			matchCode = matchCode * 31 + (identicalMatch ? node.getDependencyToNodes().size() : -1);
+			return matchCode * 31 + ( identicalMatch ? node.getAttributes().getLength() : -1 );
+		}
+
+		@Override
+		protected boolean partialMatch(JavaIdentifiedEntity entityA, JavaIdentifiedEntity entityB, EntityMatcher matcher, boolean identicalMatch) {
+			assert entityA instanceof JavaXMLNode && entityB instanceof JavaXMLNode;
+			final JavaXMLNode nodeA = (JavaXMLNode) entityA, nodeB = (JavaXMLNode) entityB;
+			boolean compareName = (nodeA.getNodeName().equals(nodeB.getNodeName()));
+			boolean compareTextContent = true;
+			if (permissionCheckTextContent(nodeA) && permissionCheckTextContent(nodeB)) {
+				compareTextContent = (nodeA.getTextContent().equals(nodeB.getTextContent()));
+			}
+			boolean compareAttributes = (matcher.matchNonOrderedNameNodeMap(nodeA.getAttributes(), nodeB.getAttributes()));
+			boolean returnBool = !identicalMatch || ((nodeA.getNodeName().equals(nodeB.getNodeName()))
+					&& compareTextContent
+					&& (matcher.matchNonOrderedNameNodeMap(nodeA.getAttributes(), nodeB.getAttributes())));
+			return returnBool;
+		}
+
+		private boolean permissionCheckTextContent(JavaXMLNode javaXMLNode) {
+			for (Map.Entry<? extends JavaNode, ? extends JavaDependencyCountTable> entry : javaXMLNode.getDependencyTo().entrySet()) {
+				if ((entry.getKey() instanceof JavaXMLNode) &&
+						(entry.getValue() instanceof DependencyCountTable) &&
+						(entry.getValue().getCount(JavaDependency.MEMBER) > 0)) {
+					return false;
+				}
 			}
 			return true;
 		}
@@ -493,6 +547,11 @@ enum EntityPartialMatcher {
 		}
 	};
 
+	void printAttributes(NamedNodeMap namedNodeMap) {
+		for (int i = 0; i < namedNodeMap.getLength(); i++) {
+			System.out.println(namedNodeMap.item(i).getNodeName() + " : " + namedNodeMap.item(i).getNodeValue());
+		}
+	}
 
 	@Nonnull private static final EntityPartialMatcher[] PARTIAL_MATCHERS = values();
 
