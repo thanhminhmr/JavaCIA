@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +19,8 @@
 package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.tree.node.JavaFieldNode;
 import mrmathami.cia.java.tree.node.JavaInitializerNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
@@ -41,8 +43,8 @@ public final class InitializerNode extends AbstractNonRootNode implements JavaIn
 	@Nonnull private transient List<InitializerImpl> initializers = List.of();
 
 
-	public InitializerNode(@Nonnull AbstractNode parent, boolean isStatic) {
-		super(parent, isStatic ? "$_clinit_$" : "$_init_$");
+	public InitializerNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, boolean isStatic) {
+		super(sourceFile, parent, isStatic ? "$_clinit_$" : "$_init_$");
 		this.isStatic = isStatic;
 	}
 

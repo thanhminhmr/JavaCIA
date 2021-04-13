@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@ package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.tree.node.JavaMethodNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractParameterizedModifiedAnnotatedNode;
@@ -57,8 +58,9 @@ public final class MethodNode extends AbstractParameterizedModifiedAnnotatedNode
 	}
 
 
-	public MethodNode(@Nonnull AbstractNode parent, @Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
-		super(parent, simpleName, createUniqueNameSuffixFromParameters(parameters));
+	public MethodNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
+		super(sourceFile, parent, simpleName, createUniqueNameSuffixFromParameters(parameters));
 		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
 				|| parent instanceof InterfaceNode : "Invalid parent type!";
 		this.parameters = List.copyOf(parameters);

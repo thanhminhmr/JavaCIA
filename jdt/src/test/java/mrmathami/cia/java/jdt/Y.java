@@ -46,7 +46,7 @@ public class Y {
 
 		long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
-				javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true);
+				null, javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true);
 		long timeParseA = System.nanoTime();
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();

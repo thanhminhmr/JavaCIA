@@ -16,7 +16,26 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.tree;
+package mrmathami.cia.java.project;
 
-public interface JavaNonIdentifiedEntity extends JavaEntity {
+import mrmathami.annotations.Nonnull;
+import mrmathami.cia.java.utils.RelativePath;
+
+public interface JavaSourceFile {
+
+	@Nonnull
+	JavaModule getModule();
+
+	@Nonnull
+	JavaSourceFileType getType();
+
+	@Nonnull
+	RelativePath getRelativePath();
+
+	@Nonnull
+	default String getName() {
+		// note: if this throw IndexOutOfBound, something seriously wrong happened in JavaNodes
+		return getRelativePath().getComponent(-1);
+	}
+
 }

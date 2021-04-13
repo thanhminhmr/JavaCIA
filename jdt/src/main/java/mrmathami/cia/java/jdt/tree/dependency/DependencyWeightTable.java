@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ public final class DependencyWeightTable implements JavaDependencyWeightTable, S
 
 
 	public DependencyWeightTable(@Nonnull double[] weights) {
-		assert weights.length == JavaDependency.valueList.size() : "Invalid length for weights.";
+		assert weights.length == JavaDependency.VALUE_LIST.size() : "Invalid length for weights.";
 		this.weights = weights;
 	}
 
@@ -53,7 +53,7 @@ public final class DependencyWeightTable implements JavaDependencyWeightTable, S
 		if (object instanceof JavaDependencyWeightTable) {
 			final JavaDependencyWeightTable dependency = (JavaDependencyWeightTable) object;
 			for (int i = 0; i < weights.length; i++) {
-				if (dependency.getWeight(JavaDependency.valueList.get(i)) != weights[i]) return false;
+				if (dependency.getWeight(JavaDependency.VALUE_LIST.get(i)) != weights[i]) return false;
 			}
 		}
 		return false;
@@ -80,7 +80,7 @@ public final class DependencyWeightTable implements JavaDependencyWeightTable, S
 		for (int i = 0; i < weights.length; i++) {
 			if (weights[i] != 0) {
 				builder.append(innerNext ? ", \"" : " \"")
-						.append(JavaDependency.valueList.get(i)).append("\": ").append(weights[i]);
+						.append(JavaDependency.VALUE_LIST.get(i)).append("\": ").append(weights[i]);
 				innerNext = true;
 			}
 		}

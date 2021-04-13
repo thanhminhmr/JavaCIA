@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,6 @@ import java.util.List;
 public enum JavaDependency {
 	USE, MEMBER, INHERITANCE, INVOCATION, OVERRIDE;
 
-	@Nonnull public static final List<JavaDependency> valueList = List.of(values());
+	@Nonnull public static final List<JavaDependency> VALUE_LIST = List.of(values());
 
 }

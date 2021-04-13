@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +19,9 @@
 package mrmathami.cia.java.tree.node;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.project.JavaModule;
+import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
 import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
 import mrmathami.cia.java.tree.node.container.JavaClassContainer;
@@ -84,6 +87,18 @@ public interface JavaRootNode extends JavaNode,
 	@Override
 	default String getUniqueName() {
 		return "{ROOT}";
+	}
+
+	@Nullable
+	@Override
+	default JavaSourceFile getSourceFile() {
+		return null;
+	}
+
+	@Nullable
+	@Override
+	default JavaModule getModule() {
+		return null;
 	}
 
 	//endregion Basic Getter

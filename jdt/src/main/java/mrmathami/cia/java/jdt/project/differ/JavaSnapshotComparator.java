@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -22,7 +22,6 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.project.ProjectSnapshotComparison;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
-import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
@@ -61,8 +60,8 @@ public final class JavaSnapshotComparator {
 
 		compareRootNodes(previousRootNode, currentRootNode, addedNodes, removedNodes, changedNodes, unchangedNodes);
 
-		final double[] dependencyImpacts = new double[JavaDependency.valueList.size()];
-		for (final JavaDependency type : JavaDependency.valueList) {
+		final double[] dependencyImpacts = new double[JavaDependency.VALUE_LIST.size()];
+		for (final JavaDependency type : JavaDependency.VALUE_LIST) {
 			dependencyImpacts[type.ordinal()] = impactWeightMap.getWeight(type);
 		}
 

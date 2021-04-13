@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,26 +19,27 @@
 package mrmathami.cia.java.jdt.tree.node.attribute;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
+import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.tree.JavaModifier;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
-import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 
 public abstract class AbstractModifiedAnnotatedNode extends AbstractAnnotatedNode implements JavaModifiedNode {
 
 	private static final long serialVersionUID = -1L;
 
-	@Nonnull static final JavaModifier[] MODIFIERS = JavaModifier.values();
-
 	private int modifiers;
 
 
-	public AbstractModifiedAnnotatedNode(@Nonnull AbstractNode parent, @Nonnull String simpleName) {
-		super(parent, simpleName);
+	public AbstractModifiedAnnotatedNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName) {
+		super(sourceFile, parent, simpleName);
 	}
 
-	public AbstractModifiedAnnotatedNode(@Nonnull AbstractNode parent, @Nonnull String simpleName,
-			@Nonnull String uniqueNameSuffix) {
-		super(parent, simpleName, uniqueNameSuffix);
+	public AbstractModifiedAnnotatedNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName, @Nonnull String uniqueNameSuffix) {
+		super(sourceFile, parent, simpleName, uniqueNameSuffix);
 	}
 
 
@@ -64,8 +65,8 @@ public abstract class AbstractModifiedAnnotatedNode extends AbstractAnnotatedNod
 		if (modifiers != 0) {
 			builder.append(", \"modifiers\": [ ");
 			boolean next = false;
-			for (final JavaModifier modifier : MODIFIERS) {
-				if ((modifiers & modifier.getMask()) != 0) {
+			for (final JavaModifier modifier : JavaModifier.VALUE_LIST) {
+				if (isContainModifier(modifier)) {
 					builder.append(next ? ", \"" : "\"").append(modifier).append('"');
 					next = true;
 				}

@@ -16,7 +16,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.tree;
+package mrmathami.cia.java.project;
 
-public interface JavaNonIdentifiedEntity extends JavaEntity {
+import mrmathami.annotations.Nonnull;
+
+import java.util.List;
+
+public enum JavaSourceFileType {
+	JAVA;
+
+	@Nonnull public static final List<JavaSourceFileType> VALUE_LIST = List.of(values());
+
 }
