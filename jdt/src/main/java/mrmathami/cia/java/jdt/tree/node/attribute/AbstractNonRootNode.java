@@ -137,7 +137,7 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 	@Nullable
 	@Override
 	public JavaSourceFile getSourceFile() {
-		return null;
+		return sourceFile;
 	}
 
 	//endregion Basic Getter

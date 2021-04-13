@@ -44,7 +44,7 @@ public final class InitializerNode extends AbstractNonRootNode implements JavaIn
 
 
 	public InitializerNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, boolean isStatic) {
-		super(sourceFile, parent, isStatic ? "$_clinit_$" : "$_init_$");
+		super(sourceFile, parent, isStatic ? "<clinit>" : "<init>");
 		this.isStatic = isStatic;
 	}
 

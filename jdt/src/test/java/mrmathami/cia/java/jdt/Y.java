@@ -29,9 +29,9 @@ public class Y {
 
 //		CodeFormatter
 
-		final Path corePath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\core\\src\\main\\java");
+		final Path corePath = Path.of("core", "src", "main", "java");
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
-		final Path jdtPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\jdt\\src\\main\\java");
+		final Path jdtPath = Path.of("jdt", "src", "main", "java");
 		final List<Path> jdtFiles = getFileList(new ArrayList<>(), jdtPath);
 		final List<Triple<String, Path, List<Path>>> javaSources = List.of(
 				Triple.immutableOf("core", corePath, coreFiles),
@@ -39,19 +39,19 @@ public class Y {
 		);
 
 		final List<Path> classPaths = List.of(
-				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\jdt\\org.eclipse.jdt.core\\3.23.0\\org.eclipse.jdt.core-3.23.0.jar"),
-				Path.of("C:\\Users\\Meo\\.m2\\repository\\org\\eclipse\\platform\\org.eclipse.text\\3.10.300\\org.eclipse.text-3.10.300.jar"),
-				Path.of("C:\\Users\\Meo\\.m2\\repository\\mrmathami\\mrmathami.utils\\1.0.1\\mrmathami.utils-1.0.1.jar")
+				Path.of("/home/meo/.m2/repository/org/eclipse/jdt/org.eclipse.jdt.core/3.25.0/org.eclipse.jdt.core-3.25.0.jar"),
+				Path.of("/home/meo/.m2/repository/org/eclipse/platform/org.eclipse.text/3.11.0/org.eclipse.text-3.11.0.jar"),
+				Path.of("/home/meo/.m2/repository/mrmathami/mrmathami.utils/1.0.4/mrmathami.utils-1.0.4.jar")
 		);
 
 		long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
-				null, javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true);
+				Path.of("."), javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true);
 		long timeParseA = System.nanoTime();
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();
 
-		Files.write(corePath.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
+		Files.write(Path.of("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);
 	}
