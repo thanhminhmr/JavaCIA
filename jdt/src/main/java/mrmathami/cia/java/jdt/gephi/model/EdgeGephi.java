@@ -17,6 +17,8 @@ public class EdgeGephi {
 				"id='" + id + '\'' +
 				" source='" + source + '\'' +
 				" target='" + target + '\'' +
-				"></edge>";
+				">" +
+				"\n\t\t\t" + "<viz:color r=\"102\" g=\"102\" b=\"102\"></viz:color>" +
+				"\n\t\t</edge>";
 	}
 }

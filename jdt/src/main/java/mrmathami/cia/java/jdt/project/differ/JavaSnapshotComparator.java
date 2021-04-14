@@ -73,7 +73,7 @@ public final class JavaSnapshotComparator {
 
 
 	private static void compareRootNodes(@Nonnull JavaRootNode previousRootNode, @Nonnull JavaRootNode currentRootNode,
-			@Nonnull Set<JavaNode> addedNodes, @Nonnull Set<JavaNode> removedNodes,
+			@Nonnull Set<JavaNode> removedNodes, @Nonnull Set<JavaNode> addedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> changedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> unchangedNodes) {
 		final EntityMatcher matcher = new EntityMatcher();

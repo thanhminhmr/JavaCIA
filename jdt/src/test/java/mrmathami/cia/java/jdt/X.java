@@ -1,6 +1,7 @@
 package mrmathami.cia.java.jdt;
 
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.gephi.Printer;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
@@ -83,6 +84,8 @@ public class X {
 				= new ObjectOutputStream(Files.newOutputStream(Path.of("jdt\\src\\test\\JSON-java.proj")))) {
 			objectOutputStream.writeObject(javaProject);
 		}
+		Printer printer = new Printer();
+		Files.write(javaSourcePathB.resolve("gephi.gexf"), printer.writeGephiComparison(snapshotComparison).getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Compare time: %s\n", (timeCompareFinish - timeCompareStart) / 1000000.0);
 

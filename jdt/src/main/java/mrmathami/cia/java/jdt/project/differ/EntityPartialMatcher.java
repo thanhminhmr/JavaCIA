@@ -121,7 +121,17 @@ enum EntityPartialMatcher {
 			int matchCode = node.getEntityClass().hashCode();
 			matchCode = matchCode * 31 + node.getNodeName().hashCode();
 			matchCode = matchCode * 31 + (identicalMatch ? node.getDependencyToNodes().size() : -1);
+			matchCode = matchCode * 31 + (identicalMatch ? node.getTextContent().hashCode() : -1);
+			matchCode = matchCode * 31 + attributeHasCode(node);
 			return matchCode * 31 + ( identicalMatch ? node.getAttributes().getLength() : -1 );
+		}
+		private int attributeHasCode(JavaXMLNode node) {
+			NamedNodeMap listAttribute = node.getAttributes();
+			int hashCode = listAttribute.getLength();
+			for (int i = 0; i < listAttribute.getLength(); i++) {
+				hashCode = hashCode * 31 + listAttribute.item(i).getNodeName().hashCode() + listAttribute.item(i).getNodeValue().hashCode();
+			}
+			return hashCode;
 		}
 
 		@Override
