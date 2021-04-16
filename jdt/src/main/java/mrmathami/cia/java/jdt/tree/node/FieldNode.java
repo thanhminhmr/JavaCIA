@@ -21,10 +21,10 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaFieldNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractModifiedAnnotatedNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
+import mrmathami.cia.java.tree.node.JavaFieldNode;
 
 import java.util.List;
 import java.util.Map;

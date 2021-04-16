@@ -21,8 +21,8 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaAnnotationNode;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractModifiedAnnotatedNode;
+import mrmathami.cia.java.tree.node.JavaAnnotationNode;
 
 public final class AnnotationNode extends AbstractModifiedAnnotatedNode implements JavaAnnotationNode {
 

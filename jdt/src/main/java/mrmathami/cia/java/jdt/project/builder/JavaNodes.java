@@ -86,7 +86,6 @@ import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 final class JavaNodes {
 
@@ -827,7 +826,7 @@ final class JavaNodes {
 			public boolean visit(@Nonnull SuperMethodInvocation node) {
 				final IMethodBinding binding = node.resolveMethodBinding();
 				if (binding != null) {
-					createDependencyFromInvocation(binding,node.typeArguments(), node.arguments());
+					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
 				} else if (!enableRecovery) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super method invocation!");
 				}

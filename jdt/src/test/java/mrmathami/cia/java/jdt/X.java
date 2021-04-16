@@ -45,7 +45,7 @@ public class X {
 
 		final long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotA = ProjectBuilders.createProjectSnapshot("JSON-java-before",
-				null, List.of(Triple.immutableOf( "main", javaSourcePathA, fileNamesA)), List.of(),
+				null, List.of(Triple.immutableOf("main", javaSourcePathA, fileNamesA)), List.of(),
 				DEPENDENCY_WEIGHT_TABLE, false);
 		final long timeParseA = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotB = ProjectBuilders.createProjectSnapshot("JSON-java-after",

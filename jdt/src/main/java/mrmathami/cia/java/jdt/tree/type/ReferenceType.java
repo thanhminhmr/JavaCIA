@@ -20,9 +20,9 @@ package mrmathami.cia.java.jdt.tree.type;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.type.JavaReferenceType;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
+import mrmathami.cia.java.tree.type.JavaReferenceType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -20,10 +20,7 @@ package mrmathami.cia.java.jdt.project.builder;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
-import mrmathami.cia.java.jdt.project.Module;
 import mrmathami.cia.java.jdt.project.ProjectSnapshot;
-import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
@@ -31,14 +28,8 @@ import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.utils.Triple;
 
-import java.io.IOException;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 
 public final class JavaSnapshotBuilder {
 

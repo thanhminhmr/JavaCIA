@@ -21,11 +21,11 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaFieldNode;
-import mrmathami.cia.java.tree.node.JavaInitializerNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.AbstractNonIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractNonRootNode;
+import mrmathami.cia.java.tree.node.JavaFieldNode;
+import mrmathami.cia.java.tree.node.JavaInitializerNode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

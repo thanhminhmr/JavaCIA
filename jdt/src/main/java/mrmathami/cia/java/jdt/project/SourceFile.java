@@ -60,6 +60,4 @@ public final class SourceFile implements JavaSourceFile, Serializable {
 	}
 
 
-
-
 }
