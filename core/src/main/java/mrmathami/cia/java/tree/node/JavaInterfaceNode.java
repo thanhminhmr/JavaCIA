@@ -50,13 +50,17 @@ public interface JavaInterfaceNode extends JavaNode,
 		return OBJECT_CLASS;
 	}
 
+	//endregion Basic Getter
+
+	//region Node Type
+
 	@Nonnull
 	@Override
 	default JavaInterfaceNode asInterfaceNode() {
 		return this;
 	}
 
-	//endregion Basic Getter
+	//endregion Node Type
 
 	//region Getter & Setter
 

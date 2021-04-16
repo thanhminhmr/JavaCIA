@@ -51,13 +51,17 @@ public interface JavaClassNode extends JavaNode,
 		return OBJECT_CLASS;
 	}
 
+	//endregion Basic Getter
+
+	//region Node Type
+
 	@Nonnull
 	@Override
 	default JavaClassNode asClassNode() {
 		return this;
 	}
 
-	//endregion Basic Getter
+	//endregion Node Type
 
 	//region Getter & Setter
 

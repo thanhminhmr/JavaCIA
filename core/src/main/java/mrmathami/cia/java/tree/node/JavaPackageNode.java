@@ -28,11 +28,12 @@ import mrmathami.cia.java.tree.node.container.JavaClassContainer;
 import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
 import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
 import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
+import mrmathami.cia.java.xml.JavaXmlContainer;
 
 public interface JavaPackageNode extends JavaNode,
 		JavaAnnotatedNode,
 		JavaAnnotationContainer, JavaClassContainer, JavaEnumContainer,
-		JavaInterfaceContainer, JavaPackageContainer {
+		JavaInterfaceContainer, JavaPackageContainer, JavaXmlContainer {
 
 	@Nonnull String OBJECT_CLASS = "JavaPackageNode";
 

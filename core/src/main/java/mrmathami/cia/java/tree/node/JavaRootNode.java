@@ -48,12 +48,6 @@ public interface JavaRootNode extends JavaNode,
 		return OBJECT_CLASS;
 	}
 
-	@Nonnull
-	@Override
-	default JavaRootNode asRootNode() {
-		return this;
-	}
-
 	@Override
 	default boolean isRoot() {
 		return true;
@@ -102,6 +96,16 @@ public interface JavaRootNode extends JavaNode,
 	}
 
 	//endregion Basic Getter
+
+	//region Node Type
+
+	@Nonnull
+	@Override
+	default JavaRootNode asRootNode() {
+		return this;
+	}
+
+	//endregion Node Type
 
 	//region Getter & Setter
 

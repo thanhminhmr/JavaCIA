@@ -37,13 +37,17 @@ public interface JavaInitializerNode extends JavaNode, JavaClassContainer {
 		return OBJECT_CLASS;
 	}
 
+	//endregion Basic Getter
+
+	//region Node Type
+
 	@Nonnull
 	@Override
 	default JavaInitializerNode asInitializerNode() {
 		return this;
 	}
 
-	//endregion Basic Getter
+	//endregion Node Type
 
 	//region Getter & Setter
 

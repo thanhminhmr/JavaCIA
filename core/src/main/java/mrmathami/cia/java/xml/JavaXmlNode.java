@@ -16,24 +16,15 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.tree.node;
+package mrmathami.cia.java.xml;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
-import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
-import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaFieldContainer;
-import mrmathami.cia.java.tree.type.JavaType;
+import mrmathami.cia.java.tree.node.JavaNode;
 
-import java.util.List;
+public interface JavaXmlNode extends JavaNode,
+		JavaXmlContainer {
 
-public interface JavaMethodNode extends JavaNode,
-		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode,
-		JavaClassContainer, JavaFieldContainer {
-
-	@Nonnull String OBJECT_CLASS = "JavaMethodNode";
+	@Nonnull String OBJECT_CLASS = "JavaXmlNode";
 
 
 	//region Basic Getter
@@ -50,26 +41,10 @@ public interface JavaMethodNode extends JavaNode,
 
 	@Nonnull
 	@Override
-	default JavaMethodNode asMethodNode() {
+	default JavaXmlNode asXmlNode() {
 		return this;
 	}
 
 	//endregion Node Type
-
-	//region Getter & Setter
-
-	@Nullable
-	JavaType getReturnType();
-
-	@Nonnull
-	List<? extends JavaType> getParameters();
-
-	@Nonnull
-	List<? extends JavaType> getExceptions();
-
-	@Nullable
-	String getBodyBlock();
-
-	//endregion Getter & Setter
 
 }

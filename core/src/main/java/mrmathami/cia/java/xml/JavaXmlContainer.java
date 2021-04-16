@@ -16,47 +16,31 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.tree.node;
+package mrmathami.cia.java.xml;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
-import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.type.JavaType;
+import mrmathami.cia.java.tree.node.JavaNode;
 
-public interface JavaFieldNode extends JavaNode,
-		JavaAnnotatedNode, JavaModifiedNode,
-		JavaClassContainer {
+import java.util.List;
 
-	@Nonnull String OBJECT_CLASS = "JavaFieldNode";
-
-
-	//region Basic Getter
+public interface JavaXmlContainer extends JavaNode {
 
 	@Nonnull
 	@Override
-	default String getEntityClass() {
-		return OBJECT_CLASS;
+	default List<? extends JavaXmlNode> getChildXmls(@Nonnull List<JavaXmlNode> xmlNodes) {
+		return getChildren(JavaXmlNode.class, xmlNodes);
 	}
 
-	//endregion Basic Getter
-
-	//region Node Type
+	@Nonnull
+	@Override
+	default List<? extends JavaXmlNode> getChildXmls() {
+		return getChildren(JavaXmlNode.class);
+	}
 
 	@Nonnull
 	@Override
-	default JavaFieldNode asFieldNode() {
+	default JavaXmlContainer asXmlContainer() {
 		return this;
 	}
-
-	//endregion Node Type
-
-	//region Getter & Setter
-
-	@Nullable
-	JavaType getType();
-
-	//endregion Getter & Setter
 
 }

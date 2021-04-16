@@ -46,12 +46,16 @@ public interface JavaAnnotationNode extends
 		return OBJECT_CLASS;
 	}
 
+	//endregion Basic Getter
+
+	//region Node Type
+
 	@Nonnull
 	@Override
 	default JavaAnnotationNode asAnnotationNode() {
 		return this;
 	}
 
-	//endregion Basic Getter
+	//endregion Node Type
 
 }

@@ -50,13 +50,17 @@ public interface JavaEnumNode extends JavaNode,
 		return OBJECT_CLASS;
 	}
 
+	//endregion Basic Getter
+
+	//region Node Type
+
 	@Nonnull
 	@Override
 	default JavaEnumNode asEnumNode() {
 		return this;
 	}
 
-	//endregion Basic Getter
+	//endregion Node Type
 
 	//region Getter & Setter
 

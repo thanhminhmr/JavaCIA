@@ -32,6 +32,8 @@ import mrmathami.cia.java.tree.node.container.JavaInitializerContainer;
 import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
 import mrmathami.cia.java.tree.node.container.JavaMethodContainer;
 import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
+import mrmathami.cia.java.xml.JavaXmlContainer;
+import mrmathami.cia.java.xml.JavaXmlNode;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -154,6 +156,11 @@ public interface JavaNode extends JavaIdentifiedEntity {
 	@Nonnull
 	default JavaRootNode asRootNode() throws ClassCastException {
 		throw new ClassCastException("Not a JavaRootNode!");
+	}
+
+	@Nonnull
+	default JavaXmlNode asXmlNode() throws ClassCastException {
+		throw new ClassCastException("Not a JavaXmlNode!");
 	}
 
 	//endregion Node Type
@@ -324,6 +331,25 @@ public interface JavaNode extends JavaIdentifiedEntity {
 	}
 
 	//endregion Package Container
+
+	//region Xml Container
+
+	@Nonnull
+	default List<? extends JavaXmlNode> getChildXmls(@Nonnull List<JavaXmlNode> xmlNodes) {
+		return xmlNodes;
+	}
+
+	@Nonnull
+	default List<? extends JavaXmlNode> getChildXmls() {
+		return List.of();
+	}
+
+	@Nonnull
+	default JavaXmlContainer asXmlContainer() throws ClassCastException {
+		throw new ClassCastException("Not a JavaXmlContainer!");
+	}
+
+	//endregion Xml Container
 
 	//endregion Container Type
 
