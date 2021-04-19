@@ -481,34 +481,50 @@ final class JavaNodes {
 	//region Package
 
 	@Nonnull
-	private Pair<PackageNode, IPackageBinding> internalCreateFirstLevelPackageFromName(@Nonnull String nameComponent) {
-		final PackageNode packageNode = rootNode.createChildPackage(nameComponent);
-		dependencies.createDependencyToNode(rootNode, packageNode, JavaDependency.MEMBER);
-		return Pair.mutableOf(packageNode, null);
+	private Pair<PackageNode, IPackageBinding> internalCreateFirstLevelPackagePairFromName(
+			@Nonnull String simpleName) {
+		return packageNodeMap.computeIfAbsent(simpleName, qualifiedName -> {
+			final PackageNode packageNode = rootNode.createChildPackage(simpleName);
+			dependencies.createDependencyToNode(rootNode, packageNode, JavaDependency.MEMBER);
+			return Pair.mutableOf(packageNode, null);
+		});
+	}
+
+	@Nonnull
+	private Pair<PackageNode, IPackageBinding> internalCreatePackagePairFromParentAndName(
+			@Nonnull PackageNode parentNode, @Nonnull String simpleName) {
+		return packageNodeMap.computeIfAbsent(parentNode.getQualifiedName() + '.' + simpleName,
+				qualifiedName -> {
+					final PackageNode packageNode = parentNode.createChildPackage(simpleName);
+					dependencies.createDependencyToNode(parentNode, packageNode, JavaDependency.MEMBER);
+					return Pair.mutableOf(packageNode, null);
+				});
 	}
 
 	@Nonnull
 	private Pair<PackageNode, IPackageBinding> internalCreatePackagePairFromNameComponents(
 			@Nonnull String[] nameComponents) {
 		assert nameComponents.length > 0 : "nameComponents length should not be 0.";
-
-		final String firstNameComponent = nameComponents[0];
-		final StringBuilder qualifiedNameBuilder = new StringBuilder(firstNameComponent);
-		Pair<PackageNode, IPackageBinding> pair = packageNodeMap.computeIfAbsent(firstNameComponent,
-				this::internalCreateFirstLevelPackageFromName);
-
+		Pair<PackageNode, IPackageBinding> pair = internalCreateFirstLevelPackagePairFromName(nameComponents[0]);
 		for (int i = 1; i < nameComponents.length; i++) {
-			final String nameComponent = nameComponents[i];
-			qualifiedNameBuilder.append(".").append(nameComponent);
-			final PackageNode parentNode = pair.getA();
-			pair = packageNodeMap.computeIfAbsent(qualifiedNameBuilder.toString(),
-					qualifiedName -> {
-						final PackageNode packageNode = parentNode.createChildPackage(nameComponent);
-						dependencies.createDependencyToNode(parentNode, packageNode, JavaDependency.MEMBER);
-						return Pair.mutableOf(packageNode, null);
-					});
+			pair = internalCreatePackagePairFromParentAndName(pair.getA(), nameComponents[i]);
 		}
 		return pair;
+	}
+
+	@Nonnull
+	private PackageNode createFirstLevelPackageFromName(@Nonnull String simpleName) {
+		return internalCreateFirstLevelPackagePairFromName(simpleName).getA();
+	}
+
+	@Nonnull
+	private PackageNode createPackageFromParentAndName(@Nonnull PackageNode parentNode, @Nonnull String simpleName) {
+		return internalCreatePackagePairFromParentAndName(parentNode, simpleName).getA();
+	}
+
+	@Nonnull
+	private PackageNode createPackageFromNameComponents(@Nonnull String[] nameComponents) {
+		return internalCreatePackagePairFromNameComponents(nameComponents).getA();
 	}
 
 	@Nonnull

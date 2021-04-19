@@ -65,7 +65,9 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nonnull private final Map<String, SourceFile> sourceFileMap;
 	@Nonnull private final JavaNodes nodes;
 
-	@Nonnull private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
+	// TODO: this make the whole parser cannot run continuously if not clean correctly
+	// TODO: memory leaking here
+	// TODO: this make the code impossible to run in parallel
 	private static final Map<String, List<XMLNode>> mapXMlDependency = new HashMap<>();
 
 	@Nullable private JavaCiaException exception;
@@ -203,20 +205,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 				listMapperPaths.add(path);
 			}
 		}
-		for (String path : listMapperPaths) {
-			if (exception != null) return;
-			try {
-				final SourceFile sourceFile = sourceFileMap.get(path);
-				if (sourceFile == null) throw new JavaCiaException("Unknown source path!");
-
-				Document doc = parseXML(Path.of(path));
-				nodes.build(sourceFile, doc, path, mapXMlDependency);
-			} catch (JavaCiaException javaCiaException) {
-				exception = javaCiaException;
-			} catch (ParserConfigurationException | IOException | SAXException e) {
-				e.printStackTrace();
-			}
-		}
+		acceptXMLMapper(listMapperPaths, mapXMlDependency);
 	}
 
 
