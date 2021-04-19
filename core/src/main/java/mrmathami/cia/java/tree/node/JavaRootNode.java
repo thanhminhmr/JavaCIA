@@ -29,13 +29,14 @@ import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
 import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
 import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
 import mrmathami.cia.java.tree.type.JavaType;
+import mrmathami.cia.java.xml.JavaXmlContainer;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 public interface JavaRootNode extends JavaNode,
 		JavaPackageContainer, JavaAnnotationContainer, JavaClassContainer,
-		JavaEnumContainer, JavaInterfaceContainer {
+		JavaEnumContainer, JavaInterfaceContainer, JavaXmlContainer {
 
 	@Nonnull String OBJECT_CLASS = "JavaRootNode";
 

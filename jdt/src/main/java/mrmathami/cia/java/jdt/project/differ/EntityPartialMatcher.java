@@ -20,8 +20,10 @@ package mrmathami.cia.java.jdt.project.differ;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
+import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import mrmathami.cia.java.tree.node.JavaClassNode;
 import mrmathami.cia.java.tree.node.JavaEnumNode;
@@ -38,7 +40,9 @@ import mrmathami.cia.java.tree.type.JavaReferenceType;
 import mrmathami.cia.java.tree.type.JavaSimpleType;
 import mrmathami.cia.java.tree.type.JavaSyntheticType;
 import mrmathami.cia.java.tree.type.JavaType;
+import mrmathami.cia.java.xml.JavaXmlNode;
 import mrmathami.utils.Pair;
+import org.w3c.dom.NamedNodeMap;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -192,6 +196,53 @@ enum EntityPartialMatcher {
 			final JavaClassNode nodeA = (JavaClassNode) entityA, nodeB = (JavaClassNode) entityB;
 			return !identicalMatch || (matcher.match(nodeA.getExtendsClass(), nodeB.getExtendsClass(), false)
 					&& matcher.matchNonOrdered(nodeA.getImplementsInterfaces(), nodeB.getImplementsInterfaces(), false));
+		}
+	},
+	XML_NODE(JavaXmlNode.class) {
+		@Override
+		protected int partialMatchCode(JavaIdentifiedEntity entity, boolean identicalMatch) {
+			assert entity instanceof JavaXmlNode;
+			final JavaXmlNode node = (JavaXmlNode) entity;
+			int matchCode = node.getEntityClass().hashCode();
+			matchCode = matchCode * 31 + node.getSimpleName().hashCode();
+			matchCode = matchCode * 31 + (identicalMatch ? node.getDependencyToNodes().size() : -1);
+			matchCode = matchCode * 31 + (identicalMatch ? node.getTextContent().hashCode() : -1);
+			matchCode = matchCode * 31 + attributeHasCode(node);
+			return matchCode * 31 + (identicalMatch ? node.getAttributes().getLength() : -1);
+		}
+
+		private int attributeHasCode(JavaXmlNode node) {
+			NamedNodeMap listAttribute = node.getAttributes();
+			int hashCode = listAttribute.getLength();
+			for (int i = 0; i < listAttribute.getLength(); i++) {
+				hashCode = hashCode * 31 + listAttribute.item(i).getNodeName().hashCode() + listAttribute.item(i).getNodeValue().hashCode();
+			}
+			return hashCode;
+		}
+
+		@Override
+		protected boolean partialMatch(JavaIdentifiedEntity entityA, JavaIdentifiedEntity entityB, EntityMatcher matcher, boolean identicalMatch) {
+			assert entityA instanceof JavaXmlNode && entityB instanceof JavaXmlNode;
+			final JavaXmlNode nodeA = (JavaXmlNode) entityA, nodeB = (JavaXmlNode) entityB;
+			boolean compareTextContent = true;
+			if (permissionCheckTextContent(nodeA) && permissionCheckTextContent(nodeB)) {
+				compareTextContent = (nodeA.getTextContent().equals(nodeB.getTextContent()));
+			}
+			boolean returnBool = !identicalMatch || ((nodeA.getSimpleName().equals(nodeB.getSimpleName()))
+					&& compareTextContent
+					&& (matcher.matchNonOrderedNameNodeMap(nodeA.getAttributes(), nodeB.getAttributes())));
+			return returnBool;
+		}
+
+		private boolean permissionCheckTextContent(JavaXmlNode javaXMLNode) {
+			for (Map.Entry<? extends JavaNode, ? extends JavaDependencyCountTable> entry : javaXMLNode.getDependencyTo().entrySet()) {
+				if ((entry.getKey() instanceof JavaXmlNode) &&
+						(entry.getValue() instanceof DependencyCountTable) &&
+						(entry.getValue().getCount(JavaDependency.MEMBER) > 0)) {
+					return false;
+				}
+			}
+			return true;
 		}
 	},
 

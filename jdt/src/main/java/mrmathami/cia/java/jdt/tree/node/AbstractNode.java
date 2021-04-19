@@ -26,6 +26,8 @@ import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.collections.ImmutableOrderedMap;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.NodeList;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -176,6 +178,13 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 		assertNonFrozen();
 		asPackageContainer();
 		return internalAddChild(new PackageNode(this, simpleName));
+	}
+
+	@Nonnull
+	public final XMLNode createChildXMlNode(@Nullable SourceFile sourceFile, @Nonnull String simpleName, String textContent, NodeList children, NamedNodeMap listAttributes) {
+		assertNonFrozen();
+		asXmlContainer();
+		return internalAddChild(new XMLNode(sourceFile, simpleName, this, textContent, children, listAttributes));
 	}
 
 	//endregion Node Container

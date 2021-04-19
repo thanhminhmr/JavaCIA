@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,7 @@ import mrmathami.cia.java.jdt.project.Module;
 import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
+import mrmathami.cia.java.jdt.tree.node.XMLNode;
 import mrmathami.cia.java.project.JavaSourceFileType;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.cia.java.utils.RelativePath;
@@ -38,7 +39,12 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FileASTRequestor;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+import org.w3c.dom.Document;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.LinkOption;
@@ -60,6 +66,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nonnull private final JavaNodes nodes;
 
 	@Nonnull private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
+	private static final Map<String, List<XMLNode>> mapXMlDependency = new HashMap<>();
 
 	@Nullable private JavaCiaException exception;
 
@@ -73,7 +80,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 	@Nonnull
 	static JavaRootNode build(@Nonnull Path projectRoot, @Nonnull List<Triple<String, Path, List<Path>>> javaSources,
-			@Nonnull List<Path> classPaths, boolean enableRecovery) throws JavaCiaException {
+			@Nonnull List<Path> classPaths, boolean enableRecovery, Path configurationPath) throws JavaCiaException, IOException, SAXException, ParserConfigurationException {
 
 		final Path projectPath = toRealPathOrThrow(projectRoot);
 		final Map<String, Module> modules = new HashMap<>();
@@ -103,7 +110,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		final String[] classPathArray = classPathList.toArray(EMPTY);
 
-		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceFileMap, enableRecovery);
+		return parse(sourcePathArray, sourceEncodingArray, classPathArray, sourceFileMap, enableRecovery, configurationPath);
 	}
 
 	@Nonnull
@@ -117,8 +124,8 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 	@Nonnull
 	private static JavaRootNode parse(@Nonnull String[] sourcePathArray, @Nonnull String[] sourceEncodingArray,
-			@Nonnull String[] classPathArray, @Nonnull Map<String, SourceFile> sourceNameMap, boolean enableRecovery)
-			throws JavaCiaException {
+			@Nonnull String[] classPathArray, @Nonnull Map<String, SourceFile> sourceNameMap, boolean enableRecovery, Path configuration)
+			throws JavaCiaException, ParserConfigurationException, SAXException, IOException {
 
 		final ASTParser astParser = ASTParser.newParser(AST.JLS15);
 		final Map<String, String> options = JavaCore.getOptions();
@@ -133,11 +140,85 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		final CodeFormatter codeFormatter = ToolFactory.createCodeFormatter(options, ToolFactory.M_FORMAT_EXISTING);
 		final JavaSnapshotParser parser = new JavaSnapshotParser(sourceNameMap, codeFormatter, enableRecovery);
+
+		if (configuration.toString().equals("")) {
+			List<String> listMapperPaths = parser.filterMapFiles(sourcePathArray);
+			parser.acceptXMLMapper(listMapperPaths, mapXMlDependency);
+		} else {
+			parser.acceptXMlConfig(configuration, sourcePathArray, mapXMlDependency);
+			parser.acceptXMlMapper(mapXMlDependency);
+		}
+
 		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 
 		// TODO: add source name info to tree
 		return parser.postProcessing();
 	}
+
+	public List<String> filterMapFiles(@Nonnull String[] sourcePathArray) throws IOException, SAXException, ParserConfigurationException {
+		List<String> list = new ArrayList<>();
+		for (String sourcePath : sourcePathArray) {
+			if (sourcePath.endsWith(".xml")) {
+				Document document = parseXML(Path.of(sourcePath));
+				String type = document.getDocumentElement().getNodeName();
+				if (type.equals("mapper")) {
+					list.add(sourcePath);
+				}
+			}
+		}
+		return list;
+	}
+
+	public void acceptXMlConfig(@Nonnull Path sourcePath, @Nonnull String[] sourcePathArray, Map<String, List<XMLNode>> mapXMlDependency) {
+		if (exception != null) return;
+		try {
+			Document doc = parseXML(sourcePath);
+			nodes.build(doc, sourcePathArray, mapXMlDependency, sourcePath);
+		} catch (ParserConfigurationException | IOException | SAXException e) {
+			e.printStackTrace();
+		}
+	}
+
+	public void acceptXMLMapper(List<String> listMapperPaths, Map<String, List<XMLNode>> mapXMlDependency) {
+		for (String path : listMapperPaths) {
+			if (exception != null) return;
+			try {
+				final SourceFile sourceFile = sourceFileMap.get(path);
+				if (sourceFile == null) throw new JavaCiaException("Unknown source path!");
+				Document doc = parseXML(Path.of(path));
+				nodes.build(sourceFile, doc, path, mapXMlDependency);
+			} catch (JavaCiaException javaCiaException) {
+				exception = javaCiaException;
+			} catch (ParserConfigurationException | IOException | SAXException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
+	public void acceptXMlMapper(Map<String, List<XMLNode>> mapXMlDependency) {
+		List<String> listMapperPaths = new ArrayList<>();
+		for (String path : mapXMlDependency.keySet()) {
+			if (path.endsWith(".xml") && path.contains("\\")) {
+				System.out.println("mapper file path: " + path);
+				listMapperPaths.add(path);
+			}
+		}
+		for (String path : listMapperPaths) {
+			if (exception != null) return;
+			try {
+				final SourceFile sourceFile = sourceFileMap.get(path);
+				if (sourceFile == null) throw new JavaCiaException("Unknown source path!");
+
+				Document doc = parseXML(Path.of(path));
+				nodes.build(sourceFile, doc, path, mapXMlDependency);
+			} catch (JavaCiaException javaCiaException) {
+				exception = javaCiaException;
+			} catch (ParserConfigurationException | IOException | SAXException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+
 
 	@Override
 	public void acceptAST(@Nonnull String sourcePath, @Nonnull CompilationUnit compilationUnit) {
@@ -145,10 +226,22 @@ final class JavaSnapshotParser extends FileASTRequestor {
 		try {
 			final SourceFile sourceFile = sourceFileMap.get(sourcePath);
 			if (sourceFile == null) throw new JavaCiaException("Unknown source path!");
-			nodes.build(sourceFile, compilationUnit);
+			nodes.build(sourceFile, compilationUnit, mapXMlDependency);
 		} catch (JavaCiaException exception) {
 			this.exception = exception;
 		}
+	}
+
+	private static Document parseXML(Path sourcePath) throws ParserConfigurationException, IOException, SAXException {
+		DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+		dbf.setNamespaceAware(true);
+		dbf.setIgnoringComments(true);
+		dbf.setCoalescing(true);
+		dbf.setIgnoringElementContentWhitespace(true);
+		DocumentBuilder db = dbf.newDocumentBuilder();
+		Document doc = db.parse(sourcePath.toFile());
+		doc.normalizeDocument();
+		return doc;
 	}
 
 	@Nonnull

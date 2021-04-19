@@ -28,7 +28,10 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Triple;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -45,9 +48,10 @@ public final class ProjectBuilders {
 	@Nonnull
 	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName, @Nonnull Path projectRoot,
 			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery,
+			Path configurationPath) throws JavaCiaException, IOException, SAXException, ParserConfigurationException {
 		return JavaSnapshotBuilder.build(
-				snapshotName, projectRoot, javaSources, classPaths, dependencyWeightTable, enableRecovery);
+				snapshotName, projectRoot, javaSources, classPaths, dependencyWeightTable, enableRecovery, configurationPath);
 	}
 
 	@Nonnull

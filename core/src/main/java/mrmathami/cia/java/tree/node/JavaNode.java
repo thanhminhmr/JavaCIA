@@ -346,7 +346,7 @@ public interface JavaNode extends JavaIdentifiedEntity {
 
 	@Nonnull
 	default JavaXmlContainer asXmlContainer() throws ClassCastException {
-		throw new ClassCastException("Not a JavaXmlContainer!");
+		throw new ClassCastException("Not a JavaXMLContainer");
 	}
 
 	//endregion Xml Container

@@ -20,6 +20,7 @@ package mrmathami.cia.java.xml;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.tree.node.JavaNode;
+import org.w3c.dom.NamedNodeMap;
 
 public interface JavaXmlNode extends JavaNode,
 		JavaXmlContainer {
@@ -34,6 +35,12 @@ public interface JavaXmlNode extends JavaNode,
 	default String getEntityClass() {
 		return OBJECT_CLASS;
 	}
+
+	@Nonnull
+	String getTextContent();
+
+	@Nonnull
+	NamedNodeMap getAttributes();
 
 	//endregion Basic Getter
 
