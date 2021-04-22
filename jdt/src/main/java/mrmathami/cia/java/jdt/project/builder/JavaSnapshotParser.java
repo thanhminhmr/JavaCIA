@@ -23,7 +23,6 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.project.Module;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
 import mrmathami.cia.java.jdt.tree.node.XMLNode;
 import mrmathami.cia.java.project.JavaSourceFileType;
@@ -68,7 +67,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	// TODO: this make the whole parser cannot run continuously if not clean correctly
 	// TODO: memory leaking here
 	// TODO: this make the code impossible to run in parallel
-	private static final Map<String, List<XMLNode>> mapXMlDependency = new HashMap<>();
+	private final Map<String, List<XMLNode>> mapXMlDependency = new HashMap<>();
 
 	@Nullable private JavaCiaException exception;
 
@@ -145,11 +144,12 @@ final class JavaSnapshotParser extends FileASTRequestor {
 
 		if (configuration.toString().equals("")) {
 			List<String> listMapperPaths = parser.filterMapFiles(sourcePathArray);
-			parser.acceptXMLMapper(listMapperPaths, mapXMlDependency);
+			parser.acceptXMLMapper(listMapperPaths, parser.mapXMlDependency);
 		} else {
-			parser.acceptXMlConfig(configuration, sourcePathArray, mapXMlDependency);
-			parser.acceptXMlMapper(mapXMlDependency);
+			parser.acceptXMlConfig(configuration, sourcePathArray, parser.mapXMlDependency);
+			parser.acceptXMlMapper(parser.mapXMlDependency);
 		}
+		System.out.println(parser.mapXMlDependency);
 
 		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 

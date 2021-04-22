@@ -1,4 +1,4 @@
-package mrmathami.cia.java.jdt.gephi.model;
+package mrmathami.cia.java.jdt.output.gephi.model;
 
 public class EdgeGephi {
 	private final int id;

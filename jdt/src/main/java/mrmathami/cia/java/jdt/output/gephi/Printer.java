@@ -1,7 +1,7 @@
-package mrmathami.cia.java.jdt.gephi;
+package mrmathami.cia.java.jdt.output.gephi;
 
-import mrmathami.cia.java.jdt.gephi.model.EdgeGephi;
-import mrmathami.cia.java.jdt.gephi.model.NodeGephi;
+import mrmathami.cia.java.jdt.output.gephi.model.EdgeGephi;
+import mrmathami.cia.java.jdt.output.gephi.model.NodeGephi;
 import mrmathami.cia.java.project.JavaNodeWeightTable;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;

@@ -21,7 +21,6 @@ package mrmathami.cia.java.jdt.project.builder;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
-import mrmathami.cia.java.jdt.project.Module;
 import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.AnnotationNode;
@@ -172,7 +171,6 @@ final class JavaNodes {
 	//for xml file in src
 	void build(@Nonnull SourceFile sourceFile, @Nonnull org.w3c.dom.Document document, String pathFile) {
 		this.sourceFile = sourceFile;
-		final Module module = sourceFile.getModule();
 		DocumentTraversal traversal = (DocumentTraversal) document;
 		PackageNode packageNode = createPackageNodeFromPath(sourceFile.getRelativePath());
 
@@ -265,12 +263,15 @@ final class JavaNodes {
 				}
 			}
 			for (int i = 0; i < listAttributes.getLength(); i++) {
-				if (listAttributes.item(i).getNodeName().equals("parameterType") || listAttributes.item(i).getNodeName().equals("resultType")) {
+				if (listAttributes.item(i).getNodeName().equals("parameterType") || listAttributes.item(i).getNodeName().equals("resultType") || listAttributes.item(i).getNodeName().equals("type")) {
 					String key = listAttributes.item(i).getNodeValue();
-					if (mapXMlDependency.containsKey(key)) {
+					if (mapXMlDependency.containsKey(key) && !key.contains(".")) {
 						for (int j = 0; j < mapXMlDependency.get(key).size(); j++) {
 							dependencies.createDependencyToNode(xmlNode, mapXMlDependency.get(key).get(j), JavaDependency.USE);
 						}
+					}
+					if (key.contains(".")) {
+						putInMap(mapXMlDependency, key, xmlNode);
 					}
 				}
 			}
@@ -336,7 +337,6 @@ final class JavaNodes {
 
 	//for configuration is not in src
 	void build(org.w3c.dom.Document document, @Nonnull String[] sourcePathArray, Map<String, List<XMLNode>> mapXMLDependency, Path sourcePath) {
-		System.out.println("xml node " + document.getDocumentElement().getNodeName());
 		XMLNode rootXMLNode = rootNode.createChildXMlNode(sourceFile, document.getDocumentElement().getNodeName(), document.getDocumentElement().getTextContent(),
 				document.getDocumentElement().getChildNodes(), document.getDocumentElement().getAttributes());
 		String key = String.valueOf(sourcePath.getFileName());
