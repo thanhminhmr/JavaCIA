@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,6 +19,8 @@
 package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.tree.node.JavaPackageNode;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractAnnotatedNode;
 
@@ -27,7 +29,7 @@ public final class PackageNode extends AbstractAnnotatedNode implements JavaPack
 	private static final long serialVersionUID = -1L;
 
 	public PackageNode(@Nonnull AbstractNode parent, @Nonnull String name) {
-		super(parent, name);
+		super(null, parent, name);
 		assert parent instanceof PackageNode || parent instanceof RootNode : "Invalid parent type!";
 	}
 

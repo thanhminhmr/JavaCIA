@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,12 +21,10 @@ package mrmathami.cia.java.project;
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Pair;
 import mrmathami.utils.Triple;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 public interface JavaProject {
 
@@ -42,23 +40,23 @@ public interface JavaProject {
 	/**
 	 * Create a snapshot of the current project.
 	 *
-	 * @param snapshotName snapshot name
-	 * @param javaSources source name map to their root folder and list of source files
-	 * @param classPaths list of dependency libraries
+	 * @param snapshotName          snapshot name
+	 * @param javaSources           a list of module name, its root folder and list of its source files
+	 * @param classPaths            list of dependency libraries
 	 * @param dependencyWeightTable dependency weight table
-	 * @param enableRecovery create unknown types and skip unknown method calls
+	 * @param enableRecovery        create unknown types and skip unknown method calls
 	 * @return the snapshot
 	 * @throws JavaCiaException some error occur during the creation of the snapshot
 	 */
 	@Nonnull
-	JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName,
+	JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName, @Nonnull Path projectRoot,
 			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException;
 
 	/**
-	 * @param comparisonName comparison name
-	 * @param previousSnapshot the old snapshot
-	 * @param currentSnapshot the new snapshot
+	 * @param comparisonName    comparison name
+	 * @param previousSnapshot  the old snapshot
+	 * @param currentSnapshot   the new snapshot
 	 * @param impactWeightTable impact weight table
 	 * @return the comparison
 	 * @throws JavaCiaException some error occur during the creation of the comparison

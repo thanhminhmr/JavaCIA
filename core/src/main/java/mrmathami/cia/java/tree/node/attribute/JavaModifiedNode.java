@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -25,6 +25,19 @@ import mrmathami.cia.java.tree.node.JavaNode;
 import java.util.EnumSet;
 import java.util.Set;
 
+import static mrmathami.cia.java.tree.JavaModifier.ABSTRACT;
+import static mrmathami.cia.java.tree.JavaModifier.FINAL;
+import static mrmathami.cia.java.tree.JavaModifier.NATIVE;
+import static mrmathami.cia.java.tree.JavaModifier.PRIVATE;
+import static mrmathami.cia.java.tree.JavaModifier.PROTECTED;
+import static mrmathami.cia.java.tree.JavaModifier.PUBLIC;
+import static mrmathami.cia.java.tree.JavaModifier.STATIC;
+import static mrmathami.cia.java.tree.JavaModifier.STRICTFP;
+import static mrmathami.cia.java.tree.JavaModifier.SYNCHRONIZED;
+import static mrmathami.cia.java.tree.JavaModifier.TRANSIENT;
+import static mrmathami.cia.java.tree.JavaModifier.VALUE_LIST;
+import static mrmathami.cia.java.tree.JavaModifier.VOLATILE;
+
 public interface JavaModifiedNode extends JavaNode {
 
 	//region Getter & Setter
@@ -35,60 +48,64 @@ public interface JavaModifiedNode extends JavaNode {
 	default Set<JavaModifier> getModifierSet() {
 		final int modifiers = getModifiers();
 		final EnumSet<JavaModifier> modifierSet = EnumSet.noneOf(JavaModifier.class);
-		for (final JavaModifier modifierType : JavaModifier.values()) {
-			if ((modifiers & modifierType.getMask()) != 0) modifierSet.add(modifierType);
+		for (final JavaModifier modifier : VALUE_LIST) {
+			if (isContainModifier(modifiers, modifier)) modifierSet.add(modifier);
 		}
 		return modifierSet;
 	}
 
-	default boolean isContainModifier(@Nonnull JavaModifier modifierType) {
-		return (getModifiers() & modifierType.getMask()) != 0;
+	default boolean isContainModifier(@Nonnull JavaModifier modifier) {
+		return isContainModifier(getModifiers(), modifier);
 	}
 
 	default boolean isPublic() {
-		return (getModifiers() & JavaModifier.PUBLIC_MASK) != 0;
+		return isContainModifier(getModifiers(), PUBLIC);
 	}
 
 	default boolean isProtected() {
-		return (getModifiers() & JavaModifier.PROTECTED_MASK) != 0;
+		return isContainModifier(getModifiers(), PROTECTED);
 	}
 
 	default boolean isPrivate() {
-		return (getModifiers() & JavaModifier.PRIVATE_MASK) != 0;
+		return isContainModifier(getModifiers(), PRIVATE);
 	}
 
 	default boolean isStatic() {
-		return (getModifiers() & JavaModifier.STATIC_MASK) != 0;
+		return isContainModifier(getModifiers(), STATIC);
 	}
 
 	default boolean isAbstract() {
-		return (getModifiers() & JavaModifier.ABSTRACT_MASK) != 0;
+		return isContainModifier(getModifiers(), ABSTRACT);
 	}
 
 	default boolean isFinal() {
-		return (getModifiers() & JavaModifier.FINAL_MASK) != 0;
+		return isContainModifier(getModifiers(), FINAL);
 	}
 
 	default boolean isNative() {
-		return (getModifiers() & JavaModifier.NATIVE_MASK) != 0;
+		return isContainModifier(getModifiers(), NATIVE);
 	}
 
 	default boolean isSynchronized() {
-		return (getModifiers() & JavaModifier.SYNCHRONIZED_MASK) != 0;
+		return isContainModifier(getModifiers(), SYNCHRONIZED);
 	}
 
 	default boolean isTransient() {
-		return (getModifiers() & JavaModifier.TRANSIENT_MASK) != 0;
+		return isContainModifier(getModifiers(), TRANSIENT);
 	}
 
 	default boolean isVolatile() {
-		return (getModifiers() & JavaModifier.VOLATILE_MASK) != 0;
+		return isContainModifier(getModifiers(), VOLATILE);
 	}
 
 	default boolean isStrictfp() {
-		return (getModifiers() & JavaModifier.STRICTFP_MASK) != 0;
+		return isContainModifier(getModifiers(), STRICTFP);
 	}
 
 	//endregion Getter & Setter
+
+	private static boolean isContainModifier(int modifiers, @Nonnull JavaModifier modifier) {
+		return (modifiers & (1 << modifier.ordinal())) != 0;
+	}
 
 }

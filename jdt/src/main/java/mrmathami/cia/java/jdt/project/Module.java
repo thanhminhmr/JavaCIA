@@ -16,7 +16,38 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.tree;
+package mrmathami.cia.java.jdt.project;
 
-public interface JavaNonIdentifiedEntity extends JavaEntity {
+import mrmathami.annotations.Nonnull;
+import mrmathami.cia.java.project.JavaModule;
+import mrmathami.cia.java.utils.RelativePath;
+
+import java.io.Serializable;
+
+public final class Module implements JavaModule, Serializable {
+
+	private static final long serialVersionUID = -1L;
+
+	@Nonnull private final String name;
+	@Nonnull private final RelativePath relativePath;
+
+
+	public Module(@Nonnull String name, @Nonnull RelativePath relativePath) {
+		this.name = name;
+		this.relativePath = relativePath;
+	}
+
+
+	@Nonnull
+	@Override
+	public String getName() {
+		return name;
+	}
+
+	@Override
+	@Nonnull
+	public RelativePath getRelativePath() {
+		return relativePath;
+	}
+
 }

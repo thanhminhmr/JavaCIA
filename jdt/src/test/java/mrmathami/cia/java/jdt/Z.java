@@ -4,7 +4,6 @@ import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Pair;
 import mrmathami.utils.Triple;
 
 import java.io.IOException;
@@ -36,7 +35,7 @@ public class Z {
 
 		long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
-				javaSources, List.of(), DEPENDENCY_WEIGHT_TABLE, true);
+				null, javaSources, List.of(), DEPENDENCY_WEIGHT_TABLE, true);
 		long timeParseA = System.nanoTime();
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();

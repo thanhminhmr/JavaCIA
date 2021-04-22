@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,18 +20,25 @@ package mrmathami.cia.java.jdt.project.builder;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.project.Module;
 import mrmathami.cia.java.jdt.project.ProjectSnapshot;
+import mrmathami.cia.java.jdt.project.SourceFile;
+import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
-import mrmathami.utils.Pair;
 import mrmathami.utils.Triple;
 
+import java.io.IOException;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 public final class JavaSnapshotBuilder {
 
@@ -40,14 +47,14 @@ public final class JavaSnapshotBuilder {
 
 
 	@Nonnull
-	public static ProjectSnapshot build(@Nonnull String snapshotName,
+	public static ProjectSnapshot build(@Nonnull String snapshotName, @Nonnull Path projectRoot,
 			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightMap, boolean enableRecovery) throws JavaCiaException {
 
-		final JavaRootNode rootNode = JavaSnapshotParser.build(javaSources, classPaths, enableRecovery);
+		final JavaRootNode rootNode = JavaSnapshotParser.build(projectRoot, javaSources, classPaths, enableRecovery);
 
-		final double[] dependencyWeights = new double[JavaDependency.valueList.size()];
-		for (final JavaDependency type : JavaDependency.valueList) {
+		final double[] dependencyWeights = new double[JavaDependency.VALUE_LIST.size()];
+		for (final JavaDependency type : JavaDependency.VALUE_LIST) {
 			dependencyWeights[type.ordinal()] = dependencyWeightMap.getWeight(type);
 		}
 
@@ -62,7 +69,7 @@ public final class JavaSnapshotBuilder {
 		for (final JavaNode node : allNodes) {
 			double nodeWeight = 0.0;
 			for (final JavaDependencyCountTable nodeDependency : node.getDependencyFrom().values()) {
-				for (final JavaDependency dependency : JavaDependency.valueList) {
+				for (final JavaDependency dependency : JavaDependency.VALUE_LIST) {
 					nodeWeight += dependencyWeights[dependency.ordinal()]
 							* nodeDependency.getCount(dependency);
 				}

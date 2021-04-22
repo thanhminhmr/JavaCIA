@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,22 +20,29 @@ package mrmathami.cia.java.jdt.tree.node.attribute;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
+import mrmathami.cia.java.project.JavaModule;
+import mrmathami.cia.java.project.JavaSourceFile;
 
 public abstract class AbstractNonRootNode extends AbstractNode {
 
 	private static final long serialVersionUID = -1L;
 
+	@Nullable private final SourceFile sourceFile;
 	@Nonnull private final AbstractNode parent;
 	@Nonnull private final String simpleName;
 	@Nonnull private final String qualifiedName;
 	@Nonnull private final String uniqueName;
 
+
 	@Nullable private transient RootNode root; // only null when deserialize
 
 
-	public AbstractNonRootNode(@Nonnull AbstractNode parent, @Nonnull String simpleName) {
+	public AbstractNonRootNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName) {
+		this.sourceFile = sourceFile;
 		this.parent = parent;
 		this.simpleName = normalizeSimpleName(simpleName);
 		this.uniqueName = this.qualifiedName = parent.isRoot()
@@ -44,7 +51,9 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 		this.root = parent.getRoot();
 	}
 
-	public AbstractNonRootNode(@Nonnull AbstractNode parent, @Nonnull String simpleName, @Nonnull String uniqueNameSuffix) {
+	public AbstractNonRootNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName, @Nonnull String uniqueNameSuffix) {
+		this.sourceFile = sourceFile;
 		this.parent = parent;
 		this.simpleName = normalizeSimpleName(simpleName);
 		this.uniqueName = (
@@ -123,6 +132,12 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 	@Override
 	public final String getUniqueName() {
 		return uniqueName;
+	}
+
+	@Nullable
+	@Override
+	public JavaSourceFile getSourceFile() {
+		return sourceFile;
 	}
 
 	//endregion Basic Getter

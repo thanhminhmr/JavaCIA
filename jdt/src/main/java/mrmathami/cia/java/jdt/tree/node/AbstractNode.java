@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,10 +20,11 @@ package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.node.JavaNode;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
+import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.collections.ImmutableOrderedMap;
 
 import java.io.IOException;
@@ -117,52 +118,57 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 	//region Node Container
 
 	@Nonnull
-	public final AnnotationNode createChildAnnotation(@Nonnull String simpleName, @Nullable String binaryName) {
+	public final AnnotationNode createChildAnnotation(@Nullable SourceFile sourceFile,
+			@Nonnull String simpleName, @Nullable String binaryName) {
 		assertNonFrozen();
 		asAnnotationContainer();
-		return internalAddChild(new AnnotationNode(this, simpleName, binaryName));
+		return internalAddChild(new AnnotationNode(sourceFile, this, simpleName, binaryName));
 	}
 
 	@Nonnull
-	public final ClassNode createChildClass(@Nonnull String simpleName, @Nullable String binaryName) {
+	public final ClassNode createChildClass(@Nullable SourceFile sourceFile,
+			@Nonnull String simpleName, @Nullable String binaryName) {
 		assertNonFrozen();
 		asClassContainer();
-		return internalAddChild(new ClassNode(this, simpleName, binaryName));
+		return internalAddChild(new ClassNode(sourceFile, this, simpleName, binaryName));
 	}
 
 	@Nonnull
-	public final EnumNode createChildEnum(@Nonnull String simpleName, @Nullable String binaryName) {
+	public final EnumNode createChildEnum(@Nullable SourceFile sourceFile,
+			@Nonnull String simpleName, @Nullable String binaryName) {
 		assertNonFrozen();
 		asEnumContainer();
-		return internalAddChild(new EnumNode(this, simpleName, binaryName));
+		return internalAddChild(new EnumNode(sourceFile, this, simpleName, binaryName));
 	}
 
 	@Nonnull
-	public final FieldNode createChildField(@Nonnull String simpleName) {
+	public final FieldNode createChildField(@Nullable SourceFile sourceFile, @Nonnull String simpleName) {
 		assertNonFrozen();
 		asFieldContainer();
-		return internalAddChild(new FieldNode(this, simpleName));
+		return internalAddChild(new FieldNode(sourceFile, this, simpleName));
 	}
 
 	@Nonnull
-	public final InitializerNode createChildInitializer(boolean isStatic) {
+	public final InitializerNode createChildInitializer(@Nullable SourceFile sourceFile, boolean isStatic) {
 		assertNonFrozen();
 		asInitializerContainer();
-		return internalAddChild(new InitializerNode(this, isStatic));
+		return internalAddChild(new InitializerNode(sourceFile, this, isStatic));
 	}
 
 	@Nonnull
-	public final InterfaceNode createChildInterface(@Nonnull String simpleName, @Nullable String binaryName) {
+	public final InterfaceNode createChildInterface(@Nullable SourceFile sourceFile,
+			@Nonnull String simpleName, @Nullable String binaryName) {
 		assertNonFrozen();
 		asInterfaceContainer();
-		return internalAddChild(new InterfaceNode(this, simpleName, binaryName));
+		return internalAddChild(new InterfaceNode(sourceFile, this, simpleName, binaryName));
 	}
 
 	@Nonnull
-	public final MethodNode createChildMethod(@Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
+	public final MethodNode createChildMethod(@Nullable SourceFile sourceFile,
+			@Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
 		assertNonFrozen();
 		asMethodContainer();
-		return internalAddChild(new MethodNode(this, simpleName, parameters));
+		return internalAddChild(new MethodNode(sourceFile, this, simpleName, parameters));
 	}
 
 	@Nonnull

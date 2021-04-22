@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -21,6 +21,7 @@ package mrmathami.cia.java.jdt.project.builder;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.AnnotationNode;
 import mrmathami.cia.java.jdt.tree.node.ClassNode;
@@ -109,7 +110,7 @@ final class JavaNodes {
 
 	@Nonnull private final List<Pair<ASTNode, AbstractNode>> delayedDependencyWalkers = new LinkedList<>();
 
-	@Nullable private Set<AbstractNode> perFileNodeSet;
+	@Nullable private SourceFile sourceFile;
 
 
 	JavaNodes(@Nonnull CodeFormatter formatter, boolean enableRecovery) {
@@ -117,9 +118,9 @@ final class JavaNodes {
 		this.enableRecovery = enableRecovery;
 	}
 
-	void build(@Nonnull Set<AbstractNode> perFileNodeSet, @Nonnull CompilationUnit compilationUnit)
+	void build(@Nonnull SourceFile sourceFile, @Nonnull CompilationUnit compilationUnit)
 			throws JavaCiaException {
-		this.perFileNodeSet = perFileNodeSet;
+		this.sourceFile = sourceFile;
 
 		final PackageDeclaration packageDeclaration = compilationUnit.getPackage();
 		if (packageDeclaration != null) {
@@ -138,7 +139,7 @@ final class JavaNodes {
 			}
 		}
 
-		this.perFileNodeSet = null;
+		this.sourceFile = null;
 	}
 
 	@Nonnull
@@ -186,17 +187,21 @@ final class JavaNodes {
 
 	//region Modifier
 
+	private static int getModifierMask(@Nonnull JavaModifier modifier) {
+		return 1 << modifier.ordinal();
+	}
+
 	private int processModifiersFromBindingModifiers(int bindingModifiers) {
 		int modifiers = 0;
-		if ((bindingModifiers & Modifier.PUBLIC) != 0) modifiers |= JavaModifier.PUBLIC_MASK;
-		if ((bindingModifiers & Modifier.PRIVATE) != 0) modifiers |= JavaModifier.PRIVATE_MASK;
-		if ((bindingModifiers & Modifier.PROTECTED) != 0) modifiers |= JavaModifier.PROTECTED_MASK;
-		if ((bindingModifiers & Modifier.STATIC) != 0) modifiers |= JavaModifier.STATIC_MASK;
-		if ((bindingModifiers & Modifier.SYNCHRONIZED) != 0) modifiers |= JavaModifier.SYNCHRONIZED_MASK;
-		if ((bindingModifiers & Modifier.VOLATILE) != 0) modifiers |= JavaModifier.VOLATILE_MASK;
-		if ((bindingModifiers & Modifier.TRANSIENT) != 0) modifiers |= JavaModifier.TRANSIENT_MASK;
-		if ((bindingModifiers & Modifier.NATIVE) != 0) modifiers |= JavaModifier.NATIVE_MASK;
-		if ((bindingModifiers & Modifier.STRICTFP) != 0) modifiers |= JavaModifier.STRICTFP_MASK;
+		if ((bindingModifiers & Modifier.PUBLIC) != 0) modifiers |= getModifierMask(JavaModifier.PUBLIC);
+		if ((bindingModifiers & Modifier.PRIVATE) != 0) modifiers |= getModifierMask(JavaModifier.PRIVATE);
+		if ((bindingModifiers & Modifier.PROTECTED) != 0) modifiers |= getModifierMask(JavaModifier.PROTECTED);
+		if ((bindingModifiers & Modifier.STATIC) != 0) modifiers |= getModifierMask(JavaModifier.STATIC);
+		if ((bindingModifiers & Modifier.SYNCHRONIZED) != 0) modifiers |= getModifierMask(JavaModifier.SYNCHRONIZED);
+		if ((bindingModifiers & Modifier.VOLATILE) != 0) modifiers |= getModifierMask(JavaModifier.VOLATILE);
+		if ((bindingModifiers & Modifier.TRANSIENT) != 0) modifiers |= getModifierMask(JavaModifier.TRANSIENT);
+		if ((bindingModifiers & Modifier.NATIVE) != 0) modifiers |= getModifierMask(JavaModifier.NATIVE);
+		if ((bindingModifiers & Modifier.STRICTFP) != 0) modifiers |= getModifierMask(JavaModifier.STRICTFP);
 		return modifiers;
 	}
 
@@ -252,11 +257,11 @@ final class JavaNodes {
 					packageNode, JavaDependency.USE));
 		}
 
-		// add to node set
-		assert perFileNodeSet != null;
-		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
-			perFileNodeSet.add(node);
-		}
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
+//			sourceFile.add(node);
+//		}
 
 		return packageNode;
 	}
@@ -310,12 +315,13 @@ final class JavaNodes {
 		final ITypeBinding typeBinding = typeDeclaration.resolveBinding();
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on class declaration!");
 
-		final ClassNode classNode = parentNode.createChildClass(typeBinding.getName(), typeBinding.getBinaryName());
+		final ClassNode classNode
+				= parentNode.createChildClass(sourceFile, typeBinding.getName(), typeBinding.getBinaryName());
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(classNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(classNode);
 
 		internalParseClassTypeBinding(classNode, typeBinding, typeDeclaration.bodyDeclarations());
 	}
@@ -364,12 +370,12 @@ final class JavaNodes {
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on interface declaration!");
 
 		final InterfaceNode interfaceNode = parentNode
-				.createChildInterface(typeBinding.getName(), typeBinding.getBinaryName());
+				.createChildInterface(sourceFile, typeBinding.getName(), typeBinding.getBinaryName());
 		dependencies.createDependencyToNode(parentNode, interfaceNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(interfaceNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(interfaceNode);
 
 		// put binding map
 		bindingNodeMap.put(typeBinding, interfaceNode);
@@ -404,12 +410,13 @@ final class JavaNodes {
 		final ITypeBinding typeBinding = enumDeclaration.resolveBinding();
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on enum declaration!");
 
-		final EnumNode enumNode = parentNode.createChildEnum(typeBinding.getName(), typeBinding.getBinaryName());
+		final EnumNode enumNode
+				= parentNode.createChildEnum(sourceFile, typeBinding.getName(), typeBinding.getBinaryName());
 		dependencies.createDependencyToNode(parentNode, enumNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(enumNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(enumNode);
 
 		// put binding map
 		bindingNodeMap.put(typeBinding, enumNode);
@@ -451,12 +458,12 @@ final class JavaNodes {
 		final IVariableBinding variableBinding = enumConstantDeclaration.resolveVariable();
 		if (variableBinding == null) throw new JavaCiaException("Cannot resolve binding on enum constant declaration!");
 
-		final FieldNode fieldNode = parentNode.createChildField(variableBinding.getName());
+		final FieldNode fieldNode = parentNode.createChildField(sourceFile, variableBinding.getName());
 		dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(fieldNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(fieldNode);
 
 		internalEnumConstantOrFieldVariableBinding(fieldNode, variableBinding);
 
@@ -512,12 +519,12 @@ final class JavaNodes {
 				? binaryName.substring(binaryName.lastIndexOf('.')).replace('.', '$')
 				: binaryName;
 
-		final ClassNode classNode = parentNode.createChildClass(className, binaryName);
+		final ClassNode classNode = parentNode.createChildClass(sourceFile, className, binaryName);
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(classNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(classNode);
 
 		internalParseClassTypeBinding(classNode, typeBinding, anonymousClassDeclaration.bodyDeclarations());
 	}
@@ -530,12 +537,12 @@ final class JavaNodes {
 		if (annotationBinding == null) throw new JavaCiaException("Cannot resolve binding on annotation declaration!");
 
 		final AnnotationNode annotationNode = parentNode
-				.createChildAnnotation(annotationBinding.getName(), annotationBinding.getBinaryName());
+				.createChildAnnotation(sourceFile, annotationBinding.getName(), annotationBinding.getBinaryName());
 		dependencies.createDependencyToNode(parentNode, annotationNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(annotationNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(annotationNode);
 
 		// put binding map
 		bindingNodeMap.put(annotationBinding, annotationNode);
@@ -565,12 +572,13 @@ final class JavaNodes {
 			throw new JavaCiaException("Cannot resolve binding on annotation type member declaration!");
 
 		// create node and containment dependency
-		final MethodNode methodNode = parentNode.createChildMethod(annotationMemberBinding.getName(), List.of());
+		final MethodNode methodNode
+				= parentNode.createChildMethod(sourceFile, annotationMemberBinding.getName(), List.of());
 		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(methodNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(methodNode);
 
 		// put binding map
 		bindingNodeMap.put(annotationMemberBinding, methodNode);
@@ -608,12 +616,12 @@ final class JavaNodes {
 					throw new JavaCiaException("Cannot resolve binding on variable declaration!");
 				}
 
-				final FieldNode fieldNode = parentNode.createChildField(variableBinding.getName());
+				final FieldNode fieldNode = parentNode.createChildField(sourceFile, variableBinding.getName());
 				dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
-				// add to node set
-				assert perFileNodeSet != null;
-				perFileNodeSet.add(fieldNode);
+				// TODO: add to node set
+//				assert sourceFile != null;
+//				sourceFile.add(fieldNode);
 
 				internalEnumConstantOrFieldVariableBinding(fieldNode, variableBinding);
 
@@ -624,9 +632,9 @@ final class JavaNodes {
 							= internalCreateOrGetInitializerNode(parentNode, fieldNode.isStatic());
 					final InitializerNode initializerNode = pair.getA();
 
-					// add to node set
-					assert perFileNodeSet != null;
-					perFileNodeSet.add(initializerNode);
+					// TODO: add to node set
+//					assert sourceFile != null;
+//					sourceFile.add(initializerNode);
 
 					final List<InitializerNode.InitializerImpl> initializerList = pair.getB();
 					initializerList.add(new InitializerNode.FieldInitializerImpl(fieldNode,
@@ -647,9 +655,9 @@ final class JavaNodes {
 		final InitializerNode initializerNode = pair.getA();
 		dependencies.createDependencyToNode(parentNode, initializerNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(initializerNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(initializerNode);
 
 		// put delayed initializer body
 		final Block initializerBody = initializer.getBody();
@@ -669,13 +677,13 @@ final class JavaNodes {
 				= classInitializerMap.computeIfAbsent(parentNode, JavaSnapshotParser::createMutablePair);
 		if (isStatic) {
 			if (pair.getA() != null) return pair.getA();
-			final InitializerNode initializer = parentNode.createChildInitializer(true);
+			final InitializerNode initializer = parentNode.createChildInitializer(sourceFile, true);
 			final List<InitializerNode.InitializerImpl> initializerList = new ArrayList<>();
 			initializer.setInitializers(initializerList);
 			return pair.setGetA(Pair.immutableOf(initializer, initializerList));
 		} else {
 			if (pair.getB() != null) return pair.getB();
-			final InitializerNode initializer = parentNode.createChildInitializer(false);
+			final InitializerNode initializer = parentNode.createChildInitializer(sourceFile, false);
 			final List<InitializerNode.InitializerImpl> initializerList = new ArrayList<>();
 			initializer.setInitializers(initializerList);
 			return pair.setGetB(Pair.immutableOf(initializer, initializerList));
@@ -698,12 +706,13 @@ final class JavaNodes {
 		}
 
 		// create node and containment dependency
-		final MethodNode methodNode = parentNode.createChildMethod(methodBinding.getName(), parameterJavaTypes);
+		final MethodNode methodNode
+				= parentNode.createChildMethod(sourceFile, methodBinding.getName(), parameterJavaTypes);
 		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
-		// add to node set
-		assert perFileNodeSet != null;
-		perFileNodeSet.add(methodNode);
+		// TODO: add to node set
+//		assert sourceFile != null;
+//		sourceFile.add(methodNode);
 
 		// create parameter proper types
 		for (final ITypeBinding parameterTypeBinding : parameterTypeBindings) {

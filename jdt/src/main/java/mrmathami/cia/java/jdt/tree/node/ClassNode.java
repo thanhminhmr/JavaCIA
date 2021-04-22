@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@ package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.tree.node.JavaClassNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractParameterizedModifiedAnnotatedNode;
@@ -42,8 +43,9 @@ public final class ClassNode extends AbstractParameterizedModifiedAnnotatedNode 
 	@Nonnull private transient List<AbstractType> implementsInterfaces = List.of();
 
 
-	public ClassNode(@Nonnull AbstractNode parent, @Nonnull String name, @Nullable String binaryName) {
-		super(parent, name);
+	public ClassNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, @Nonnull String name,
+			@Nullable String binaryName) {
+		super(sourceFile, parent, name);
 		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
 				|| parent instanceof FieldNode || parent instanceof InterfaceNode || parent instanceof MethodNode
 				|| parent instanceof PackageNode || parent instanceof RootNode

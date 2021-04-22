@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -34,7 +34,7 @@ public final class DependencyCountTable implements JavaDependencyCountTable, Ser
 
 
 	public DependencyCountTable(@Nonnull int[] counts) {
-		assert counts.length == JavaDependency.valueList.size() : "Invalid length for counts.";
+		assert counts.length == JavaDependency.VALUE_LIST.size() : "Invalid length for counts.";
 		this.counts = counts;
 	}
 
@@ -53,7 +53,7 @@ public final class DependencyCountTable implements JavaDependencyCountTable, Ser
 		if (object instanceof JavaDependencyCountTable) {
 			final JavaDependencyCountTable dependency = (JavaDependencyCountTable) object;
 			for (int i = 0; i < counts.length; i++) {
-				if (dependency.getCount(JavaDependency.valueList.get(i)) != counts[i]) return false;
+				if (dependency.getCount(JavaDependency.VALUE_LIST.get(i)) != counts[i]) return false;
 			}
 		}
 		return false;
@@ -80,7 +80,7 @@ public final class DependencyCountTable implements JavaDependencyCountTable, Ser
 		for (int i = 0; i < counts.length; i++) {
 			if (counts[i] != 0) {
 				builder.append(innerNext ? ", \"" : " \"")
-						.append(JavaDependency.valueList.get(i)).append("\": ").append(counts[i]);
+						.append(JavaDependency.VALUE_LIST.get(i)).append("\": ").append(counts[i]);
 				innerNext = true;
 			}
 		}

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -54,7 +54,7 @@ final class ImpactCalculator implements Callable<double[]> {
 
 			double linkWeight = 1.0;
 			final JavaDependencyCountTable nodeDependency = entry.getValue();
-			for (final JavaDependency dependency : JavaDependency.valueList) {
+			for (final JavaDependency dependency : JavaDependency.VALUE_LIST) {
 				final int count = nodeDependency.getCount(dependency);
 				if (count > 0) {
 					linkWeight *= Math.pow(1.0 - dependencyImpacts[dependency.ordinal()], count);

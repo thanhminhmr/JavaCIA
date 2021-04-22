@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,7 @@ package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.tree.node.JavaInterfaceNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractParameterizedModifiedAnnotatedNode;
@@ -41,8 +42,9 @@ public final class InterfaceNode extends AbstractParameterizedModifiedAnnotatedN
 	@Nonnull private transient List<AbstractType> extendsInterfaces = List.of();
 
 
-	public InterfaceNode(@Nonnull AbstractNode parent, @Nonnull String simpleName, @Nullable String binaryName) {
-		super(parent, simpleName);
+	public InterfaceNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName, @Nullable String binaryName) {
+		super(sourceFile, parent, simpleName);
 		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
 				|| parent instanceof InterfaceNode || parent instanceof PackageNode || parent instanceof RootNode
 				: "Invalid parent type!";

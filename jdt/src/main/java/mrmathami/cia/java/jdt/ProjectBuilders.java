@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -26,6 +26,7 @@ import mrmathami.cia.java.jdt.project.differ.JavaSnapshotComparator;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
+import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
 import mrmathami.utils.Triple;
@@ -45,10 +46,11 @@ public final class ProjectBuilders {
 	}
 
 	@Nonnull
-	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
+	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName, @Nonnull Path projectRoot,
 			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
 			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
-		return JavaSnapshotBuilder.build(snapshotName, javaSources, classPaths, dependencyWeightTable, enableRecovery);
+		return JavaSnapshotBuilder.build(
+				snapshotName, projectRoot, javaSources, classPaths, dependencyWeightTable, enableRecovery);
 	}
 
 	@Nonnull

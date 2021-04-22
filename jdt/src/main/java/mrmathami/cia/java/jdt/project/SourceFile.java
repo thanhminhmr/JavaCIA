@@ -16,43 +16,50 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.tree.node;
+package mrmathami.cia.java.jdt.project;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
-import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.type.JavaType;
+import mrmathami.cia.java.project.JavaSourceFile;
+import mrmathami.cia.java.project.JavaSourceFileType;
+import mrmathami.cia.java.utils.RelativePath;
 
-public interface JavaFieldNode extends JavaNode,
-		JavaAnnotatedNode, JavaModifiedNode,
-		JavaClassContainer {
+import java.io.Serializable;
 
-	@Nonnull String OBJECT_CLASS = "JavaFieldNode";
+public final class SourceFile implements JavaSourceFile, Serializable {
+
+	private static final long serialVersionUID = -1L;
+
+	@Nonnull private final Module module;
+	@Nonnull private final JavaSourceFileType type;
+	@Nonnull private final RelativePath relativePath;
 
 
-	//region Basic Getter
+	public SourceFile(@Nonnull Module module, @Nonnull JavaSourceFileType type, @Nonnull RelativePath relativePath) {
+		this.module = module;
+		this.type = type;
+		this.relativePath = relativePath;
+	}
+
 
 	@Nonnull
 	@Override
-	default String getEntityClass() {
-		return OBJECT_CLASS;
+	public Module getModule() {
+		return module;
 	}
 
 	@Nonnull
 	@Override
-	default JavaFieldNode asFieldNode() {
-		return this;
+	public JavaSourceFileType getType() {
+		return type;
 	}
 
-	//endregion Basic Getter
+	@Nonnull
+	@Override
+	public RelativePath getRelativePath() {
+		return relativePath;
+	}
 
-	//region Getter & Setter
 
-	@Nullable
-	JavaType getType();
 
-	//endregion Getter & Setter
 
 }

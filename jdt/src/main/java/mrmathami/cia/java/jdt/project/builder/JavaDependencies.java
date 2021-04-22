@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -219,7 +219,7 @@ final class JavaDependencies {
 
 	@Nonnull
 	private static <R> int[] internalCreateDependencyCounts(@Nullable R any) {
-		return new int[JavaDependency.valueList.size()];
+		return new int[JavaDependency.VALUE_LIST.size()];
 	}
 
 	//region Main Dependency

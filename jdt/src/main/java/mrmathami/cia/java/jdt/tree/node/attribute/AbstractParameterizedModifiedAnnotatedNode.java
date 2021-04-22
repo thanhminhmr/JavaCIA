@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -19,10 +19,12 @@
 package mrmathami.cia.java.jdt.tree.node.attribute;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
+import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
+import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -39,13 +41,14 @@ public abstract class AbstractParameterizedModifiedAnnotatedNode extends Abstrac
 	@Nonnull private transient List<AbstractType> typeParameters = List.of();
 
 
-	public AbstractParameterizedModifiedAnnotatedNode(@Nonnull AbstractNode parent, @Nonnull String simpleName) {
-		super(parent, simpleName);
+	public AbstractParameterizedModifiedAnnotatedNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName) {
+		super(sourceFile, parent, simpleName);
 	}
 
-	public AbstractParameterizedModifiedAnnotatedNode(@Nonnull AbstractNode parent, @Nonnull String simpleName,
-			@Nonnull String uniqueNameSuffix) {
-		super(parent, simpleName, uniqueNameSuffix);
+	public AbstractParameterizedModifiedAnnotatedNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName, @Nonnull String uniqueNameSuffix) {
+		super(sourceFile, parent, simpleName, uniqueNameSuffix);
 	}
 
 

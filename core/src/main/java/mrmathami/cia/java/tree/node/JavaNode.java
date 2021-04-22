@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
+ * Copyright (C) 2020-2021 Mai Thanh Minh (a.k.a. thanhminhmr or mrmathami)
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -20,6 +20,8 @@ package mrmathami.cia.java.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
+import mrmathami.cia.java.project.JavaModule;
+import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
 import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
@@ -79,6 +81,15 @@ public interface JavaNode extends JavaIdentifiedEntity {
 
 	@Nonnull
 	String getUniqueName();
+
+	@Nullable
+	JavaSourceFile getSourceFile();
+
+	@Nullable
+	default JavaModule getModule() {
+		final JavaSourceFile sourceFile = getSourceFile();
+		return sourceFile != null ? sourceFile.getModule() : null;
+	}
 
 	//endregion Basic Getter
 
