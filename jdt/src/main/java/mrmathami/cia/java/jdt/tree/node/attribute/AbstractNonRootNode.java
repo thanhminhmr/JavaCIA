@@ -63,6 +63,18 @@ public abstract class AbstractNonRootNode extends AbstractNode {
 		this.root = parent.getRoot();
 	}
 
+	public AbstractNonRootNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
+			@Nonnull String simpleName, @Nonnull String uniqueName, int order) {
+		this.sourceFile = sourceFile;
+		this.parent = parent;
+		this.simpleName = normalizeSimpleName(simpleName);
+		this.qualifiedName = parent.isRoot()
+				? this.simpleName
+				: parent.getQualifiedName() + '.' + this.simpleName;
+		this.uniqueName = uniqueName + order;
+		this.root = parent.getRoot();
+	}
+
 
 	@Nonnull
 	private static String normalizeSimpleName(@Nonnull String name) {

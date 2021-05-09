@@ -24,9 +24,10 @@ public class ExportCSV {
 		try (BufferedWriter bufferedWriter = new BufferedWriter(new FileWriter(String.valueOf(outputPath)));
 				CSVPrinter csvPrinter = new CSVPrinter(bufferedWriter, CSVFormat.DEFAULT.withHeader(componentHeader))) {
 			for (JavaNode node : nodeList) {
-				if (!node.isRoot()) {
-					csvPrinter.printRecord(node.getEntityClass(), node.getQualifiedName());
-				}
+				String entityClass = node.getEntityClass();
+				String temp = entityClass.substring(4);
+				String type = temp.substring(0, temp.length() - 4);
+				csvPrinter.printRecord(type, node.getUniqueName());
 			}
 			csvPrinter.flush();
 		} catch (IOException e) {
@@ -45,9 +46,10 @@ public class ExportCSV {
 				CSVPrinter csvPrinter = new CSVPrinter(bufferedWriter, CSVFormat.DEFAULT.withHeader(impactHeader))) {
 			addedNodes.forEach(javaNode -> {
 				try {
-					if (!javaNode.isRoot()) {
-						csvPrinter.printRecord(javaNode.getEntityClass(), javaNode.getQualifiedName(), nodeImpactTable.getWeight(javaNode));
-					}
+					String entityClass = javaNode.getEntityClass();
+					String temp = entityClass.substring(4);
+					String type = temp.substring(0, temp.length() - 4);
+					csvPrinter.printRecord(type, javaNode.getUniqueName(), nodeImpactTable.getWeight(javaNode));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
@@ -63,7 +65,10 @@ public class ExportCSV {
 	public void printSetPair(Set<Pair<JavaNode, JavaNode>> set, CSVPrinter csvPrinter, JavaNodeWeightTable nodeImpactTable) {
 		set.forEach(pair -> {
 			try {
-				csvPrinter.printRecord(pair.getB().getEntityClass(), pair.getB().getQualifiedName(), nodeImpactTable.getWeight(pair.getB()));
+				String entityClass = pair.getB().getEntityClass();
+				String temp = entityClass.substring(4);
+				String type = temp.substring(0, temp.length() - 4);
+				csvPrinter.printRecord(type, pair.getB().getUniqueName(), nodeImpactTable.getWeight(pair.getB()));
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

@@ -26,7 +26,7 @@ public class Printer {
 		List<EdgeGephi> edgeGephiList = new ArrayList<>();
 		int count = 0;
 		for (Map.Entry<JavaNode, Set<? extends JavaNode>> entry : dependencyToMap.entrySet()) {
-			NodeGephi nodeGephi = new NodeGephi(entry.getKey().getId(), entry.getKey().getSimpleName(), NodeGephi.Type.UNCHANGE);
+			NodeGephi nodeGephi = new NodeGephi(entry.getKey().getId(), entry.getKey().getUniqueName(), NodeGephi.Type.UNCHANGE);
 			nodeGephiList.add(nodeGephi);
 			Set<? extends JavaNode> value = entry.getValue();
 			for (JavaNode javaNode : value) {
@@ -66,19 +66,19 @@ public class Printer {
 		for (Map.Entry<JavaNode, Set<? extends JavaNode>> entry : dependencyToMap.entrySet()) {
 			NodeGephi nodeGephi = null;
 			if (addedNodes.contains(entry.getKey())) {
-				nodeGephi = new NodeGephi(entry.getKey().getId(), entry.getKey().getSimpleName() + " weight: " + nodeImpactTable.getWeight(entry.getKey()), NodeGephi.Type.ADD);
+				nodeGephi = new NodeGephi(entry.getKey().getId(), entry.getKey().getUniqueName() + " weight: " + nodeImpactTable.getWeight(entry.getKey()), NodeGephi.Type.ADD);
 			}
 
 			for (Pair<JavaNode, JavaNode> pair : changedNodes) {
 				final JavaNode pairB = pair.getB();
 				if (entry.getKey() == pairB) {
-					nodeGephi = new NodeGephi(pairB.getId(), pairB.getSimpleName() + " weight: " + nodeImpactTable.getWeight(pairB), NodeGephi.Type.CHANGE);
+					nodeGephi = new NodeGephi(pairB.getId(), pairB.getUniqueName() + " weight: " + nodeImpactTable.getWeight(pairB), NodeGephi.Type.CHANGE);
 				}
 			}
 			for (Pair<JavaNode, JavaNode> pair : unchangedNodes) {
 				final JavaNode pairB = pair.getB();
 				if (entry.getKey() == pairB) {
-					nodeGephi = new NodeGephi(pairB.getId(), pairB.getSimpleName() + " weight: " + nodeImpactTable.getWeight(pairB), NodeGephi.Type.UNCHANGE);
+					nodeGephi = new NodeGephi(pairB.getId(), pairB.getUniqueName() + " weight: " + nodeImpactTable.getWeight(pairB), NodeGephi.Type.UNCHANGE);
 				}
 			}
 			nodeGephiList.add(nodeGephi);
@@ -91,7 +91,7 @@ public class Printer {
 		}
 
 		for (JavaNode node : removedNodes) {
-			NodeGephi nodeGephi = new NodeGephi(node.getId() + nodeGephiList.size(), node.getSimpleName(), NodeGephi.Type.DELETE);
+			NodeGephi nodeGephi = new NodeGephi(node.getId() + nodeGephiList.size(), node.getUniqueName(), NodeGephi.Type.DELETE);
 			final Set<? extends JavaNode> dependencyToNodes = node.getDependencyToNodes();
 			for (JavaNode javaNode : dependencyToNodes) {
 				EdgeGephi edgeGephi = new EdgeGephi(count, node.getId() + nodeGephiList.size(), javaNode.getId());

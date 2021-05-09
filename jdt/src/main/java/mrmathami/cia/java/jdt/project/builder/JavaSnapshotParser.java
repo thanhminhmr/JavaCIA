@@ -149,7 +149,6 @@ final class JavaSnapshotParser extends FileASTRequestor {
 			parser.acceptXMlConfig(configuration, sourcePathArray, parser.mapXMlDependency);
 			parser.acceptXMlMapper(parser.mapXMlDependency);
 		}
-		System.out.println(parser.mapXMlDependency);
 
 		astParser.createASTs(sourcePathArray, sourceEncodingArray, EMPTY, parser, null);
 

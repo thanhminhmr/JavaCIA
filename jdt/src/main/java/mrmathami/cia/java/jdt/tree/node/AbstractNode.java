@@ -63,7 +63,7 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 	public abstract AbstractNode getParent();
 
 	@Nonnull
-	public final List<AbstractNode> getChildren() {
+	public List<AbstractNode> getChildren() {
 		return isFrozen() ? children : Collections.unmodifiableList(children);
 	}
 
@@ -181,10 +181,10 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 	}
 
 	@Nonnull
-	public final XMLNode createChildXMlNode(@Nullable SourceFile sourceFile, @Nonnull String simpleName, String textContent, NodeList children, NamedNodeMap listAttributes) {
+	public final XMLNode createChildXMlNode(@Nullable SourceFile sourceFile, @Nonnull String simpleName, @Nullable String textContent, @Nullable NodeList children, @Nullable NamedNodeMap listAttributes, int order) {
 		assertNonFrozen();
 		asXmlContainer();
-		return internalAddChild(new XMLNode(sourceFile, simpleName, this, textContent, children, listAttributes));
+		return internalAddChild(new XMLNode(sourceFile, this, simpleName, textContent, children, listAttributes, order));
 	}
 
 	//endregion Node Container
