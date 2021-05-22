@@ -20,11 +20,10 @@ package mrmathami.cia.java.tree.node;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.tree.JavaEntity;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
 
 import java.util.List;
 
-public interface JavaInitializerNode extends JavaNode, JavaClassContainer {
+public interface JavaInitializerNode extends JavaNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaInitializerNode";
 
@@ -38,16 +37,6 @@ public interface JavaInitializerNode extends JavaNode, JavaClassContainer {
 	}
 
 	//endregion Basic Getter
-
-	//region Node Type
-
-	@Nonnull
-	@Override
-	default JavaInitializerNode asInitializerNode() {
-		return this;
-	}
-
-	//endregion Node Type
 
 	//region Getter & Setter
 

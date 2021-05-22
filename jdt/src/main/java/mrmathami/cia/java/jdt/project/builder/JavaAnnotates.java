@@ -172,7 +172,7 @@ final class JavaAnnotates {
 		delayedAnnotationNodes.computeIfAbsent(annotationTypeBinding, JavaSnapshotParser::createArrayList)
 				.add(annotate);
 
-		final HashMap<IBinding, int[]> newDependencyMap = new HashMap<>();
+		final Map<IBinding, int[]> newDependencyMap = new HashMap<>();
 		JavaDependencies.addDependencyToDelayedDependencyMap(newDependencyMap,
 				JavaDependencies.getOriginTypeBinding(annotationTypeBinding), dependencyType);
 		delayedAnnotations.put(annotationBinding, Pair.immutableOf(annotate, newDependencyMap));

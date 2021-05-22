@@ -23,7 +23,7 @@ import mrmathami.annotations.Nonnull;
 import java.util.List;
 
 public enum JavaSourceFileType {
-	JAVA;
+	JAVA, XML;
 
 	@Nonnull public static final List<JavaSourceFileType> VALUE_LIST = List.of(values());
 

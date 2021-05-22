@@ -45,9 +45,8 @@ public final class InterfaceNode extends AbstractParameterizedModifiedAnnotatedN
 	public InterfaceNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
 			@Nonnull String simpleName, @Nullable String binaryName) {
 		super(sourceFile, parent, simpleName);
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof InterfaceNode || parent instanceof PackageNode || parent instanceof RootNode
-				: "Invalid parent type!";
+		checkParent(parent, AnnotationNode.class, ClassNode.class, EnumNode.class,
+				InterfaceNode.class, PackageNode.class, RootNode.class);
 
 		this.binaryName = binaryName;
 	}

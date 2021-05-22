@@ -38,8 +38,8 @@ public final class FieldNode extends AbstractModifiedAnnotatedNode implements Ja
 
 	public FieldNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, @Nonnull String simpleName) {
 		super(sourceFile, parent, simpleName);
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof InterfaceNode || parent instanceof MethodNode : "Invalid parent type!";
+		checkParent(parent, AnnotationNode.class, ClassNode.class, EnumNode.class,
+				InterfaceNode.class, MethodNode.class);
 	}
 
 

@@ -46,10 +46,8 @@ public final class ClassNode extends AbstractParameterizedModifiedAnnotatedNode 
 	public ClassNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, @Nonnull String name,
 			@Nullable String binaryName) {
 		super(sourceFile, parent, name);
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof FieldNode || parent instanceof InterfaceNode || parent instanceof MethodNode
-				|| parent instanceof PackageNode || parent instanceof RootNode
-				: "Invalid parent type!";
+		checkParent(parent, AbstractNode.class, ClassNode.class, EnumNode.class, FieldNode.class,
+				InterfaceNode.class, MethodNode.class, PackageNode.class, RootNode.class);
 
 		this.binaryName = binaryName;
 	}

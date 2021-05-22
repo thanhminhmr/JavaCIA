@@ -28,7 +28,7 @@ public final class PackageNode extends AbstractAnnotatedNode implements JavaPack
 
 	public PackageNode(@Nonnull AbstractNode parent, @Nonnull String name) {
 		super(null, parent, name);
-		assert parent instanceof PackageNode || parent instanceof RootNode : "Invalid parent type!";
+		checkParent(parent, PackageNode.class, RootNode.class);
 	}
 
 }

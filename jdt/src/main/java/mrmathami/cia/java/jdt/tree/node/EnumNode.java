@@ -44,9 +44,8 @@ public final class EnumNode extends AbstractParameterizedModifiedAnnotatedNode i
 	public EnumNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
 			@Nonnull String simpleName, @Nullable String binaryName) {
 		super(sourceFile, parent, simpleName);
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof InterfaceNode || parent instanceof PackageNode || parent instanceof RootNode
-				: "Invalid parent type!";
+		checkParent(parent, AbstractNode.class, ClassNode.class, EnumNode.class,
+				InterfaceNode.class, PackageNode.class, RootNode.class);
 
 		this.binaryName = binaryName;
 	}

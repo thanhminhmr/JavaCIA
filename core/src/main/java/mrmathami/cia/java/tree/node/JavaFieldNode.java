@@ -22,12 +22,10 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
 import mrmathami.cia.java.tree.type.JavaType;
 
 public interface JavaFieldNode extends JavaNode,
-		JavaAnnotatedNode, JavaModifiedNode,
-		JavaClassContainer {
+		JavaAnnotatedNode, JavaModifiedNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaFieldNode";
 
@@ -41,16 +39,6 @@ public interface JavaFieldNode extends JavaNode,
 	}
 
 	//endregion Basic Getter
-
-	//region Node Type
-
-	@Nonnull
-	@Override
-	default JavaFieldNode asFieldNode() {
-		return this;
-	}
-
-	//endregion Node Type
 
 	//region Getter & Setter
 
