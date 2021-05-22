@@ -35,13 +35,6 @@ import mrmathami.cia.java.jdt.tree.node.RootNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.JavaModifier;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
-import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
-import mrmathami.cia.java.tree.node.container.JavaFieldContainer;
-import mrmathami.cia.java.tree.node.container.JavaInitializerContainer;
-import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
-import mrmathami.cia.java.tree.node.container.JavaMethodContainer;
 import mrmathami.utils.Pair;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -86,7 +79,6 @@ import java.util.IdentityHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 final class JavaNodes {
 
@@ -125,14 +117,14 @@ final class JavaNodes {
 		final PackageDeclaration packageDeclaration = compilationUnit.getPackage();
 		if (packageDeclaration != null) {
 			final PackageNode packageNode = createPackageNodeFromPackageDeclaration(packageDeclaration);
-			for (Object type : compilationUnit.types()) {
+			for (final Object type : compilationUnit.types()) {
 				if (type instanceof AbstractTypeDeclaration) {
 					parseAbstractTypeDeclaration(packageNode, (AbstractTypeDeclaration) type);
 				}
 			}
 		} else {
 			// the parent is root
-			for (Object type : compilationUnit.types()) {
+			for (final Object type : compilationUnit.types()) {
 				if (type instanceof AbstractTypeDeclaration) {
 					parseAbstractTypeDeclaration(rootNode, (AbstractTypeDeclaration) type);
 				}
@@ -210,34 +202,50 @@ final class JavaNodes {
 	//region Package
 
 	@Nonnull
-	private Pair<PackageNode, IPackageBinding> internalCreateFirstLevelPackageFromName(@Nonnull String nameComponent) {
-		final PackageNode packageNode = rootNode.createChildPackage(nameComponent);
-		dependencies.createDependencyToNode(rootNode, packageNode, JavaDependency.MEMBER);
-		return Pair.mutableOf(packageNode, null);
+	private Pair<PackageNode, IPackageBinding> internalCreateFirstLevelPackagePairFromName(
+			@Nonnull String simpleName) {
+		return packageNodeMap.computeIfAbsent(simpleName, qualifiedName -> {
+			final PackageNode packageNode = rootNode.addChild(new PackageNode(rootNode, simpleName));
+			dependencies.createDependencyToNode(rootNode, packageNode, JavaDependency.MEMBER);
+			return Pair.mutableOf(packageNode, null);
+		});
+	}
+
+	@Nonnull
+	private Pair<PackageNode, IPackageBinding> internalCreatePackagePairFromParentAndName(
+			@Nonnull PackageNode parentNode, @Nonnull String simpleName) {
+		return packageNodeMap.computeIfAbsent(parentNode.getQualifiedName() + '.' + simpleName,
+				qualifiedName -> {
+					final PackageNode packageNode = parentNode.addChild(new PackageNode(parentNode, simpleName));
+					dependencies.createDependencyToNode(parentNode, packageNode, JavaDependency.MEMBER);
+					return Pair.mutableOf(packageNode, null);
+				});
 	}
 
 	@Nonnull
 	private Pair<PackageNode, IPackageBinding> internalCreatePackagePairFromNameComponents(
 			@Nonnull String[] nameComponents) {
 		assert nameComponents.length > 0 : "nameComponents length should not be 0.";
-
-		final String firstNameComponent = nameComponents[0];
-		final StringBuilder qualifiedNameBuilder = new StringBuilder(firstNameComponent);
-		Pair<PackageNode, IPackageBinding> pair = packageNodeMap.computeIfAbsent(firstNameComponent,
-				this::internalCreateFirstLevelPackageFromName);
-
+		Pair<PackageNode, IPackageBinding> pair = internalCreateFirstLevelPackagePairFromName(nameComponents[0]);
 		for (int i = 1; i < nameComponents.length; i++) {
-			final String nameComponent = nameComponents[i];
-			qualifiedNameBuilder.append(".").append(nameComponent);
-			final PackageNode parentNode = pair.getA();
-			pair = packageNodeMap.computeIfAbsent(qualifiedNameBuilder.toString(),
-					qualifiedName -> {
-						final PackageNode packageNode = parentNode.createChildPackage(nameComponent);
-						dependencies.createDependencyToNode(parentNode, packageNode, JavaDependency.MEMBER);
-						return Pair.mutableOf(packageNode, null);
-					});
+			pair = internalCreatePackagePairFromParentAndName(pair.getA(), nameComponents[i]);
 		}
 		return pair;
+	}
+
+	@Nonnull
+	private PackageNode createFirstLevelPackageFromName(@Nonnull String simpleName) {
+		return internalCreateFirstLevelPackagePairFromName(simpleName).getA();
+	}
+
+	@Nonnull
+	private PackageNode createPackageFromParentAndName(@Nonnull PackageNode parentNode, @Nonnull String simpleName) {
+		return internalCreatePackagePairFromParentAndName(parentNode, simpleName).getA();
+	}
+
+	@Nonnull
+	private PackageNode createPackageFromNameComponents(@Nonnull String[] nameComponents) {
+		return internalCreatePackagePairFromNameComponents(nameComponents).getA();
 	}
 
 	@Nonnull
@@ -310,13 +318,12 @@ final class JavaNodes {
 	private void parseClassTypeDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull TypeDeclaration typeDeclaration) throws JavaCiaException {
 		assert !typeDeclaration.isInterface() : "Expected a class TypeDeclaration.";
-		assert parentNode instanceof JavaClassContainer : "Expected a JavaClassContainer parent.";
 
 		final ITypeBinding typeBinding = typeDeclaration.resolveBinding();
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on class declaration!");
 
-		final ClassNode classNode
-				= parentNode.createChildClass(sourceFile, typeBinding.getName(), typeBinding.getBinaryName());
+		final ClassNode classNode = parentNode.addChild(new ClassNode(sourceFile, parentNode,
+				typeBinding.getName(), typeBinding.getBinaryName()));
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -364,13 +371,12 @@ final class JavaNodes {
 	private void parseInterfaceTypeDeclaration(@Nonnull AbstractNode parentNode, @Nonnull TypeDeclaration typeDeclaration)
 			throws JavaCiaException {
 		assert !typeDeclaration.isInterface() : "Expected a interface TypeDeclaration.";
-		assert parentNode instanceof JavaInterfaceContainer : "Expected a JavaInterfaceContainer parent.";
 
 		final ITypeBinding typeBinding = typeDeclaration.resolveBinding();
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on interface declaration!");
 
-		final InterfaceNode interfaceNode = parentNode
-				.createChildInterface(sourceFile, typeBinding.getName(), typeBinding.getBinaryName());
+		final InterfaceNode interfaceNode = parentNode.addChild(new InterfaceNode(sourceFile, parentNode,
+				typeBinding.getName(), typeBinding.getBinaryName()));
 		dependencies.createDependencyToNode(parentNode, interfaceNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -405,13 +411,11 @@ final class JavaNodes {
 
 	private void parseEnumDeclaration(@Nonnull AbstractNode parentNode, @Nonnull EnumDeclaration enumDeclaration)
 			throws JavaCiaException {
-		assert parentNode instanceof JavaEnumContainer : "Expected a JavaEnumContainer parent.";
-
 		final ITypeBinding typeBinding = enumDeclaration.resolveBinding();
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on enum declaration!");
 
-		final EnumNode enumNode
-				= parentNode.createChildEnum(sourceFile, typeBinding.getName(), typeBinding.getBinaryName());
+		final EnumNode enumNode = parentNode.addChild(new EnumNode(sourceFile, parentNode,
+				typeBinding.getName(), typeBinding.getBinaryName()));
 		dependencies.createDependencyToNode(parentNode, enumNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -453,12 +457,11 @@ final class JavaNodes {
 
 	private void parseEnumConstantDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull EnumConstantDeclaration enumConstantDeclaration) throws JavaCiaException {
-		assert parentNode instanceof JavaFieldContainer : "Expected a JavaFieldContainer parent.";
-
 		final IVariableBinding variableBinding = enumConstantDeclaration.resolveVariable();
 		if (variableBinding == null) throw new JavaCiaException("Cannot resolve binding on enum constant declaration!");
 
-		final FieldNode fieldNode = parentNode.createChildField(sourceFile, variableBinding.getName());
+		final FieldNode fieldNode = parentNode.addChild(new FieldNode(sourceFile, parentNode,
+				variableBinding.getName()));
 		dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -507,8 +510,6 @@ final class JavaNodes {
 
 	private void parseAnonymousClassDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull AnonymousClassDeclaration anonymousClassDeclaration) throws JavaCiaException {
-		assert parentNode instanceof JavaClassContainer : "Expected a JavaClassContainer parent.";
-
 		final ITypeBinding typeBinding = anonymousClassDeclaration.resolveBinding();
 		if (typeBinding == null) throw new JavaCiaException("Cannot resolve binding on class declaration!");
 
@@ -519,7 +520,7 @@ final class JavaNodes {
 				? binaryName.substring(binaryName.lastIndexOf('.')).replace('.', '$')
 				: binaryName;
 
-		final ClassNode classNode = parentNode.createChildClass(sourceFile, className, binaryName);
+		final ClassNode classNode = parentNode.addChild(new ClassNode(sourceFile, parentNode, className, binaryName));
 		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -531,13 +532,11 @@ final class JavaNodes {
 
 	private void parseAnnotationTypeDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull AnnotationTypeDeclaration annotationTypeDeclaration) throws JavaCiaException {
-		assert parentNode instanceof JavaAnnotationContainer : "Expected a JavaAnnotationContainer parent.";
-
 		final ITypeBinding annotationBinding = annotationTypeDeclaration.resolveBinding();
 		if (annotationBinding == null) throw new JavaCiaException("Cannot resolve binding on annotation declaration!");
 
-		final AnnotationNode annotationNode = parentNode
-				.createChildAnnotation(sourceFile, annotationBinding.getName(), annotationBinding.getBinaryName());
+		final AnnotationNode annotationNode = parentNode.addChild(new AnnotationNode(sourceFile, parentNode,
+				annotationBinding.getName(), annotationBinding.getBinaryName()));
 		dependencies.createDependencyToNode(parentNode, annotationNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -564,16 +563,14 @@ final class JavaNodes {
 
 	private void parseAnnotationTypeMemberDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull AnnotationTypeMemberDeclaration annotationMemberDeclaration) throws JavaCiaException {
-		assert parentNode instanceof JavaMethodContainer : "Expected a JavaMethodContainer parent.";
-
 		// check null and resolve origin
 		final IMethodBinding annotationMemberBinding = annotationMemberDeclaration.resolveBinding();
 		if (annotationMemberBinding == null)
 			throw new JavaCiaException("Cannot resolve binding on annotation type member declaration!");
 
 		// create node and containment dependency
-		final MethodNode methodNode
-				= parentNode.createChildMethod(sourceFile, annotationMemberBinding.getName(), List.of());
+		final MethodNode methodNode = parentNode.addChild(new MethodNode(sourceFile, parentNode,
+				annotationMemberBinding.getName(), List.of()));
 		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -605,9 +602,7 @@ final class JavaNodes {
 
 	private void parseFieldDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull FieldDeclaration fieldDeclaration) throws JavaCiaException {
-		assert parentNode instanceof JavaFieldContainer : "Expected a JavaFieldContainer parent.";
-
-		for (Object fragment : fieldDeclaration.fragments()) {
+		for (final Object fragment : fieldDeclaration.fragments()) {
 			if (fragment instanceof VariableDeclaration) {
 				final VariableDeclaration variableDeclaration = (VariableDeclaration) fragment;
 
@@ -616,7 +611,8 @@ final class JavaNodes {
 					throw new JavaCiaException("Cannot resolve binding on variable declaration!");
 				}
 
-				final FieldNode fieldNode = parentNode.createChildField(sourceFile, variableBinding.getName());
+				final FieldNode fieldNode = parentNode.addChild(new FieldNode(sourceFile, parentNode,
+						variableBinding.getName()));
 				dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
 				// TODO: add to node set
@@ -647,8 +643,6 @@ final class JavaNodes {
 
 	private void parseInitializer(@Nonnull AbstractNode parentNode, @Nonnull Initializer initializer)
 			throws JavaCiaException {
-		assert parentNode instanceof JavaInitializerContainer : "Expected a JavaInitializerContainer parent.";
-
 		// create node and containment dependency
 		final Pair<InitializerNode, List<InitializerNode.InitializerImpl>> pair = internalCreateOrGetInitializerNode(
 				parentNode, (initializer.getModifiers() & Modifier.STATIC) != 0);
@@ -677,13 +671,13 @@ final class JavaNodes {
 				= classInitializerMap.computeIfAbsent(parentNode, JavaSnapshotParser::createMutablePair);
 		if (isStatic) {
 			if (pair.getA() != null) return pair.getA();
-			final InitializerNode initializer = parentNode.createChildInitializer(sourceFile, true);
+			final InitializerNode initializer = parentNode.addChild(new InitializerNode(sourceFile, parentNode, true));
 			final List<InitializerNode.InitializerImpl> initializerList = new ArrayList<>();
 			initializer.setInitializers(initializerList);
 			return pair.setGetA(Pair.immutableOf(initializer, initializerList));
 		} else {
 			if (pair.getB() != null) return pair.getB();
-			final InitializerNode initializer = parentNode.createChildInitializer(sourceFile, false);
+			final InitializerNode initializer = parentNode.addChild(new InitializerNode(sourceFile, parentNode, false));
 			final List<InitializerNode.InitializerImpl> initializerList = new ArrayList<>();
 			initializer.setInitializers(initializerList);
 			return pair.setGetB(Pair.immutableOf(initializer, initializerList));
@@ -692,8 +686,6 @@ final class JavaNodes {
 
 	private void parseMethodDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull MethodDeclaration methodDeclaration) throws JavaCiaException {
-		assert parentNode instanceof JavaMethodContainer : "Expected a JavaMethodContainer parent.";
-
 		// check null and resolve origin
 		final IMethodBinding methodBinding = methodDeclaration.resolveBinding();
 		if (methodBinding == null) throw new JavaCiaException("Cannot resolve binding on method declaration!");
@@ -706,8 +698,8 @@ final class JavaNodes {
 		}
 
 		// create node and containment dependency
-		final MethodNode methodNode
-				= parentNode.createChildMethod(sourceFile, methodBinding.getName(), parameterJavaTypes);
+		final MethodNode methodNode = parentNode.addChild(new MethodNode(sourceFile, parentNode,
+				methodBinding.getName(), parameterJavaTypes));
 		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
 		// TODO: add to node set
@@ -827,7 +819,7 @@ final class JavaNodes {
 			public boolean visit(@Nonnull SuperMethodInvocation node) {
 				final IMethodBinding binding = node.resolveMethodBinding();
 				if (binding != null) {
-					createDependencyFromInvocation(binding,node.typeArguments(), node.arguments());
+					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
 				} else if (!enableRecovery) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super method invocation!");
 				}

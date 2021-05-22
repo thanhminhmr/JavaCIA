@@ -26,14 +26,11 @@ import mrmathami.cia.java.jdt.project.differ.JavaSnapshotComparator;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
-import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Pair;
 import mrmathami.utils.Triple;
 
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 
 public final class ProjectBuilders {
 

@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -115,7 +116,11 @@ final class JavaDependencies {
 
 	@Nonnull
 	private static List<MethodNode> getChildMethodsFromNode(@Nonnull AbstractNode parentNode) {
-		return parentNode.getChildren(MethodNode.class, new ArrayList<>());
+		final List<MethodNode> methods = new ArrayList<>();
+		for (final AbstractNode childNode : parentNode.getChildren()) {
+			if (childNode instanceof MethodNode) methods.add((MethodNode) childNode);
+		}
+		return methods;
 	}
 
 	private void internalPostProcessingOverrideInterface(@Nonnull InterfaceNode interfaceNode) {
@@ -273,7 +278,7 @@ final class JavaDependencies {
 			@Nonnull Map<IBinding, int[]> dependencyMap) {
 		final Map<IBinding, int[]> oldDependencyMap = delayedDependencies.get(dependencySourceNode);
 		if (oldDependencyMap == null) {
-			final HashMap<IBinding, int[]> newDependencyMap = new HashMap<>(dependencyMap);
+			final HashMap<IBinding, int[]> newDependencyMap = new LinkedHashMap<>(dependencyMap);
 			for (final Map.Entry<IBinding, int[]> entry : newDependencyMap.entrySet()) {
 				entry.setValue(entry.getValue().clone());
 			}

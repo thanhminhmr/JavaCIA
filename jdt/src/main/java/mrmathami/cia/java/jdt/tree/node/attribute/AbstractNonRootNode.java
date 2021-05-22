@@ -23,7 +23,6 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
-import mrmathami.cia.java.project.JavaModule;
 import mrmathami.cia.java.project.JavaSourceFile;
 
 public abstract class AbstractNonRootNode extends AbstractNode {

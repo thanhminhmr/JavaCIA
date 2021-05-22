@@ -20,10 +20,10 @@ package mrmathami.cia.java.jdt.project;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.jdt.tree.dependency.DependencyWeightTable;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
+import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.collections.ImmutableOrderedSet;
 import mrmathami.utils.Pair;
 

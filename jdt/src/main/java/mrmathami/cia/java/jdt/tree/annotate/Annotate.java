@@ -20,10 +20,10 @@ package mrmathami.cia.java.jdt.tree.annotate;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.annotate.JavaAnnotate;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.AbstractNonIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
+import mrmathami.cia.java.tree.annotate.JavaAnnotate;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

@@ -15,6 +15,7 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -38,26 +39,31 @@ public class X {
 //		System.in.read();
 //
 //		for (int i = 0; i < 10; i++) {
-		final Path javaSourcePathA = Path.of("..\\test\\JSON-java-before\\src\\main\\java");
-		final Path javaSourcePathB = Path.of("..\\test\\JSON-java\\src\\main\\java");
+		final Path javaRootPathA = Path.of("test/JSON-java-before");
+		final Path javaSourcePathA = javaRootPathA.resolve(Path.of("src", "main", "java"));
+		final Path javaRootPathB = Path.of("test/JSON-java");
+		final Path javaSourcePathB = javaRootPathB.resolve(Path.of("src", "main", "java"));
 		final List<Path> fileNamesA = getFileList(new ArrayList<>(), javaSourcePathA);
 		final List<Path> fileNamesB = getFileList(new ArrayList<>(), javaSourcePathB);
 
+		Collections.sort(fileNamesA);
+		Collections.sort(fileNamesB);
+
 		final long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotA = ProjectBuilders.createProjectSnapshot("JSON-java-before",
-				null, List.of(Triple.immutableOf( "main", javaSourcePathA, fileNamesA)), List.of(),
+				javaRootPathA, List.of(Triple.immutableOf("main", javaSourcePathA, fileNamesA)), List.of(),
 				DEPENDENCY_WEIGHT_TABLE, false);
 		final long timeParseA = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotB = ProjectBuilders.createProjectSnapshot("JSON-java-after",
-				null, List.of(Triple.immutableOf("main", javaSourcePathB, fileNamesB)), List.of(),
+				javaRootPathB, List.of(Triple.immutableOf("main", javaSourcePathB, fileNamesB)), List.of(),
 				DEPENDENCY_WEIGHT_TABLE, false);
 		final long timeParseB = System.nanoTime();
 
 		final String jsonA = projectSnapshotA.getRootNode().toJson();
 		final String jsonB = projectSnapshotB.getRootNode().toJson();
 
-		Files.write(javaSourcePathA.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
-		Files.write(javaSourcePathB.resolve("output.txt"), jsonB.getBytes(StandardCharsets.UTF_8));
+		Files.write(Path.of("test/outputA.json"), jsonA.getBytes(StandardCharsets.UTF_8));
+		Files.write(Path.of("test/outputB.json"), jsonB.getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);
 		System.out.printf("Parse B time: %s\n", (timeParseB - timeParseA) / 1000000.0);
@@ -73,7 +79,7 @@ public class X {
 		javaProject.addSnapshotComparison(snapshotComparison);
 
 		try (final ObjectOutputStream objectOutputStream
-				= new ObjectOutputStream(Files.newOutputStream(Path.of("..\\test\\JSON-java.proj")))) {
+				= new ObjectOutputStream(Files.newOutputStream(Path.of("test/JSON-java.proj")))) {
 			objectOutputStream.writeObject(javaProject);
 		}
 

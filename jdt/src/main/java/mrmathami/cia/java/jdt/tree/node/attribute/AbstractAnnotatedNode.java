@@ -21,10 +21,10 @@ package mrmathami.cia.java.jdt.tree.node.attribute;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.annotate.Annotate;
 import mrmathami.cia.java.jdt.tree.node.AbstractNode;
+import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

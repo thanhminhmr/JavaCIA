@@ -23,19 +23,12 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.project.JavaModule;
 import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
-import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
-import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
-import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
 import mrmathami.cia.java.tree.type.JavaType;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
-public interface JavaRootNode extends JavaNode,
-		JavaPackageContainer, JavaAnnotationContainer, JavaClassContainer,
-		JavaEnumContainer, JavaInterfaceContainer {
+public interface JavaRootNode extends JavaNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaRootNode";
 
@@ -46,12 +39,6 @@ public interface JavaRootNode extends JavaNode,
 	@Override
 	default String getEntityClass() {
 		return OBJECT_CLASS;
-	}
-
-	@Nonnull
-	@Override
-	default JavaRootNode asRootNode() {
-		return this;
 	}
 
 	@Override

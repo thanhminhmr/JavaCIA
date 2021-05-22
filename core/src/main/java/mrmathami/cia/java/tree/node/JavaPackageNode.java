@@ -23,16 +23,9 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.project.JavaModule;
 import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
-import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
-import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
-import mrmathami.cia.java.tree.node.container.JavaPackageContainer;
 
 public interface JavaPackageNode extends JavaNode,
-		JavaAnnotatedNode,
-		JavaAnnotationContainer, JavaClassContainer, JavaEnumContainer,
-		JavaInterfaceContainer, JavaPackageContainer {
+		JavaAnnotatedNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaPackageNode";
 
@@ -58,15 +51,5 @@ public interface JavaPackageNode extends JavaNode,
 	}
 
 	//endregion Basic Getter
-
-	//region Node Type
-
-	@Nonnull
-	@Override
-	default JavaPackageNode asPackageNode() {
-		return this;
-	}
-
-	//endregion Node Type
 
 }

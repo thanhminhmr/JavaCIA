@@ -23,7 +23,6 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.project.Module;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.jdt.tree.node.AbstractNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
 import mrmathami.cia.java.project.JavaSourceFileType;
 import mrmathami.cia.java.tree.node.JavaRootNode;
@@ -47,10 +46,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 final class JavaSnapshotParser extends FileASTRequestor {
 
@@ -59,7 +56,7 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nonnull private final Map<String, SourceFile> sourceFileMap;
 	@Nonnull private final JavaNodes nodes;
 
-	@Nonnull private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
+	//@Nonnull private final Map<String, Set<AbstractNode>> sourceNodeMap = new HashMap<>();
 
 	@Nullable private JavaCiaException exception;
 
@@ -177,11 +174,6 @@ final class JavaSnapshotParser extends FileASTRequestor {
 	@Nonnull
 	static <A, B, R> Map<A, B> createIdentityHashMap(@Nullable R any) {
 		return new IdentityHashMap<>();
-	}
-
-	@Nonnull
-	static <A, R> Set<A> createLinkedHashSet(@Nullable R any) {
-		return new LinkedHashSet<>();
 	}
 
 	//endregion Misc

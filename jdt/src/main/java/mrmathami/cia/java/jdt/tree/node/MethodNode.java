@@ -21,10 +21,10 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaMethodNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractParameterizedModifiedAnnotatedNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
+import mrmathami.cia.java.tree.node.JavaMethodNode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -61,8 +61,8 @@ public final class MethodNode extends AbstractParameterizedModifiedAnnotatedNode
 	public MethodNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
 			@Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
 		super(sourceFile, parent, simpleName, createUniqueNameSuffixFromParameters(parameters));
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof InterfaceNode : "Invalid parent type!";
+		checkParent(parent, AbstractNode.class, ClassNode.class, EnumNode.class, InterfaceNode.class);
+
 		this.parameters = List.copyOf(parameters);
 	}
 

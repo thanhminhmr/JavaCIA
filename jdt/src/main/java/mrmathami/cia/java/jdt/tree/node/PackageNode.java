@@ -19,10 +19,8 @@
 package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaPackageNode;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractAnnotatedNode;
+import mrmathami.cia.java.tree.node.JavaPackageNode;
 
 public final class PackageNode extends AbstractAnnotatedNode implements JavaPackageNode {
 
@@ -30,7 +28,7 @@ public final class PackageNode extends AbstractAnnotatedNode implements JavaPack
 
 	public PackageNode(@Nonnull AbstractNode parent, @Nonnull String name) {
 		super(null, parent, name);
-		assert parent instanceof PackageNode || parent instanceof RootNode : "Invalid parent type!";
+		checkParent(parent, PackageNode.class, RootNode.class);
 	}
 
 }

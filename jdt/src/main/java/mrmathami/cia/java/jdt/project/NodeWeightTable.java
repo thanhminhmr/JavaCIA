@@ -19,14 +19,11 @@
 package mrmathami.cia.java.jdt.project;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.cia.java.project.JavaNodeWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
-import mrmathami.cia.java.project.JavaNodeWeightTable;
 
 import java.io.Serializable;
-import java.util.Iterator;
-import java.util.List;
-import java.util.NoSuchElementException;
 
 public final class NodeWeightTable implements JavaNodeWeightTable, Serializable {
 

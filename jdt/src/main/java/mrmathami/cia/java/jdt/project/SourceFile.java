@@ -59,7 +59,4 @@ public final class SourceFile implements JavaSourceFile, Serializable {
 		return relativePath;
 	}
 
-
-
-
 }

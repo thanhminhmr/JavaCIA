@@ -21,11 +21,11 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaFieldNode;
-import mrmathami.cia.java.tree.node.JavaInitializerNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.AbstractNonIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractNonRootNode;
+import mrmathami.cia.java.tree.node.JavaFieldNode;
+import mrmathami.cia.java.tree.node.JavaInitializerNode;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -45,6 +45,8 @@ public final class InitializerNode extends AbstractNonRootNode implements JavaIn
 
 	public InitializerNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, boolean isStatic) {
 		super(sourceFile, parent, isStatic ? "<clinit>" : "<init>");
+		checkParent(parent, AnnotationNode.class, ClassNode.class, EnumNode.class, InterfaceNode.class);
+
 		this.isStatic = isStatic;
 	}
 
@@ -67,7 +69,7 @@ public final class InitializerNode extends AbstractNonRootNode implements JavaIn
 		this.initializers = initializers;
 	}
 
-	//region Getter & Setter
+	//endregion Getter & Setter
 
 	//region Serialization Helper
 
@@ -192,7 +194,9 @@ public final class InitializerNode extends AbstractNonRootNode implements JavaIn
 			super.internalToJsonStart(builder, indentation);
 			builder.append(", \"fieldNode\": { ");
 			fieldNode.internalToReferenceJson(builder);
-			builder.append(" }");
+			builder.append(" }, \"initialExpression\": \"");
+			internalEscapeString(builder, initialExpression);
+			builder.append('"');
 		}
 
 		//endregion Jsonify

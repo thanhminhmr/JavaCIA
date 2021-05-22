@@ -19,11 +19,8 @@
 package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.dependency.DependencyCountTable;
-import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.collections.ImmutableOrderedMap;
 
@@ -44,6 +41,14 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 	@Nonnull private transient List<AbstractNode> children = new ArrayList<>();
 	@Nonnull private transient Map<AbstractNode, DependencyCountTable> dependencyFrom = new LinkedHashMap<>();
 	@Nonnull private transient Map<AbstractNode, DependencyCountTable> dependencyTo = new LinkedHashMap<>();
+
+
+	protected static void checkParent(@Nonnull AbstractNode parentNode, @Nonnull Class<?>... nodeClasses) {
+		for (final Class<?> nodeClass : nodeClasses) {
+			if (nodeClass.isInstance(parentNode)) return;
+		}
+		throw new UnsupportedOperationException("Invalid parent type!");
+	}
 
 
 	public AbstractNode() {
@@ -108,77 +113,15 @@ public abstract class AbstractNode extends AbstractIdentifiedEntity implements J
 	//region Tree Node
 
 	@Nonnull
-	private <E extends AbstractNode> E internalAddChild(@Nonnull E node) {
+	public final <E extends AbstractNode> E addChild(@Nonnull E node) {
+		assertNonFrozen();
+		assert !node.isRoot() && node.getParent() == this : "This node is not my child!";
+		assert !children.contains(node) : "This node is already my child!";
 		children.add(node);
 		return node;
 	}
 
 	//endregion Tree Node
-
-	//region Node Container
-
-	@Nonnull
-	public final AnnotationNode createChildAnnotation(@Nullable SourceFile sourceFile,
-			@Nonnull String simpleName, @Nullable String binaryName) {
-		assertNonFrozen();
-		asAnnotationContainer();
-		return internalAddChild(new AnnotationNode(sourceFile, this, simpleName, binaryName));
-	}
-
-	@Nonnull
-	public final ClassNode createChildClass(@Nullable SourceFile sourceFile,
-			@Nonnull String simpleName, @Nullable String binaryName) {
-		assertNonFrozen();
-		asClassContainer();
-		return internalAddChild(new ClassNode(sourceFile, this, simpleName, binaryName));
-	}
-
-	@Nonnull
-	public final EnumNode createChildEnum(@Nullable SourceFile sourceFile,
-			@Nonnull String simpleName, @Nullable String binaryName) {
-		assertNonFrozen();
-		asEnumContainer();
-		return internalAddChild(new EnumNode(sourceFile, this, simpleName, binaryName));
-	}
-
-	@Nonnull
-	public final FieldNode createChildField(@Nullable SourceFile sourceFile, @Nonnull String simpleName) {
-		assertNonFrozen();
-		asFieldContainer();
-		return internalAddChild(new FieldNode(sourceFile, this, simpleName));
-	}
-
-	@Nonnull
-	public final InitializerNode createChildInitializer(@Nullable SourceFile sourceFile, boolean isStatic) {
-		assertNonFrozen();
-		asInitializerContainer();
-		return internalAddChild(new InitializerNode(sourceFile, this, isStatic));
-	}
-
-	@Nonnull
-	public final InterfaceNode createChildInterface(@Nullable SourceFile sourceFile,
-			@Nonnull String simpleName, @Nullable String binaryName) {
-		assertNonFrozen();
-		asInterfaceContainer();
-		return internalAddChild(new InterfaceNode(sourceFile, this, simpleName, binaryName));
-	}
-
-	@Nonnull
-	public final MethodNode createChildMethod(@Nullable SourceFile sourceFile,
-			@Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
-		assertNonFrozen();
-		asMethodContainer();
-		return internalAddChild(new MethodNode(sourceFile, this, simpleName, parameters));
-	}
-
-	@Nonnull
-	public final PackageNode createChildPackage(@Nonnull String simpleName) {
-		assertNonFrozen();
-		asPackageContainer();
-		return internalAddChild(new PackageNode(this, simpleName));
-	}
-
-	//endregion Node Container
 
 	//region Serialization Helper
 

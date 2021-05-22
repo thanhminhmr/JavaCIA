@@ -26,9 +26,6 @@ public class Y {
 
 	public static void main(String[] args) throws JavaCiaException, IOException {
 //		System.in.read();
-
-//		CodeFormatter
-
 		final Path corePath = Path.of("core", "src", "main", "java");
 		final List<Path> coreFiles = getFileList(new ArrayList<>(), corePath);
 		final Path jdtPath = Path.of("jdt", "src", "main", "java");

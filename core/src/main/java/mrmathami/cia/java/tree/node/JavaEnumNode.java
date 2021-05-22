@@ -23,21 +23,12 @@ import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaTypeNode;
-import mrmathami.cia.java.tree.node.container.JavaAnnotationContainer;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaEnumContainer;
-import mrmathami.cia.java.tree.node.container.JavaFieldContainer;
-import mrmathami.cia.java.tree.node.container.JavaInitializerContainer;
-import mrmathami.cia.java.tree.node.container.JavaInterfaceContainer;
-import mrmathami.cia.java.tree.node.container.JavaMethodContainer;
 import mrmathami.cia.java.tree.type.JavaType;
 
 import java.util.List;
 
 public interface JavaEnumNode extends JavaNode,
-		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode, JavaTypeNode,
-		JavaAnnotationContainer, JavaClassContainer, JavaEnumContainer,
-		JavaFieldContainer, JavaInitializerContainer, JavaInterfaceContainer, JavaMethodContainer {
+		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode, JavaTypeNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaEnumNode";
 
@@ -48,12 +39,6 @@ public interface JavaEnumNode extends JavaNode,
 	@Override
 	default String getEntityClass() {
 		return OBJECT_CLASS;
-	}
-
-	@Nonnull
-	@Override
-	default JavaEnumNode asEnumNode() {
-		return this;
 	}
 
 	//endregion Basic Getter

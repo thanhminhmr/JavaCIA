@@ -21,8 +21,8 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaAnnotationNode;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractModifiedAnnotatedNode;
+import mrmathami.cia.java.tree.node.JavaAnnotationNode;
 
 public final class AnnotationNode extends AbstractModifiedAnnotatedNode implements JavaAnnotationNode {
 
@@ -33,9 +33,8 @@ public final class AnnotationNode extends AbstractModifiedAnnotatedNode implemen
 	public AnnotationNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
 			@Nonnull String simpleName, @Nullable String binaryName) {
 		super(sourceFile, parent, simpleName);
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof InterfaceNode || parent instanceof PackageNode || parent instanceof RootNode
-				: "Invalid parent type!";
+		checkParent(parent, AbstractNode.class, ClassNode.class, EnumNode.class,
+				InterfaceNode.class, PackageNode.class, RootNode.class);
 
 		this.binaryName = binaryName;
 	}

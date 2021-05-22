@@ -21,10 +21,10 @@ package mrmathami.cia.java.jdt.tree.node;
 import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
-import mrmathami.cia.java.tree.node.JavaFieldNode;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.node.attribute.AbstractModifiedAnnotatedNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
+import mrmathami.cia.java.tree.node.JavaFieldNode;
 
 import java.util.List;
 import java.util.Map;
@@ -38,8 +38,8 @@ public final class FieldNode extends AbstractModifiedAnnotatedNode implements Ja
 
 	public FieldNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, @Nonnull String simpleName) {
 		super(sourceFile, parent, simpleName);
-		assert parent instanceof AnnotationNode || parent instanceof ClassNode || parent instanceof EnumNode
-				|| parent instanceof InterfaceNode || parent instanceof MethodNode : "Invalid parent type!";
+		checkParent(parent, AnnotationNode.class, ClassNode.class, EnumNode.class,
+				InterfaceNode.class, MethodNode.class);
 	}
 
 

@@ -23,15 +23,12 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
-import mrmathami.cia.java.tree.node.container.JavaClassContainer;
-import mrmathami.cia.java.tree.node.container.JavaFieldContainer;
 import mrmathami.cia.java.tree.type.JavaType;
 
 import java.util.List;
 
 public interface JavaMethodNode extends JavaNode,
-		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode,
-		JavaClassContainer, JavaFieldContainer {
+		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaMethodNode";
 
@@ -42,12 +39,6 @@ public interface JavaMethodNode extends JavaNode,
 	@Override
 	default String getEntityClass() {
 		return OBJECT_CLASS;
-	}
-
-	@Nonnull
-	@Override
-	default JavaMethodNode asMethodNode() {
-		return this;
 	}
 
 	//endregion Basic Getter

@@ -19,9 +19,9 @@
 package mrmathami.cia.java.jdt.tree.type;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.cia.java.tree.type.JavaType;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
 import mrmathami.cia.java.jdt.tree.annotate.Annotate;
+import mrmathami.cia.java.tree.type.JavaType;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
