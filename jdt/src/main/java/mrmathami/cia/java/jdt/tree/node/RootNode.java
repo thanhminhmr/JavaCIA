@@ -95,7 +95,7 @@ public final class RootNode extends AbstractNode implements JavaRootNode {
 	@Nonnull
 	@Override
 	public AbstractNode getParent() {
-		throw new NoSuchElementException("JavaRootNode");
+		throw new NoSuchElementException("JavaRootNode does not have a parent.");
 	}
 
 	//endregion Basic Getter
