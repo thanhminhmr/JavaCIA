@@ -50,7 +50,8 @@ public final class ProjectSnapshotComparison implements JavaProjectSnapshotCompa
 
 	public ProjectSnapshotComparison(@Nonnull String name,
 			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
-			@Nonnull Set<JavaNode> removedNodes, @Nonnull Set<JavaNode> addedNodes,
+			@Nonnull Set<JavaNode> removedNodes,
+			@Nonnull Set<JavaNode> addedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> changedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> unchangedNodes,
 			@Nonnull double[] dependencyImpacts, @Nonnull double[] nodeImpacts) {

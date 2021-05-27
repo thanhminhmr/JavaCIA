@@ -1,13 +1,16 @@
 package mrmathami.cia.java.jdt;
 
 import mrmathami.cia.java.JavaCiaException;
+import mrmathami.cia.java.jdt.gephi.Printer;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -34,23 +37,27 @@ public class X {
 			JavaDependency.OVERRIDE, 0.3
 	));
 
-	public static void main(String[] args) throws JavaCiaException, IOException {
+	public static void main(String[] args) throws JavaCiaException, IOException, ParserConfigurationException, SAXException {
 //		System.in.read();
 //
 //		for (int i = 0; i < 10; i++) {
-//		final Path javaSourcePathA = Path.of("..\\test\\JSON-java-before\\src\\main\\java");
-//		final Path javaSourcePathB = Path.of("..\\test\\JSON-java\\src\\main\\java");
-		final Path javaSourcePathA = Path.of("D:\\test-weight-1806\\test1\\src\\src");
-		final Path javaSourcePathB = Path.of("D:\\test-weight-1806\\test1\\new\\src\\src");
+		//final Path javaSourcePathA = Path.of("D:\\test-weight-1806\\test1\\src\\src");
+		//final Path javaSourcePathB = Path.of("D:\\test-weight-1806\\test1\\new\\src\\src");
+		final Path javaSourcePathA = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\src");
+		final Path javaSourcePathB = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\new\\mybatis-example-1\\src");
 		final List<Path> fileNamesA = getFileList(new ArrayList<>(), javaSourcePathA);
 		final List<Path> fileNamesB = getFileList(new ArrayList<>(), javaSourcePathB);
+		final Path configurationPathA = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\mybatis-example-1\\resources\\SqlMapConfig.xml");
+		//final Path configurationPathA = Path.of("");
+		final Path configurationPathB = Path.of("D:\\project\\MyBatis Collection\\mybatis-XML\\new\\mybatis-example-1\\resources\\SqlMapConfig.xml");
+		//final Path configurationPathB = Path.of("");
 
 		final long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotA = ProjectBuilders.createProjectSnapshot("JSON-java-before",
-				Map.of("main", Pair.immutableOf(javaSourcePathA, fileNamesA)), List.of(), DEPENDENCY_WEIGHT_TABLE, true);
+				Map.of("main", Pair.immutableOf(javaSourcePathA, fileNamesA)), List.of(), DEPENDENCY_WEIGHT_TABLE, true, configurationPathA);
 		final long timeParseA = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshotB = ProjectBuilders.createProjectSnapshot("JSON-java-after",
-				Map.of("main", Pair.immutableOf(javaSourcePathB, fileNamesB)), List.of(), DEPENDENCY_WEIGHT_TABLE, true);
+				Map.of("main", Pair.immutableOf(javaSourcePathB, fileNamesB)), List.of(), DEPENDENCY_WEIGHT_TABLE, true, configurationPathB);
 		final long timeParseB = System.nanoTime();
 
 		final String jsonA = projectSnapshotA.getRootNode().toJson();
@@ -72,10 +79,13 @@ public class X {
 		javaProject.addSnapshot(projectSnapshotB);
 		javaProject.addSnapshotComparison(snapshotComparison);
 
+
 		try (final ObjectOutputStream objectOutputStream
 				= new ObjectOutputStream(Files.newOutputStream(Path.of("jdt\\src\\test\\JSON-java.proj")))) {
 			objectOutputStream.writeObject(javaProject);
 		}
+		Printer printer = new Printer();
+		Files.write(javaSourcePathB.resolve("gephi.gexf"), printer.writeGephiComparison(snapshotComparison).getBytes(StandardCharsets.UTF_8));
 
 		System.out.printf("Compare time: %s\n", (timeCompareFinish - timeCompareStart) / 1000000.0);
 

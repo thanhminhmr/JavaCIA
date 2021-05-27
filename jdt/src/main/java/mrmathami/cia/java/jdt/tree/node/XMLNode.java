@@ -1,6 +1,7 @@
 package mrmathami.cia.java.jdt.tree.node;
 
 import mrmathami.annotations.Nonnull;
+import mrmathami.cia.java.jdt.tree.AbstractEntity;
 import mrmathami.cia.java.tree.node.JavaXMLNode;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.NodeList;
@@ -53,20 +54,19 @@ public final class XMLNode extends AbstractNode implements JavaXMLNode {
 		return parent;
 	}
 
-	@Override
 	public String getTextContent() {
 		return textContent;
 	}
 
-	@Override
 	public NodeList getChildNodes() {
 		return children;
 	}
 
-	@Override
 	public NamedNodeMap getAttributes() {
 		return listAttributes;
 	}
+
+
 
 	public void setTextContent(String textContent) {
 		this.textContent = textContent;
@@ -84,8 +84,9 @@ public final class XMLNode extends AbstractNode implements JavaXMLNode {
 
 	protected void internalToReferenceJsonStart(@Nonnull StringBuilder builder) {
 		builder.append(", \"nodeName\": \"").append(nodeName)
-				.append("\", \"textContent\": \"").append(textContent)
-				.append("\", \"listAttributes\": ").append(internalToReferenceJson(listAttributes));
+				.append("\", \"textContent\": \"");
+		AbstractEntity.internalEscapeString(builder, textContent);
+		builder.append("\", \"listAttributes\": ").append(internalToReferenceJson(listAttributes));
 	}
 
 	private static String internalToReferenceJson(NamedNodeMap namedNodeMap) {
@@ -102,6 +103,7 @@ public final class XMLNode extends AbstractNode implements JavaXMLNode {
 		listAttributes += " ]";
 		return listAttributes;
 	}
+
 
 	//endregion Jsonify
 }

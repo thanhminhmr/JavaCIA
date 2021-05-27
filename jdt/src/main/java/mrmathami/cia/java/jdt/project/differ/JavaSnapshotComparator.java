@@ -73,14 +73,13 @@ public final class JavaSnapshotComparator {
 
 
 	private static void compareRootNodes(@Nonnull JavaRootNode previousRootNode, @Nonnull JavaRootNode currentRootNode,
-			@Nonnull Set<JavaNode> addedNodes, @Nonnull Set<JavaNode> removedNodes,
+			@Nonnull Set<JavaNode> removedNodes, @Nonnull Set<JavaNode> addedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> changedNodes,
 			@Nonnull Set<Pair<JavaNode, JavaNode>> unchangedNodes) {
 		final EntityMatcher matcher = new EntityMatcher();
 
 		final Map<EntityWrapper, JavaNode> previousNodeMap = new HashMap<>();
 		final Map<EntityWrapper, JavaNode> currentNodeMap = new HashMap<>();
-
 		for (final JavaNode node : previousRootNode.getAllNodes()) {
 			previousNodeMap.put(matcher.wrap(node, false), node);
 		}
@@ -92,6 +91,7 @@ public final class JavaSnapshotComparator {
 			final EntityWrapper previousWrapper = previousEntry.getKey();
 			final JavaNode previousNode = previousEntry.getValue();
 			final JavaNode currentNode = currentNodeMap.get(previousWrapper);
+
 			if (currentNode != null) {
 				if (matcher.match(previousNode, currentNode, true)) {
 					unchangedNodes.add(Pair.immutableOf(previousNode, currentNode));
@@ -102,6 +102,8 @@ public final class JavaSnapshotComparator {
 				removedNodes.add(previousNode);
 			}
 		}
+
+
 		for (final Map.Entry<EntityWrapper, JavaNode> currentEntry : currentNodeMap.entrySet()) {
 			final EntityWrapper currentWrapper = currentEntry.getKey();
 			final JavaNode currentNode = currentEntry.getValue();

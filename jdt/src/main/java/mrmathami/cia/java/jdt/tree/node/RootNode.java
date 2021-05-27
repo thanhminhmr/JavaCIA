@@ -108,6 +108,7 @@ public final class RootNode extends AbstractNode implements JavaRootNode {
 		return isFrozen() ? allNodes : Collections.unmodifiableList(allNodes);
 	}
 
+
 //	void setAllNodes(@Nonnull List<AbstractNode> allNodes) {
 //		checkFrozen();
 //		this.allNodes = allNodes;

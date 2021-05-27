@@ -27,7 +27,10 @@ import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 import mrmathami.utils.Pair;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
@@ -41,9 +44,9 @@ public final class JavaSnapshotBuilder {
 	@Nonnull
 	public static ProjectSnapshot build(@Nonnull String snapshotName,
 			@Nonnull Map<String, Pair<Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightMap, boolean enableRecovery) throws JavaCiaException {
+			@Nonnull JavaDependencyWeightTable dependencyWeightMap, boolean enableRecovery, Path configurationPath) throws JavaCiaException, IOException, SAXException, ParserConfigurationException {
 
-		final JavaRootNode rootNode = JavaSnapshotParser.build(javaSources, classPaths, enableRecovery);
+		final JavaRootNode rootNode = JavaSnapshotParser.build(javaSources, classPaths, enableRecovery, configurationPath);
 
 		final double[] dependencyWeights = new double[JavaDependency.valueList.size()];
 		for (final JavaDependency type : JavaDependency.valueList) {

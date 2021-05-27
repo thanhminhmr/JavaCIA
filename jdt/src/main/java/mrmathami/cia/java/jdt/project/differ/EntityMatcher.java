@@ -22,11 +22,15 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.utils.Pair;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 
 final class EntityMatcher {
@@ -89,6 +93,46 @@ final class EntityMatcher {
 			if (countWrapper == null || --countWrapper[0] < 0) return false;
 		}
 		return true;
+	}
+
+	boolean matchNonOrderedNameNodeMap(NamedNodeMap namedNodeMapA, NamedNodeMap namedNodeMapB) {
+		if (namedNodeMapA.getLength() != namedNodeMapB.getLength()) return false;
+//		List<Node> listA = getListNode(namedNodeMapA);
+//		List<Node> listB = getListNode(namedNodeMapB);
+//		for (Node node : listA) {
+//			if (!listB.contains(node)) {
+//				return false;
+//			}
+//		}
+
+		HashMap<String, String> hashNodeA = getHash(namedNodeMapA);
+		HashMap<String, String> hashNodeB = getHash(namedNodeMapB);
+		for (String key : hashNodeA.keySet()) {
+			if (hashNodeB.containsKey(key)) {
+				if (!hashNodeA.get(key).equals(hashNodeB.get(key))) {
+					return false;
+				}
+			} else {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private HashMap<String, String> getHash(NamedNodeMap namedNodeMap) {
+		HashMap<String, String> hashMap = new HashMap<>();
+		for (int i = 0; i < namedNodeMap.getLength(); i++) {
+			hashMap.put(namedNodeMap.item(i).getNodeName(), namedNodeMap.item(i).getNodeValue());
+		}
+		return hashMap;
+	}
+
+	private List<Node> getListNode(NamedNodeMap namedNodeMap) {
+		List<Node> list = new ArrayList<>();
+		for (int i = 0; i < namedNodeMap.getLength(); i++) {
+			list.add(namedNodeMap.item(i));
+		}
+		return list;
 	}
 
 	@Nonnull

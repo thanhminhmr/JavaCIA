@@ -5,7 +5,9 @@ import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.utils.Pair;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.DirectoryStream;
@@ -23,8 +25,9 @@ public class Z {
 			JavaDependency.INVOCATION, 4.0,
 			JavaDependency.OVERRIDE, 1.0
 	));
+	private static final Path configurationPath = Path.of("");
 
-	public static void main(String[] args) throws JavaCiaException, IOException {
+	public static void main(String[] args) throws JavaCiaException, IOException, ParserConfigurationException, SAXException {
 //		System.in.read();
 
 //		CodeFormatter
@@ -43,7 +46,7 @@ public class Z {
 
 		long timeStart = System.nanoTime();
 		final JavaProjectSnapshot projectSnapshot = ProjectBuilders.createProjectSnapshot("before",
-				javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true);
+				javaSources, classPaths, DEPENDENCY_WEIGHT_TABLE, true, configurationPath);
 		long timeParseA = System.nanoTime();
 
 		final String jsonA = projectSnapshot.getRootNode().toJson();
