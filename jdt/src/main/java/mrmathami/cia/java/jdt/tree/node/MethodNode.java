@@ -37,6 +37,7 @@ public final class MethodNode extends AbstractParameterizedModifiedAnnotatedNode
 
 	private static final long serialVersionUID = -1L;
 
+	private final boolean isConstructor;
 	@Nonnull private final List<AbstractType> parameters;
 	@Nullable private AbstractType returnType;
 	@Nullable private String bodyBlock;
@@ -59,15 +60,21 @@ public final class MethodNode extends AbstractParameterizedModifiedAnnotatedNode
 
 
 	public MethodNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent,
-			@Nonnull String simpleName, @Nonnull List<AbstractType> parameters) {
+			@Nonnull String simpleName, boolean isConstructor, @Nonnull List<AbstractType> parameters) {
 		super(sourceFile, parent, simpleName, createUniqueNameSuffixFromParameters(parameters));
 		checkParent(parent, AbstractNode.class, ClassNode.class, EnumNode.class, InterfaceNode.class);
 
+		this.isConstructor = isConstructor;
 		this.parameters = List.copyOf(parameters);
 	}
 
 
 	//region Getter & Setter
+
+	@Override
+	public boolean isConstructor() {
+		return isConstructor;
+	}
 
 	@Nonnull
 	@Override

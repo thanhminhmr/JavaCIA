@@ -21,10 +21,9 @@ package mrmathami.cia.java.project;
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Triple;
 
-import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 
 public interface JavaProject {
 
@@ -36,35 +35,6 @@ public interface JavaProject {
 
 	@Nonnull
 	List<? extends JavaProjectSnapshotComparison> getSnapshotComparisons();
-
-	/**
-	 * Create a snapshot of the current project.
-	 *
-	 * @param snapshotName          snapshot name
-	 * @param javaSources           a list of module name, its root folder and list of its source files
-	 * @param classPaths            list of dependency libraries
-	 * @param dependencyWeightTable dependency weight table
-	 * @param enableRecovery        create unknown types and skip unknown method calls
-	 * @return the snapshot
-	 * @throws JavaCiaException some error occur during the creation of the snapshot
-	 */
-	@Nonnull
-	JavaProjectSnapshot createSnapshot(@Nonnull String snapshotName, @Nonnull Path projectRoot,
-			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException;
-
-	/**
-	 * @param comparisonName    comparison name
-	 * @param previousSnapshot  the old snapshot
-	 * @param currentSnapshot   the new snapshot
-	 * @param impactWeightTable impact weight table
-	 * @return the comparison
-	 * @throws JavaCiaException some error occur during the creation of the comparison
-	 */
-	@Nonnull
-	JavaProjectSnapshotComparison createSnapshotComparison(@Nonnull String comparisonName,
-			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
-			@Nonnull JavaDependencyWeightTable impactWeightTable) throws JavaCiaException;
 
 	boolean containsSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
 
