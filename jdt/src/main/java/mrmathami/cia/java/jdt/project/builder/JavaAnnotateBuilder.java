@@ -35,12 +35,13 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-final class JavaAnnotates {
+final class JavaAnnotateBuilder {
 
-	@Nonnull private final JavaDependencies dependencies;
+	@Nonnull private final JavaNodeBuilder nodes;
 
 	@Nonnull private final Map<IAnnotationBinding, Pair<Annotate, Map<IBinding, int[]>>> delayedAnnotations = new HashMap<>();
 	@Nonnull private final Map<ITypeBinding, List<Annotate>> delayedAnnotationNodes = new HashMap<>();
@@ -48,13 +49,12 @@ final class JavaAnnotates {
 	@Nonnull private final Map<IBinding, List<Annotate.NodeValueImpl>> delayedAnnotationNodeValues = new HashMap<>();
 
 
-	JavaAnnotates(@Nonnull JavaDependencies dependencies) {
-		this.dependencies = dependencies;
+	JavaAnnotateBuilder(@Nonnull JavaNodeBuilder nodes) {
+		this.nodes = nodes;
 	}
 
 
 	void postprocessing(@Nonnull Map<IBinding, AbstractNode> bindingNodeMap) {
-		// =====
 		// delay annotations
 		delayedAnnotations.clear();
 
@@ -113,9 +113,9 @@ final class JavaAnnotates {
 			final ITypeBinding typeBinding = (ITypeBinding) value;
 			final Annotate.NodeValueImpl nodeValue =
 					new Annotate.NodeValueImpl("Class<" + typeBinding.getQualifiedName() + ">");
-			JavaDependencies.addDependencyToDelayedDependencyMap(dependencyMap,
-					JavaDependencies.getOriginTypeBinding(typeBinding), dependencyType);
-			delayedAnnotationNodeValues.computeIfAbsent(typeBinding, JavaSnapshotParser::createArrayList)
+			JavaNodeBuilder.addDependencyToDelayedDependencyMap(dependencyMap,
+					JavaNodeBuilder.getOriginTypeBinding(typeBinding), dependencyType);
+			delayedAnnotationNodeValues.computeIfAbsent(typeBinding, JavaParser::createArrayList)
 					.add(nodeValue);
 			return nodeValue;
 
@@ -123,9 +123,9 @@ final class JavaAnnotates {
 			final IVariableBinding variableBinding = (IVariableBinding) value;
 			final Annotate.NodeValueImpl nodeValue = new Annotate.NodeValueImpl(
 					variableBinding.getDeclaringClass().getQualifiedName() + '.' + variableBinding.getName());
-			JavaDependencies.addDependencyToDelayedDependencyMap(dependencyMap,
-					JavaDependencies.getOriginVariableBinding(variableBinding), dependencyType);
-			delayedAnnotationNodeValues.computeIfAbsent(variableBinding, JavaSnapshotParser::createArrayList)
+			JavaNodeBuilder.addDependencyToDelayedDependencyMap(dependencyMap,
+					JavaNodeBuilder.getOriginVariableBinding(variableBinding), dependencyType);
+			delayedAnnotationNodeValues.computeIfAbsent(variableBinding, JavaParser::createArrayList)
 					.add(nodeValue);
 			return nodeValue;
 
@@ -163,18 +163,18 @@ final class JavaAnnotates {
 
 		final Pair<Annotate, Map<IBinding, int[]>> pair = delayedAnnotations.get(annotationBinding);
 		if (pair != null) {
-			if (dependencyMap != null) JavaDependencies.combineDelayedDependencyMap(dependencyMap, pair.getB());
+			if (dependencyMap != null) JavaNodeBuilder.combineDelayedDependencyMap(dependencyMap, pair.getB());
 			return pair.getA();
 		}
 
 		final ITypeBinding annotationTypeBinding = annotationBinding.getAnnotationType();
 		final Annotate annotate = new Annotate(annotationTypeBinding.getQualifiedName());
-		delayedAnnotationNodes.computeIfAbsent(annotationTypeBinding, JavaSnapshotParser::createArrayList)
+		delayedAnnotationNodes.computeIfAbsent(annotationTypeBinding, JavaParser::createArrayList)
 				.add(annotate);
 
-		final Map<IBinding, int[]> newDependencyMap = new HashMap<>();
-		JavaDependencies.addDependencyToDelayedDependencyMap(newDependencyMap,
-				JavaDependencies.getOriginTypeBinding(annotationTypeBinding), dependencyType);
+		final Map<IBinding, int[]> newDependencyMap = new LinkedHashMap<>();
+		JavaNodeBuilder.addDependencyToDelayedDependencyMap(newDependencyMap,
+				JavaNodeBuilder.getOriginTypeBinding(annotationTypeBinding), dependencyType);
 		delayedAnnotations.put(annotationBinding, Pair.immutableOf(annotate, newDependencyMap));
 
 		final IMemberValuePairBinding[] pairBindings = annotationBinding.getDeclaredMemberValuePairs();
@@ -183,10 +183,10 @@ final class JavaAnnotates {
 			final IMethodBinding annotationMethodBinding = pairBinding.getMethodBinding();
 
 			final Annotate.ParameterImpl parameter = new Annotate.ParameterImpl(pairBinding.getName());
-			JavaDependencies.addDependencyToDelayedDependencyMap(newDependencyMap,
-					JavaDependencies.getOriginMethodBinding(annotationMethodBinding), dependencyType);
+			JavaNodeBuilder.addDependencyToDelayedDependencyMap(newDependencyMap,
+					JavaNodeBuilder.getOriginMethodBinding(annotationMethodBinding), dependencyType);
 			delayedAnnotationParameters
-					.computeIfAbsent(annotationMethodBinding, JavaSnapshotParser::createArrayList)
+					.computeIfAbsent(annotationMethodBinding, JavaParser::createArrayList)
 					.add(parameter);
 
 			final Object value = pairBinding.getValue();
@@ -198,7 +198,7 @@ final class JavaAnnotates {
 		}
 		annotate.setParameters(parameters);
 
-		if (dependencyMap != null) JavaDependencies.combineDelayedDependencyMap(dependencyMap, newDependencyMap);
+		if (dependencyMap != null) JavaNodeBuilder.combineDelayedDependencyMap(dependencyMap, newDependencyMap);
 		return annotate;
 	}
 
@@ -207,13 +207,13 @@ final class JavaAnnotates {
 			@Nonnull AbstractNode dependencySourceNode, @Nonnull JavaDependency dependencyType)
 			throws JavaCiaException {
 		if (annotationBindings.length == 0) return List.of(); // unnecessary, but nice to have
-		final Map<IBinding, int[]> dependencyMap = new HashMap<>();
+		final Map<IBinding, int[]> dependencyMap = new LinkedHashMap<>();
 		final List<Annotate> annotates = new ArrayList<>(annotationBindings.length);
 		for (final IAnnotationBinding annotationBinding : annotationBindings) {
 			annotates.add(
 					internalCreateAnnotateFromAnnotationBinding(annotationBinding, dependencyType, dependencyMap));
 		}
-		dependencies.createDelayDependencyFromDependencyMap(dependencySourceNode, dependencyMap);
+		nodes.createDelayDependencyFromDependencyMap(dependencySourceNode, dependencyMap);
 		return annotates;
 	}
 

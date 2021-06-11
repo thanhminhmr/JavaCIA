@@ -16,27 +16,25 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.project;
+package mrmathami.cia.java.jdt.project.builder.parameter;
 
-import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.cia.java.tree.node.JavaRootNode;
 
 import java.io.Serializable;
 
-public interface JavaProjectSnapshot {
+public abstract class SnapshotBuildParameter implements Serializable {
 
-	@Nonnull
-	String getName();
+	private static final long serialVersionUID = -1L;
 
-	@Nonnull
-	JavaRootNode getRootNode();
 
-	@Nonnull
-	JavaDependencyWeightTable getDependencyWeightTable();
+	@Override
+	public final int hashCode() {
+		return getClass().hashCode();
+	}
 
-	@Nonnull
-	JavaNodeWeightTable getNodeWeightTable();
+	@Override
+	public boolean equals(@Nullable Object object) {
+		return object == this || object != null && object.getClass() == getClass();
+	}
 
 }

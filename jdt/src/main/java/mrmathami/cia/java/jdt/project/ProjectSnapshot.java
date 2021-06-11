@@ -35,7 +35,7 @@ public final class ProjectSnapshot implements JavaProjectSnapshot, Serializable 
 	@Nonnull private final double[] dependencyWeights;
 	@Nonnull private final double[] nodeWeights;
 
-	@Nullable private transient DependencyWeightTable dependencyWeightMap;
+	@Nullable private transient DependencyWeightTable dependencyWeightTable;
 	@Nullable private transient NodeWeightTable nodeWeightTable;
 
 
@@ -65,8 +65,8 @@ public final class ProjectSnapshot implements JavaProjectSnapshot, Serializable 
 	@Nonnull
 	@Override
 	public DependencyWeightTable getDependencyWeightTable() {
-		return dependencyWeightMap != null ? dependencyWeightMap
-				: (this.dependencyWeightMap = new DependencyWeightTable(dependencyWeights));
+		return dependencyWeightTable != null ? dependencyWeightTable
+				: (this.dependencyWeightTable = new DependencyWeightTable(dependencyWeights));
 	}
 
 	@Nonnull

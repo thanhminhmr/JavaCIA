@@ -16,27 +16,34 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package mrmathami.cia.java.project;
+package mrmathami.cia.java.jdt.project.builder.parameter;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.cia.java.tree.node.JavaRootNode;
 
-import java.io.Serializable;
+import java.nio.file.Path;
+import java.util.List;
 
-public interface JavaProjectSnapshot {
+public final class JavaBuildParameter extends SnapshotBuildParameter {
+
+	private static final long serialVersionUID = -1L;
+
+	@Nonnull private final List<Path> classPaths;
+	private final boolean recoveryEnabled;
+
+
+	public JavaBuildParameter(@Nonnull List<Path> classPaths, boolean recoveryEnabled) {
+		this.classPaths = List.copyOf(classPaths);
+		this.recoveryEnabled = recoveryEnabled;
+	}
+
 
 	@Nonnull
-	String getName();
+	public List<Path> getClassPaths() {
+		return classPaths;
+	}
 
-	@Nonnull
-	JavaRootNode getRootNode();
-
-	@Nonnull
-	JavaDependencyWeightTable getDependencyWeightTable();
-
-	@Nonnull
-	JavaNodeWeightTable getNodeWeightTable();
+	public boolean isRecoveryEnabled() {
+		return recoveryEnabled;
+	}
 
 }

@@ -30,6 +30,8 @@ import java.util.concurrent.Callable;
 
 final class ImpactCalculator implements Callable<double[]> {
 
+	private static final double THRESHOLD = 1.0e-5;
+
 	@Nonnull private final BitSet pathSet;
 	@Nonnull private final double[] calculatingWeights;
 	@Nonnull private final double[] dependencyImpacts;
@@ -62,8 +64,10 @@ final class ImpactCalculator implements Callable<double[]> {
 			}
 
 			final double nextWeight = currentWeight * (1.0 - linkWeight);
-			calculatingWeights[nextId] *= 1.0 - nextWeight;
-			recursiveCalculate(nextNode, nextWeight);
+			if (nextWeight >= THRESHOLD) {
+				calculatingWeights[nextId] *= 1.0 - nextWeight;
+				recursiveCalculate(nextNode, nextWeight);
+			}
 
 			pathSet.clear(nextId);
 		}
