@@ -21,20 +21,20 @@ package mrmathami.cia.java.jdt;
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.project.Project;
-import mrmathami.cia.java.jdt.project.builder.JavaSnapshotBuilder;
+import mrmathami.cia.java.jdt.project.builder.parameter.BuildInputSources;
 import mrmathami.cia.java.jdt.project.differ.JavaSnapshotComparator;
+import mrmathami.cia.java.jdt.project.builder.SnapshotBuilder;
+import mrmathami.cia.java.jdt.project.builder.parameter.SnapshotBuildParameter;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Triple;
 
-import java.nio.file.Path;
-import java.util.List;
+import java.util.Set;
 
-public final class ProjectBuilders {
+public final class ProjectBuilder {
 
-	private ProjectBuilders() {
+	private ProjectBuilder() {
 	}
 
 	@Nonnull
@@ -43,11 +43,10 @@ public final class ProjectBuilders {
 	}
 
 	@Nonnull
-	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName, @Nonnull Path projectRoot,
-			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
-		return JavaSnapshotBuilder.build(
-				snapshotName, projectRoot, javaSources, classPaths, dependencyWeightTable, enableRecovery);
+	public static JavaProjectSnapshot createProjectSnapshot(@Nonnull String snapshotName,
+			@Nonnull JavaDependencyWeightTable dependencyWeightTable, @Nonnull BuildInputSources inputSources,
+			@Nonnull Set<SnapshotBuildParameter> parameters) throws JavaCiaException {
+		return SnapshotBuilder.build(snapshotName, dependencyWeightTable, inputSources, parameters);
 	}
 
 	@Nonnull

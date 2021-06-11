@@ -28,6 +28,7 @@ import mrmathami.cia.java.jdt.tree.node.ClassNode;
 import mrmathami.cia.java.jdt.tree.node.EnumNode;
 import mrmathami.cia.java.jdt.tree.node.FieldNode;
 import mrmathami.cia.java.jdt.tree.node.InitializerNode;
+import mrmathami.cia.java.jdt.tree.node.InitializerNode.InitializerImpl;
 import mrmathami.cia.java.jdt.tree.node.InterfaceNode;
 import mrmathami.cia.java.jdt.tree.node.MethodNode;
 import mrmathami.cia.java.jdt.tree.node.PackageNode;
@@ -36,6 +37,7 @@ import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.JavaModifier;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.utils.Pair;
+import mrmathami.utils.Triple;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -50,6 +52,8 @@ import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.FileASTRequestor;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -74,68 +78,76 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-final class JavaNodes {
+final class JavaNodeBuilder extends FileASTRequestor {
+
+	@Nonnull private final Map<String, SourceFile> sourceFileMap;
+
+	@Nonnull private final JavaParser parser;
+	@Nonnull private final RootNode rootNode;
+	@Nonnull private final Map<IBinding, AbstractNode> bindingNodeMap;
 
 	@Nonnull private final CodeFormatter codeFormatter;
-	private final boolean enableRecovery;
-
-	@Nonnull private final JavaDependencies dependencies = new JavaDependencies();
-	@Nonnull private final JavaAnnotates annotates = new JavaAnnotates(dependencies);
-	@Nonnull private final JavaTypes types = new JavaTypes(dependencies, annotates);
+	private final boolean recoveryEnabled;
 
 
-	@Nonnull private final RootNode rootNode = new RootNode();
-	@Nonnull private final Map<String, Pair<PackageNode, IPackageBinding>> packageNodeMap = new HashMap<>();
+	@Nonnull private final JavaAnnotateBuilder annotates = new JavaAnnotateBuilder(this);
+	@Nonnull private final JavaTypeBuilder types = new JavaTypeBuilder(this, annotates);
 
-	@Nonnull private final Map<IBinding, AbstractNode> bindingNodeMap = new HashMap<>();
+	@Nonnull private final Map<AbstractNode, Triple<Pair<InitializerNode, List<InitializerImpl>>,
+			Pair<InitializerNode, List<InitializerImpl>>, List<MethodNode>>> classInitializerMap
+			= new IdentityHashMap<>();
 
-	@Nonnull private final Map<AbstractNode, Pair<
-			Pair<InitializerNode, List<InitializerNode.InitializerImpl>>,
-			Pair<InitializerNode, List<InitializerNode.InitializerImpl>>>>
-			classInitializerMap = new IdentityHashMap<>();
-
+	@Nonnull private final Map<AbstractNode, Map<IBinding, int[]>> delayedDependencies = new LinkedHashMap<>();
 	@Nonnull private final List<Pair<ASTNode, AbstractNode>> delayedDependencyWalkers = new LinkedList<>();
 
+	@Nullable private JavaCiaException exception;
 	@Nullable private SourceFile sourceFile;
 
 
-	JavaNodes(@Nonnull CodeFormatter formatter, boolean enableRecovery) {
+	JavaNodeBuilder(@Nonnull Map<String, SourceFile> sourceFileMap, @Nonnull JavaParser parser,
+			@Nonnull RootNode rootNode, @Nonnull Map<IBinding, AbstractNode> bindingNodeMap,
+			@Nonnull CodeFormatter formatter, boolean recoveryEnabled) {
+		this.sourceFileMap = sourceFileMap;
+		this.parser = parser;
+		this.rootNode = rootNode;
+		this.bindingNodeMap = bindingNodeMap;
 		this.codeFormatter = formatter;
-		this.enableRecovery = enableRecovery;
+		this.recoveryEnabled = recoveryEnabled;
 	}
 
-	void build(@Nonnull SourceFile sourceFile, @Nonnull CompilationUnit compilationUnit)
-			throws JavaCiaException {
-		this.sourceFile = sourceFile;
 
-		final PackageDeclaration packageDeclaration = compilationUnit.getPackage();
-		if (packageDeclaration != null) {
-			final PackageNode packageNode = createPackageNodeFromPackageDeclaration(packageDeclaration);
+	@Override
+	public void acceptAST(@Nonnull String sourcePath, @Nonnull CompilationUnit compilationUnit) {
+		if (exception != null) return;
+		try {
+			this.sourceFile = sourceFileMap.get(sourcePath);
+			if (sourceFile == null) throw new JavaCiaException("Unknown source path!");
+
+			final PackageDeclaration packageDeclaration = compilationUnit.getPackage();
+			final AbstractNode parentNode = packageDeclaration != null
+					? createPackageNodeFromPackageDeclaration(packageDeclaration)
+					: rootNode;
 			for (final Object type : compilationUnit.types()) {
 				if (type instanceof AbstractTypeDeclaration) {
-					parseAbstractTypeDeclaration(packageNode, (AbstractTypeDeclaration) type);
+					parseAbstractTypeDeclaration(parentNode, (AbstractTypeDeclaration) type);
 				}
 			}
-		} else {
-			// the parent is root
-			for (final Object type : compilationUnit.types()) {
-				if (type instanceof AbstractTypeDeclaration) {
-					parseAbstractTypeDeclaration(rootNode, (AbstractTypeDeclaration) type);
-				}
-			}
+
+			this.sourceFile = null;
+		} catch (JavaCiaException exception) {
+			this.exception = exception;
 		}
-
-		this.sourceFile = null;
 	}
 
-	@Nonnull
-	RootNode postprocessing() throws JavaCiaException {
+	void postprocessing() throws JavaCiaException {
+		if (exception != null) throw exception;
+
 		// delay dependency walkers
 		for (final Pair<ASTNode, AbstractNode> pair : delayedDependencyWalkers) {
 			walkDependency(pair.getA(), pair.getB());
@@ -149,18 +161,38 @@ final class JavaNodes {
 		annotates.postprocessing(bindingNodeMap);
 
 		// delay dependencies
-		dependencies.postProcessing(bindingNodeMap);
+		for (final Map.Entry<AbstractNode, Map<IBinding, int[]>> entry : delayedDependencies.entrySet()) {
+			final AbstractNode sourceNode = entry.getKey();
+			for (final Map.Entry<IBinding, int[]> bindingEntry : entry.getValue().entrySet()) {
+				final AbstractNode targetNode = bindingNodeMap.get(bindingEntry.getKey());
+				if (targetNode != null && sourceNode != targetNode) {
+					parser.createDependenciesToNode(sourceNode, targetNode, bindingEntry.getValue());
+				}
+			}
+		}
+		delayedDependencies.clear();
+
+		// delay method overrides
+		{
+			final JavaOverrideBuilder overrides = new JavaOverrideBuilder(parser);
+			overrides.processOverrides(bindingNodeMap);
+		}
 
 		// set class initializers
+		for (Triple<Pair<InitializerNode, List<InitializerImpl>>, Pair<InitializerNode, List<InitializerImpl>>,
+				List<MethodNode>> triple : classInitializerMap.values()) {
+			// get non-static init block
+			final Pair<InitializerNode, List<InitializerImpl>> pair = triple.getB();
+			if (pair == null) continue;
+			// get method list
+			final List<MethodNode> constructors = triple.getC();
+			if (constructors == null) continue;
+			// create call from method to init block
+			for (final MethodNode constructor : constructors) {
+				parser.createDependencyToNode(constructor, pair.getA(), JavaDependency.INVOCATION);
+			}
+		}
 		classInitializerMap.clear();
-
-		// final cleanup
-		packageNodeMap.clear();
-		bindingNodeMap.clear();
-
-		// freeze root node
-		rootNode.freeze();
-		return rootNode;
 	}
 
 
@@ -176,6 +208,79 @@ final class JavaNodes {
 		}
 	}
 
+
+	//region Delayed Dependency
+
+	static void combineDelayedDependencyMap(@Nonnull Map<IBinding, int[]> targetMap,
+			@Nonnull Map<IBinding, int[]> sourceMap) {
+		for (final Map.Entry<IBinding, int[]> entry : sourceMap.entrySet()) {
+			final IBinding binding = entry.getKey();
+			final int[] sourceCounts = entry.getValue();
+			final int[] targetCounts = targetMap.get(binding);
+			if (targetCounts != null) {
+				for (int i = 0; i < targetCounts.length; i++) targetCounts[i] += sourceCounts[i];
+			} else {
+				targetMap.put(binding, sourceCounts.clone());
+			}
+		}
+	}
+
+	static void addDependencyToDelayedDependencyMap(@Nonnull Map<IBinding, int[]> targetMap,
+			@Nonnull IBinding targetBinding, @Nonnull JavaDependency dependencyType) {
+		final int[] counts = targetMap
+				.computeIfAbsent(targetBinding, JavaParser::createDependencyCounts);
+		counts[dependencyType.ordinal()] += 1;
+	}
+
+	void createDelayDependencyFromDependencyMap(@Nonnull AbstractNode dependencySourceNode,
+			@Nonnull Map<IBinding, int[]> dependencyMap) {
+		final Map<IBinding, int[]> oldDependencyMap = delayedDependencies.get(dependencySourceNode);
+		if (oldDependencyMap == null) {
+			final Map<IBinding, int[]> newDependencyMap = new LinkedHashMap<>(dependencyMap);
+			for (final Map.Entry<IBinding, int[]> entry : newDependencyMap.entrySet()) {
+				entry.setValue(entry.getValue().clone());
+			}
+			delayedDependencies.put(dependencySourceNode, newDependencyMap);
+		} else {
+			combineDelayedDependencyMap(oldDependencyMap, dependencyMap);
+		}
+	}
+
+	void createDelayDependency(@Nonnull AbstractNode dependencySourceNode,
+			@Nonnull IBinding targetBinding, @Nonnull JavaDependency dependencyType) {
+		addDependencyToDelayedDependencyMap(
+				delayedDependencies.computeIfAbsent(dependencySourceNode, JavaParser::createLinkedHashMap),
+				targetBinding, dependencyType);
+	}
+
+	@Nonnull
+	static ITypeBinding getOriginTypeBinding(@Nonnull ITypeBinding typeBinding) {
+		while (true) {
+			final ITypeBinding parentBinding = typeBinding.getTypeDeclaration();
+			if (parentBinding == null || parentBinding == typeBinding) return typeBinding;
+			typeBinding = parentBinding;
+		}
+	}
+
+	@Nonnull
+	static IMethodBinding getOriginMethodBinding(@Nonnull IMethodBinding methodBinding) {
+		while (true) {
+			final IMethodBinding parentBinding = methodBinding.getMethodDeclaration();
+			if (parentBinding == null || parentBinding == methodBinding) return methodBinding;
+			methodBinding = parentBinding;
+		}
+	}
+
+	@Nonnull
+	static IVariableBinding getOriginVariableBinding(@Nonnull IVariableBinding variableBinding) {
+		while (true) {
+			final IVariableBinding parentBinding = variableBinding.getVariableDeclaration();
+			if (parentBinding == null || parentBinding == variableBinding) return variableBinding;
+			variableBinding = parentBinding;
+		}
+	}
+
+	//endregion Delayed Dependency
 
 	//region Modifier
 
@@ -199,54 +304,40 @@ final class JavaNodes {
 
 	//endregion Modifier
 
-	//region Package
+	//region Initializer
 
 	@Nonnull
-	private Pair<PackageNode, IPackageBinding> internalCreateFirstLevelPackagePairFromName(
-			@Nonnull String simpleName) {
-		return packageNodeMap.computeIfAbsent(simpleName, qualifiedName -> {
-			final PackageNode packageNode = rootNode.addChild(new PackageNode(rootNode, simpleName));
-			dependencies.createDependencyToNode(rootNode, packageNode, JavaDependency.MEMBER);
-			return Pair.mutableOf(packageNode, null);
-		});
-	}
-
-	@Nonnull
-	private Pair<PackageNode, IPackageBinding> internalCreatePackagePairFromParentAndName(
-			@Nonnull PackageNode parentNode, @Nonnull String simpleName) {
-		return packageNodeMap.computeIfAbsent(parentNode.getQualifiedName() + '.' + simpleName,
-				qualifiedName -> {
-					final PackageNode packageNode = parentNode.addChild(new PackageNode(parentNode, simpleName));
-					dependencies.createDependencyToNode(parentNode, packageNode, JavaDependency.MEMBER);
-					return Pair.mutableOf(packageNode, null);
-				});
-	}
-
-	@Nonnull
-	private Pair<PackageNode, IPackageBinding> internalCreatePackagePairFromNameComponents(
-			@Nonnull String[] nameComponents) {
-		assert nameComponents.length > 0 : "nameComponents length should not be 0.";
-		Pair<PackageNode, IPackageBinding> pair = internalCreateFirstLevelPackagePairFromName(nameComponents[0]);
-		for (int i = 1; i < nameComponents.length; i++) {
-			pair = internalCreatePackagePairFromParentAndName(pair.getA(), nameComponents[i]);
+	private Pair<InitializerNode, List<InitializerImpl>> internalCreateOrGetInitializerNode(
+			@Nonnull AbstractNode parentNode, boolean isStatic) {
+		final Triple<Pair<InitializerNode, List<InitializerImpl>>, Pair<InitializerNode, List<InitializerImpl>>,
+				List<MethodNode>> triple
+				= classInitializerMap.computeIfAbsent(parentNode, JavaParser::createMutableTriple);
+		final Pair<InitializerNode, List<InitializerImpl>> oldPair = isStatic ? triple.getA() : triple.getB();
+		if (oldPair != null) return oldPair;
+		final InitializerNode initializer = parentNode.addChild(new InitializerNode(sourceFile, parentNode, isStatic));
+		final List<InitializerImpl> initializerList = new ArrayList<>();
+		initializer.setInitializers(initializerList);
+		final Pair<InitializerNode, List<InitializerImpl>> pair = Pair.immutableOf(initializer, initializerList);
+		if (isStatic) {
+			triple.setA(pair);
+		} else {
+			triple.setB(pair);
 		}
 		return pair;
 	}
 
-	@Nonnull
-	private PackageNode createFirstLevelPackageFromName(@Nonnull String simpleName) {
-		return internalCreateFirstLevelPackagePairFromName(simpleName).getA();
+	private void internalCreateDelayCallToInitializer(@Nonnull AbstractNode parentNode,
+			@Nonnull MethodNode methodNode) {
+		final Triple<Pair<InitializerNode, List<InitializerImpl>>, Pair<InitializerNode, List<InitializerImpl>>,
+				List<MethodNode>> triple
+				= classInitializerMap.computeIfAbsent(parentNode, JavaParser::createMutableTriple);
+		if (triple.getC() == null) triple.setC(new ArrayList<>());
+		triple.getC().add(methodNode);
 	}
 
-	@Nonnull
-	private PackageNode createPackageFromParentAndName(@Nonnull PackageNode parentNode, @Nonnull String simpleName) {
-		return internalCreatePackagePairFromParentAndName(parentNode, simpleName).getA();
-	}
+	//endregion Initializer
 
-	@Nonnull
-	private PackageNode createPackageFromNameComponents(@Nonnull String[] nameComponents) {
-		return internalCreatePackagePairFromNameComponents(nameComponents).getA();
-	}
+	//region Parser
 
 	@Nonnull
 	private PackageNode createPackageNodeFromPackageDeclaration(@Nonnull PackageDeclaration packageDeclaration)
@@ -254,29 +345,14 @@ final class JavaNodes {
 		final IPackageBinding packageBinding = packageDeclaration.resolveBinding();
 		if (packageBinding == null) throw new JavaCiaException("Cannot resolve binding on package declaration!");
 
-		final Pair<PackageNode, IPackageBinding> oldPair = packageNodeMap.get(packageBinding.getName());
-		final Pair<PackageNode, IPackageBinding> pair = oldPair != null
-				? oldPair
-				: internalCreatePackagePairFromNameComponents(packageBinding.getNameComponents());
-		final PackageNode packageNode = pair.getA();
-		if (pair.getB() == null) {
-			pair.setB(packageBinding);
-			packageNode.setAnnotates(annotates.createAnnotatesFromAnnotationBindings(packageBinding.getAnnotations(),
-					packageNode, JavaDependency.USE));
+		final PackageNode packageNode = parser.createPackageFromNameComponents(packageBinding.getNameComponents());
+		final IAnnotationBinding[] annotations = packageBinding.getAnnotations();
+		if (annotations.length > 0) {
+			packageNode.setAnnotates(annotates.createAnnotatesFromAnnotationBindings(
+					annotations, packageNode, JavaDependency.USE));
 		}
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		for (AbstractNode node = packageNode; !node.isRoot(); node = node.getParent()) {
-//			sourceFile.add(node);
-//		}
-
 		return packageNode;
 	}
-
-	//endregion Package
-
-	//region Parser
 
 	private void parseBodyDeclaration(@Nonnull AbstractNode parentNode,
 			@Nonnull BodyDeclaration bodyDeclaration) throws JavaCiaException {
@@ -324,11 +400,7 @@ final class JavaNodes {
 
 		final ClassNode classNode = parentNode.addChild(new ClassNode(sourceFile, parentNode,
 				typeBinding.getName(), typeBinding.getBinaryName()));
-		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(classNode);
+		parser.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
 		internalParseClassTypeBinding(classNode, typeBinding, typeDeclaration.bodyDeclarations());
 	}
@@ -377,11 +449,7 @@ final class JavaNodes {
 
 		final InterfaceNode interfaceNode = parentNode.addChild(new InterfaceNode(sourceFile, parentNode,
 				typeBinding.getName(), typeBinding.getBinaryName()));
-		dependencies.createDependencyToNode(parentNode, interfaceNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(interfaceNode);
+		parser.createDependencyToNode(parentNode, interfaceNode, JavaDependency.MEMBER);
 
 		// put binding map
 		bindingNodeMap.put(typeBinding, interfaceNode);
@@ -416,11 +484,7 @@ final class JavaNodes {
 
 		final EnumNode enumNode = parentNode.addChild(new EnumNode(sourceFile, parentNode,
 				typeBinding.getName(), typeBinding.getBinaryName()));
-		dependencies.createDependencyToNode(parentNode, enumNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(enumNode);
+		parser.createDependencyToNode(parentNode, enumNode, JavaDependency.MEMBER);
 
 		// put binding map
 		bindingNodeMap.put(typeBinding, enumNode);
@@ -462,19 +526,14 @@ final class JavaNodes {
 
 		final FieldNode fieldNode = parentNode.addChild(new FieldNode(sourceFile, parentNode,
 				variableBinding.getName()));
-		dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(fieldNode);
+		parser.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
 		internalEnumConstantOrFieldVariableBinding(fieldNode, variableBinding);
 
 		// put constructor invocation dependency
 		final IMethodBinding constructorBinding = enumConstantDeclaration.resolveConstructorBinding();
 		if (constructorBinding != null) {
-			dependencies.createDelayDependency(fieldNode,
-					JavaDependencies.getOriginMethodBinding(constructorBinding), JavaDependency.INVOCATION);
+			createDelayDependency(fieldNode, getOriginMethodBinding(constructorBinding), JavaDependency.INVOCATION);
 		}
 
 		// put delayed variable initializer
@@ -521,11 +580,7 @@ final class JavaNodes {
 				: binaryName;
 
 		final ClassNode classNode = parentNode.addChild(new ClassNode(sourceFile, parentNode, className, binaryName));
-		dependencies.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(classNode);
+		parser.createDependencyToNode(parentNode, classNode, JavaDependency.MEMBER);
 
 		internalParseClassTypeBinding(classNode, typeBinding, anonymousClassDeclaration.bodyDeclarations());
 	}
@@ -537,11 +592,7 @@ final class JavaNodes {
 
 		final AnnotationNode annotationNode = parentNode.addChild(new AnnotationNode(sourceFile, parentNode,
 				annotationBinding.getName(), annotationBinding.getBinaryName()));
-		dependencies.createDependencyToNode(parentNode, annotationNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(annotationNode);
+		parser.createDependencyToNode(parentNode, annotationNode, JavaDependency.MEMBER);
 
 		// put binding map
 		bindingNodeMap.put(annotationBinding, annotationNode);
@@ -570,12 +621,8 @@ final class JavaNodes {
 
 		// create node and containment dependency
 		final MethodNode methodNode = parentNode.addChild(new MethodNode(sourceFile, parentNode,
-				annotationMemberBinding.getName(), List.of()));
-		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(methodNode);
+				annotationMemberBinding.getName(), false, List.of()));
+		parser.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
 		// put binding map
 		bindingNodeMap.put(annotationMemberBinding, methodNode);
@@ -613,26 +660,18 @@ final class JavaNodes {
 
 				final FieldNode fieldNode = parentNode.addChild(new FieldNode(sourceFile, parentNode,
 						variableBinding.getName()));
-				dependencies.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
-
-				// TODO: add to node set
-//				assert sourceFile != null;
-//				sourceFile.add(fieldNode);
+				parser.createDependencyToNode(parentNode, fieldNode, JavaDependency.MEMBER);
 
 				internalEnumConstantOrFieldVariableBinding(fieldNode, variableBinding);
 
 				// put delayed variable initializer
 				final Expression variableInitializer = variableDeclaration.getInitializer();
 				if (variableInitializer != null) {
-					final Pair<InitializerNode, List<InitializerNode.InitializerImpl>> pair
+					final Pair<InitializerNode, List<InitializerImpl>> pair
 							= internalCreateOrGetInitializerNode(parentNode, fieldNode.isStatic());
 					final InitializerNode initializerNode = pair.getA();
 
-					// TODO: add to node set
-//					assert sourceFile != null;
-//					sourceFile.add(initializerNode);
-
-					final List<InitializerNode.InitializerImpl> initializerList = pair.getB();
+					final List<InitializerImpl> initializerList = pair.getB();
 					initializerList.add(new InitializerNode.FieldInitializerImpl(fieldNode,
 							format(variableInitializer.toString(), CodeFormatter.K_EXPRESSION)));
 					walkDeclaration(variableInitializer, fieldNode, initializerNode);
@@ -644,43 +683,18 @@ final class JavaNodes {
 	private void parseInitializer(@Nonnull AbstractNode parentNode, @Nonnull Initializer initializer)
 			throws JavaCiaException {
 		// create node and containment dependency
-		final Pair<InitializerNode, List<InitializerNode.InitializerImpl>> pair = internalCreateOrGetInitializerNode(
+		final Pair<InitializerNode, List<InitializerImpl>> pair = internalCreateOrGetInitializerNode(
 				parentNode, (initializer.getModifiers() & Modifier.STATIC) != 0);
 		final InitializerNode initializerNode = pair.getA();
-		dependencies.createDependencyToNode(parentNode, initializerNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(initializerNode);
+		parser.createDependencyToNode(parentNode, initializerNode, JavaDependency.MEMBER);
 
 		// put delayed initializer body
 		final Block initializerBody = initializer.getBody();
 		if (initializerBody != null) {
-			final List<InitializerNode.InitializerImpl> initializerList = pair.getB();
+			final List<InitializerImpl> initializerList = pair.getB();
 			initializerList.add(new InitializerNode.BlockInitializerImpl(
 					format(initializerBody.toString(), CodeFormatter.K_STATEMENTS)));
 			walkDeclaration(initializerBody, initializerNode, initializerNode);
-		}
-	}
-
-	@Nonnull
-	private Pair<InitializerNode, List<InitializerNode.InitializerImpl>> internalCreateOrGetInitializerNode(
-			@Nonnull AbstractNode parentNode, boolean isStatic) {
-		final Pair<Pair<InitializerNode, List<InitializerNode.InitializerImpl>>,
-				Pair<InitializerNode, List<InitializerNode.InitializerImpl>>> pair
-				= classInitializerMap.computeIfAbsent(parentNode, JavaSnapshotParser::createMutablePair);
-		if (isStatic) {
-			if (pair.getA() != null) return pair.getA();
-			final InitializerNode initializer = parentNode.addChild(new InitializerNode(sourceFile, parentNode, true));
-			final List<InitializerNode.InitializerImpl> initializerList = new ArrayList<>();
-			initializer.setInitializers(initializerList);
-			return pair.setGetA(Pair.immutableOf(initializer, initializerList));
-		} else {
-			if (pair.getB() != null) return pair.getB();
-			final InitializerNode initializer = parentNode.addChild(new InitializerNode(sourceFile, parentNode, false));
-			final List<InitializerNode.InitializerImpl> initializerList = new ArrayList<>();
-			initializer.setInitializers(initializerList);
-			return pair.setGetB(Pair.immutableOf(initializer, initializerList));
 		}
 	}
 
@@ -699,12 +713,8 @@ final class JavaNodes {
 
 		// create node and containment dependency
 		final MethodNode methodNode = parentNode.addChild(new MethodNode(sourceFile, parentNode,
-				methodBinding.getName(), parameterJavaTypes));
-		dependencies.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
-
-		// TODO: add to node set
-//		assert sourceFile != null;
-//		sourceFile.add(methodNode);
+				methodBinding.getName(), methodBinding.isConstructor(), parameterJavaTypes));
+		parser.createDependencyToNode(parentNode, methodNode, JavaDependency.MEMBER);
 
 		// create parameter proper types
 		for (final ITypeBinding parameterTypeBinding : parameterTypeBindings) {
@@ -738,10 +748,12 @@ final class JavaNodes {
 		// put delayed method body
 		final Block methodDeclarationBody = methodDeclaration.getBody();
 		if (methodDeclarationBody != null) {
-			methodNode.setBodyBlock(
-					format(methodDeclarationBody.toString(), CodeFormatter.K_STATEMENTS));
+			methodNode.setBodyBlock(format(methodDeclarationBody.toString(), CodeFormatter.K_STATEMENTS));
 			walkDeclaration(methodDeclarationBody, methodNode, methodNode);
 		}
+
+		// put delayed call to initializer block if this is a constructor
+		if (methodNode.isConstructor()) internalCreateDelayCallToInitializer(parentNode, methodNode);
 	}
 
 	//endregion Parser
@@ -798,7 +810,7 @@ final class JavaNodes {
 				final IMethodBinding binding = node.resolveConstructorBinding();
 				if (binding != null) {
 					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
-				} else if (!enableRecovery) {
+				} else if (!recoveryEnabled) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super constructor invocation!");
 				}
 				return false;
@@ -809,7 +821,7 @@ final class JavaNodes {
 				final IMethodBinding binding = node.resolveConstructorBinding();
 				if (binding != null) {
 					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
-				} else if (!enableRecovery) {
+				} else if (!recoveryEnabled) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on constructor invocation!");
 				}
 				return false;
@@ -820,7 +832,7 @@ final class JavaNodes {
 				final IMethodBinding binding = node.resolveMethodBinding();
 				if (binding != null) {
 					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
-				} else if (!enableRecovery) {
+				} else if (!recoveryEnabled) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on super method invocation!");
 				}
 				return false;
@@ -831,7 +843,7 @@ final class JavaNodes {
 				final IMethodBinding binding = node.resolveMethodBinding();
 				if (binding != null) {
 					createDependencyFromInvocation(binding, node.typeArguments(), node.arguments());
-				} else if (!enableRecovery) {
+				} else if (!recoveryEnabled) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on method invocation!");
 				}
 				return false;
@@ -839,8 +851,7 @@ final class JavaNodes {
 
 			private void createDependencyFromInvocation(@Nonnull IMethodBinding binding,
 					@Nonnull List<?> typeArguments, @Nonnull List<?> arguments) {
-				dependencies.createDelayDependency(javaNode,
-						JavaDependencies.getOriginMethodBinding(binding), JavaDependency.INVOCATION);
+				createDelayDependency(javaNode, getOriginMethodBinding(binding), JavaDependency.INVOCATION);
 				for (final Object object : typeArguments) {
 					if (object instanceof Type) ((Type) object).accept(this);
 				}
@@ -852,19 +863,19 @@ final class JavaNodes {
 			@Override
 			public boolean visit(@Nonnull SimpleName node) {
 				final IBinding binding = node.resolveBinding();
-				if (binding == null && !enableRecovery) {
+				if (binding == null && !recoveryEnabled) {
 					exceptionProxy[0] = new JavaCiaException("Cannot resolve binding on simple name!");
 					return false;
 				}
 				final IBinding originalBinding = binding instanceof ITypeBinding
-						? JavaDependencies.getOriginTypeBinding((ITypeBinding) binding)
+						? getOriginTypeBinding((ITypeBinding) binding)
 						: binding instanceof IMethodBinding
-						? JavaDependencies.getOriginMethodBinding((IMethodBinding) binding)
+						? getOriginMethodBinding((IMethodBinding) binding)
 						: binding instanceof IVariableBinding
-						? JavaDependencies.getOriginVariableBinding((IVariableBinding) binding)
+						? getOriginVariableBinding((IVariableBinding) binding)
 						: null;
 				if (originalBinding != null) {
-					dependencies.createDelayDependency(javaNode, originalBinding, JavaDependency.USE);
+					createDelayDependency(javaNode, originalBinding, JavaDependency.USE);
 				}
 				return true;
 			}

@@ -45,6 +45,8 @@ public interface JavaMethodNode extends JavaNode,
 
 	//region Getter & Setter
 
+	boolean isConstructor();
+
 	@Nullable
 	JavaType getReturnType();
 

@@ -20,19 +20,18 @@ package mrmathami.cia.java.jdt.project;
 
 import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.JavaCiaException;
-import mrmathami.cia.java.jdt.project.builder.JavaSnapshotBuilder;
 import mrmathami.cia.java.jdt.project.differ.JavaSnapshotComparator;
+import mrmathami.cia.java.jdt.project.builder.SnapshotBuilder;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
-import mrmathami.utils.Triple;
 
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 public final class Project implements JavaProject, Serializable {
 
@@ -75,30 +74,6 @@ public final class Project implements JavaProject, Serializable {
 	@Override
 	public List<ProjectSnapshotComparison> getSnapshotComparisons() {
 		return Collections.unmodifiableList(snapshotComparisons);
-	}
-
-	@Nonnull
-	@Override
-	public ProjectSnapshot createSnapshot(@Nonnull String snapshotName, @Nonnull Path projectRoot,
-			@Nonnull List<Triple<String, Path, List<Path>>> javaSources, @Nonnull List<Path> classPaths,
-			@Nonnull JavaDependencyWeightTable dependencyWeightTable, boolean enableRecovery) throws JavaCiaException {
-		final ProjectSnapshot snapshot = JavaSnapshotBuilder.build(
-				snapshotName, projectRoot, javaSources, classPaths, dependencyWeightTable, enableRecovery);
-		snapshots.add(snapshot);
-		return snapshot;
-	}
-
-	@Nonnull
-	@Override
-	public ProjectSnapshotComparison createSnapshotComparison(@Nonnull String comparisonName,
-			@Nonnull JavaProjectSnapshot previousSnapshot, @Nonnull JavaProjectSnapshot currentSnapshot,
-			@Nonnull JavaDependencyWeightTable impactWeightTable) throws JavaCiaException {
-		checkSnapshot(previousSnapshot);
-		checkSnapshot(currentSnapshot);
-		final ProjectSnapshotComparison comparison = JavaSnapshotComparator.compare(
-				comparisonName, previousSnapshot, currentSnapshot, impactWeightTable);
-		snapshotComparisons.add(comparison);
-		return comparison;
 	}
 
 	public boolean containsSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot) {
