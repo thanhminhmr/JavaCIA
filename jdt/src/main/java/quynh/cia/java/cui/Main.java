@@ -51,7 +51,7 @@ public final class Main {
 
 		@Option(
 				names = {"-s", "--source-path"},
-				paramLabel = "SOURCE-PATH",
+				paramLabel = "NAME=SOURCE-PATH",
 				required = true,
 				split = ",",
 				description = "Path of source files."
@@ -102,7 +102,7 @@ public final class Main {
 
 		@Option(
 				names = {"-sa", "--source-pathA"},
-				paramLabel = "SOURCE-PATH",
+				paramLabel = "NAME=SOURCE-PATH",
 				required = true,
 				split = ",",
 				description = "Path of source files."
@@ -126,7 +126,7 @@ public final class Main {
 
 		@Option(
 				names = {"-sb", "--source-pathB"},
-				paramLabel = "SOURCE-PATH",
+				paramLabel = "NAME=SOURCE-PATH",
 				required = true,
 				split = ",",
 				description = "Path of source files."

@@ -5,6 +5,7 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.ProjectBuilders;
 import mrmathami.cia.java.jdt.output.ExportCSV;
+import mrmathami.cia.java.jdt.output.gephi.Printer;
 import mrmathami.cia.java.project.JavaProject;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.project.JavaProjectSnapshotComparison;
@@ -40,6 +41,22 @@ public class VersionComparison {
 			JavaDependency.OVERRIDE, 0.3,
 			JavaDependency.ACCESS, 0.4
 	));
+	/*public static final JavaDependencyWeightTable DEPENDENCY_WEIGHT_TABLE = JavaDependencyWeightTable.of(Map.of(
+			JavaDependency.USE, 1.0,
+			JavaDependency.MEMBER, 1.0,
+			JavaDependency.INHERITANCE, 4.0,
+			JavaDependency.INVOCATION, 1.0,
+			JavaDependency.OVERRIDE, 4.0,
+			JavaDependency.ACCESS, 1.0
+	));
+	public static final JavaDependencyWeightTable DEPENDENCY_IMPACT_TABLE = JavaDependencyWeightTable.of(Map.of(
+			JavaDependency.USE, 0.3563,
+			JavaDependency.MEMBER, 0.3034,
+			JavaDependency.INHERITANCE, 0.3034,
+			JavaDependency.INVOCATION, 0.3034,
+			JavaDependency.OVERRIDE, 0.4668,
+			JavaDependency.ACCESS, 0.3563
+	));*/
 
 	public static void compare(@Nullable Path configurationPathA, @Nonnull Map<String, Path> sourcesA, @Nullable List<Path> classPathsA,
 			@Nullable Path configurationPathB, @Nonnull Map<String, Path> sourcesB, @Nullable List<Path> classPathsB,
@@ -91,6 +108,9 @@ public class VersionComparison {
 
 		ExportCSV exportCSV = new ExportCSV();
 		exportCSV.exportImpactList(snapshotComparison, outputPath.resolve("weight.csv"));
+
+		Printer printer = new Printer();
+		Files.write(outputPath.resolve("gephi.gexf"), printer.writeGephiComparison(snapshotComparison).getBytes(StandardCharsets.UTF_8));
 
 		System.out.println("------------------------");
 		System.out.println("Output path: " + outputPath);

@@ -27,7 +27,7 @@ public class Z {
 	public static void main(String[] args) throws JavaCiaException, IOException {
 //		System.in.read();
 
-		final Path inputPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\test\\test_recovery");
+		/*final Path inputPath = Path.of("D:\\Research\\SourceCodeComparator\\javacia\\test\\test_recovery");
 		final List<Path> inputFiles = getFileList(new ArrayList<>(), inputPath);
 		final List<Triple<String, Path, List<Path>>> javaSources = List.of(
 				Triple.immutableOf("input", inputPath, inputFiles)
@@ -42,7 +42,7 @@ public class Z {
 
 		Files.write(inputPath.resolve("output.txt"), jsonA.getBytes(StandardCharsets.UTF_8));
 
-		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);
+		System.out.printf("Parse A time: %s\n", (timeParseA - timeStart) / 1000000.0);*/
 	}
 
 	private static List<Path> getFileList(List<Path> fileList, Path dir) {

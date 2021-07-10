@@ -5,6 +5,7 @@ import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.jdt.ProjectBuilders;
 import mrmathami.cia.java.jdt.output.ExportCSV;
+import mrmathami.cia.java.jdt.output.gephi.Printer;
 import mrmathami.cia.java.project.JavaProjectSnapshot;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
@@ -30,6 +31,14 @@ public class AnalysisBuilder {
 			JavaDependency.OVERRIDE, 1.0,
 			JavaDependency.ACCESS, 1.0
 	));
+	/*public static final JavaDependencyWeightTable DEPENDENCY_WEIGHT_TABLE = JavaDependencyWeightTable.of(Map.of(
+			JavaDependency.USE, 1.0,
+			JavaDependency.MEMBER, 1.0,
+			JavaDependency.INHERITANCE, 4.0,
+			JavaDependency.INVOCATION, 1.0,
+			JavaDependency.OVERRIDE, 4.0,
+			JavaDependency.ACCESS, 1.0
+	));*/
 
 	public static void build(@Nullable Path configurationPath, @Nonnull Map<String, Path> sources, @Nullable List<Path> classPaths, @Nonnull Path outputPath) throws IOException, ParserConfigurationException, SAXException, JavaCiaException {
 		final List<Triple<String, Path, List<Path>>> javaSources = new ArrayList<>();
@@ -51,6 +60,8 @@ public class AnalysisBuilder {
 
 		ExportCSV exportCSV = new ExportCSV();
 		exportCSV.exportComponentsList(projectSnapshot, outputPath.resolve("list.csv"));
+		Printer printer = new Printer();
+		Files.write(outputPath.resolve("gephi.gexf"), printer.writeGephi(projectSnapshot).getBytes(StandardCharsets.UTF_8));
 		System.out.println("------------------------");
 		System.out.println("Output path: " + outputPath);
 		System.out.println("------------------------");
