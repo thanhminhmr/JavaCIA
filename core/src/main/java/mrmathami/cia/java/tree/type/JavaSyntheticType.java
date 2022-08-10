@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.tree.type;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -26,9 +26,8 @@ public interface JavaSyntheticType extends JavaType {
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return "JavaSyntheticType";
 	}
 
@@ -36,8 +35,7 @@ public interface JavaSyntheticType extends JavaType {
 
 	//region Getter & Setter
 
-	@Nonnull
-	List<? extends JavaType> getBounds();
+	@NotNull List<? extends JavaType> getBounds();
 
 	//endregion Getter & Setter
 

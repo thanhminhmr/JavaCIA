@@ -18,26 +18,25 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.project.JavaModule;
 import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
 import mrmathami.cia.java.tree.type.JavaType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
 
 public interface JavaRootNode extends JavaNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaRootNode";
+	@NotNull String OBJECT_CLASS = "JavaRootNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
@@ -46,45 +45,38 @@ public interface JavaRootNode extends JavaNode {
 		return true;
 	}
 
-	@Nonnull
 	@Override
-	default JavaRootNode getRoot() {
+	default @NotNull JavaRootNode getRoot() {
 		return this;
 	}
 
-	@Nonnull
 	@Override
-	default JavaNode getParent() {
+	default @NotNull JavaNode getParent() {
 		throw new NoSuchElementException("JavaRootNode does not have a parent.");
 	}
 
-	@Nonnull
 	@Override
-	default String getSimpleName() {
+	default @NotNull String getSimpleName() {
 		return "{ROOT}";
 	}
 
-	@Nonnull
 	@Override
-	default String getQualifiedName() {
+	default @NotNull String getQualifiedName() {
 		return "{ROOT}";
 	}
 
-	@Nonnull
 	@Override
-	default String getUniqueName() {
+	default @NotNull String getUniqueName() {
 		return "{ROOT}";
 	}
 
-	@Nullable
 	@Override
-	default JavaSourceFile getSourceFile() {
+	default @Nullable JavaSourceFile getSourceFile() {
 		return null;
 	}
 
-	@Nullable
 	@Override
-	default JavaModule getModule() {
+	default @Nullable JavaModule getModule() {
 		return null;
 	}
 
@@ -92,14 +84,11 @@ public interface JavaRootNode extends JavaNode {
 
 	//region Getter & Setter
 
-	@Nonnull
-	List<? extends JavaNode> getAllNodes();
+	@NotNull List<? extends JavaNode> getAllNodes();
 
-	@Nonnull
-	List<? extends JavaType> getAllTypes();
+	@NotNull List<? extends JavaType> getAllTypes();
 
-	@Nonnull
-	List<? extends JavaAnnotate> getAllAnnotates();
+	@NotNull List<? extends JavaAnnotate> getAllAnnotates();
 
 	//endregion Getter & Setter
 

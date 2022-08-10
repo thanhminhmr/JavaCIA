@@ -18,15 +18,13 @@
 
 package mrmathami.cia.java.project;
 
-import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.utils.RelativePath;
+import org.jetbrains.annotations.NotNull;
 
 public interface JavaModule {
 
-	@Nonnull
-	String getName();
+	@NotNull String getName();
 
-	@Nonnull
-	RelativePath getRelativePath();
+	@NotNull RelativePath getRelativePath();
 
 }

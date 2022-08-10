@@ -18,22 +18,16 @@
 
 package mrmathami.cia.java.project;
 
-import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.utils.RelativePath;
+import org.jetbrains.annotations.NotNull;
 
 public interface JavaSourceFile {
 
-	@Nonnull
-	JavaModule getModule();
+	@NotNull JavaModule getModule();
 
-	@Nonnull
-	JavaSourceFileType getType();
+	@NotNull RelativePath getRelativePath();
 
-	@Nonnull
-	RelativePath getRelativePath();
-
-	@Nonnull
-	default String getName() {
+	default @NotNull String getName() {
 		// note: if this throw IndexOutOfBound, something seriously wrong happened in JavaNodes
 		return getRelativePath().getComponent(-1);
 	}

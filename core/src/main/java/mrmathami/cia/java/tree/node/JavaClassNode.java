@@ -18,8 +18,8 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
@@ -31,14 +31,13 @@ import java.util.List;
 public interface JavaClassNode extends JavaNode,
 		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode, JavaTypeNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaClassNode";
+	@NotNull String OBJECT_CLASS = "JavaClassNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
@@ -46,11 +45,9 @@ public interface JavaClassNode extends JavaNode,
 
 	//region Getter & Setter
 
-	@Nullable
-	JavaType getExtendsClass();
+	@Nullable JavaType getExtendsClass();
 
-	@Nonnull
-	List<? extends JavaType> getImplementsInterfaces();
+	@NotNull List<? extends JavaType> getImplementsInterfaces();
 
 	//endregion Getter & Setter
 

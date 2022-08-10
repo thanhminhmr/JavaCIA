@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.project;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.JavaCiaException;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 
@@ -27,25 +27,22 @@ import java.util.Set;
 
 public interface JavaProject {
 
-	@Nonnull
-	String getName();
+	@NotNull String getName();
 
-	@Nonnull
-	List<? extends JavaProjectSnapshot> getSnapshots();
+	@NotNull List<? extends JavaProjectSnapshot> getSnapshots();
 
-	@Nonnull
-	List<? extends JavaProjectSnapshotComparison> getSnapshotComparisons();
+	@NotNull List<? extends JavaProjectSnapshotComparison> getSnapshotComparisons();
 
-	boolean containsSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
+	boolean containsSnapshot(@NotNull JavaProjectSnapshot projectSnapshot);
 
-	boolean containsSnapshotComparison(@Nonnull JavaProjectSnapshotComparison snapshotComparison);
+	boolean containsSnapshotComparison(@NotNull JavaProjectSnapshotComparison snapshotComparison);
 
-	boolean addSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
+	boolean addSnapshot(@NotNull JavaProjectSnapshot projectSnapshot);
 
-	boolean addSnapshotComparison(@Nonnull JavaProjectSnapshotComparison snapshotComparison);
+	boolean addSnapshotComparison(@NotNull JavaProjectSnapshotComparison snapshotComparison);
 
-	boolean removeSnapshot(@Nonnull JavaProjectSnapshot projectSnapshot);
+	boolean removeSnapshot(@NotNull JavaProjectSnapshot projectSnapshot);
 
-	boolean removeSnapshotComparison(@Nonnull JavaProjectSnapshotComparison snapshotComparison);
+	boolean removeSnapshotComparison(@NotNull JavaProjectSnapshotComparison snapshotComparison);
 
 }

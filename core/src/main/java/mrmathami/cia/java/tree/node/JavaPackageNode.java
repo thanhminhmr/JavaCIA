@@ -18,35 +18,32 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.project.JavaModule;
 import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface JavaPackageNode extends JavaNode,
 		JavaAnnotatedNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaPackageNode";
+	@NotNull String OBJECT_CLASS = "JavaPackageNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
-	@Nullable
 	@Override
-	default JavaSourceFile getSourceFile() {
+	default @Nullable JavaSourceFile getSourceFile() {
 		return null;
 	}
 
-	@Nullable
 	@Override
-	default JavaModule getModule() {
+	default @Nullable JavaModule getModule() {
 		return null;
 	}
 

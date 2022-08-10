@@ -18,32 +18,29 @@
 
 package mrmathami.cia.java.utils;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
-import mrmathami.utils.ArrayUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 public final class RelativePath implements Serializable {
-
 	private static final long serialVersionUID = -1L;
 
-	@Nonnull private final String[] components;
+	private final @NotNull String @NotNull [] components;
+	private transient @Nullable List<@NotNull String> componentList;
 
-	@Nullable private transient List<String> componentList;
 
-
-	public RelativePath(@Nonnull String[] components) {
+	public RelativePath(@NotNull String @NotNull [] components) {
 		this.components = components;
 	}
 
 
-	@Nonnull
-	public static RelativePath fromPath(@Nonnull Path path) {
+	public static @NotNull RelativePath fromPath(@NotNull Path path) {
 		return new RelativePath(
 				StreamSupport.stream(path.spliterator(), false)
 						.map(Path::toString)
@@ -51,11 +48,11 @@ public final class RelativePath implements Serializable {
 		);
 	}
 
-	@Nonnull
-	public static RelativePath concat(@Nonnull RelativePath relativePathA, @Nonnull RelativePath relativePathB) {
-		final String[] componentsA = relativePathA.components, componentsB = relativePathB.components;
-		return componentsA.length == 0 ? relativePathB : componentsB.length == 0 ? relativePathA
-				: new RelativePath(ArrayUtils.concat(componentsA, componentsB));
+	public static @NotNull RelativePath concat(@NotNull RelativePath pathA, @NotNull RelativePath pathB) {
+		return pathA.length() == 0 ? pathB : pathB.length() == 0 ? pathA : new RelativePath(
+				Stream.concat(Arrays.stream(pathA.components), Arrays.stream(pathB.components))
+						.toArray(String[]::new)
+		);
 	}
 
 
@@ -63,25 +60,21 @@ public final class RelativePath implements Serializable {
 		return components.length;
 	}
 
-	@Nonnull
-	public String getComponent(int index) {
+	public @NotNull String getComponent(int index) {
 		final int length = components.length;
 		if (index < -length || index >= length) throw new IndexOutOfBoundsException();
 		return index >= 0 ? components[index] : components[length + index];
 	}
 
-	@Nonnull
-	public List<String> getComponents() {
+	public @NotNull List<@NotNull String> getComponents() {
 		return componentList != null ? componentList : (this.componentList = List.of(components));
 	}
 
-	@Nonnull
-	public String[] toArray() {
+	public @NotNull String @NotNull [] toArray() {
 		return components.clone();
 	}
 
-	@Nonnull
-	public Path appendToPath(@Nonnull Path path) {
+	public @NotNull Path appendToPath(@NotNull Path path) {
 		Path result = path;
 		for (final String component : components) {
 			result = result.resolve(component);
@@ -103,8 +96,7 @@ public final class RelativePath implements Serializable {
 	}
 
 	@Override
-	public String toString() {
+	public @NotNull String toString() {
 		return String.join("/", components);
 	}
-
 }

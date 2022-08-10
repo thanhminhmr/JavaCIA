@@ -18,40 +18,31 @@
 
 package mrmathami.cia.java.project;
 
-import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaNode;
-import mrmathami.utils.Pair;
+import mrmathami.cia.java.utils.Pair;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Set;
 
 public interface JavaProjectSnapshotComparison {
 
-	@Nonnull
-	String getName();
+	@NotNull String getName();
 
-	@Nonnull
-	JavaProjectSnapshot getPreviousSnapshot();
+	@NotNull JavaProjectSnapshot getPreviousSnapshot();
 
-	@Nonnull
-	JavaProjectSnapshot getCurrentSnapshot();
+	@NotNull JavaProjectSnapshot getCurrentSnapshot();
 
-	@Nonnull
-	Set<JavaNode> getRemovedNodes();
+	@NotNull Set<@NotNull JavaNode> getRemovedNodes();
 
-	@Nonnull
-	Set<JavaNode> getAddedNodes();
+	@NotNull Set<@NotNull JavaNode> getAddedNodes();
 
-	@Nonnull
-	Set<Pair<JavaNode, JavaNode>> getChangedNodes();
+	@NotNull Set<@NotNull Pair<@NotNull JavaNode, @NotNull JavaNode>> getChangedNodes();
 
-	@Nonnull
-	Set<Pair<JavaNode, JavaNode>> getUnchangedNodes();
+	@NotNull Set<@NotNull Pair<@NotNull JavaNode, @NotNull JavaNode>> getUnchangedNodes();
 
-	@Nonnull
-	JavaDependencyWeightTable getDependencyImpactTable();
+	@NotNull JavaDependencyWeightTable getDependencyImpactTable();
 
-	@Nonnull
-	JavaNodeWeightTable getNodeImpactTable();
+	@NotNull JavaNodeWeightTable getNodeImpactTable();
 
 }

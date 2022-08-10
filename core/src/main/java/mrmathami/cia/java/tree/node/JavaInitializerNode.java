@@ -18,19 +18,18 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface JavaInitializerNode extends JavaNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaInitializerNode";
+	@NotNull String OBJECT_CLASS = "JavaInitializerNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
@@ -40,8 +39,7 @@ public interface JavaInitializerNode extends JavaNode {
 
 	boolean isStatic();
 
-	@Nullable
-	String getBodyBlock();
+	@Nullable String getBodyBlock();
 
 	//endregion Getter & Setter
 

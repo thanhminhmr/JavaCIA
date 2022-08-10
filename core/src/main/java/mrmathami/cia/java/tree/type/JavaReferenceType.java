@@ -18,9 +18,9 @@
 
 package mrmathami.cia.java.tree.type;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.node.JavaNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -28,9 +28,8 @@ public interface JavaReferenceType extends JavaType {
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return "JavaReferenceType";
 	}
 
@@ -38,11 +37,9 @@ public interface JavaReferenceType extends JavaType {
 
 	//region Getter & Setter
 
-	@Nullable
-	JavaNode getNode();
+	@Nullable JavaNode getNode();
 
-	@Nonnull
-	List<? extends JavaType> getArguments();
+	@NotNull List<? extends JavaType> getArguments();
 
 	//endregion Getter & Setter
 

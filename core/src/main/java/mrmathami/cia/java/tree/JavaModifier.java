@@ -18,13 +18,13 @@
 
 package mrmathami.cia.java.tree;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public enum JavaModifier {
 	PUBLIC, PROTECTED, PRIVATE, STATIC, ABSTRACT, FINAL, NATIVE, SYNCHRONIZED, TRANSIENT, VOLATILE, STRICTFP;
 
-	@Nonnull public static final List<JavaModifier> VALUE_LIST = List.of(values());
+	@NotNull public static final List<JavaModifier> VALUE_LIST = List.of(values());
 
 }

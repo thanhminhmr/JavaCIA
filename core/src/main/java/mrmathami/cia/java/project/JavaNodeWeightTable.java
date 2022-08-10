@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.project;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.tree.node.JavaNode;
 
 public interface JavaNodeWeightTable {
@@ -28,6 +28,6 @@ public interface JavaNodeWeightTable {
 	 * @return weight of the JavaNode
 	 * @throws IllegalArgumentException if the input JavaNode doesn't belong to this tree
 	 */
-	double getWeight(@Nonnull JavaNode javaNode) throws IllegalArgumentException;
+	double getWeight(@NotNull JavaNode javaNode) throws IllegalArgumentException;
 
 }

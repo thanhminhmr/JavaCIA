@@ -18,26 +18,25 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
 import mrmathami.cia.java.tree.type.JavaType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface JavaMethodNode extends JavaNode,
 		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaMethodNode";
+	@NotNull String OBJECT_CLASS = "JavaMethodNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
@@ -47,17 +46,13 @@ public interface JavaMethodNode extends JavaNode,
 
 	boolean isConstructor();
 
-	@Nullable
-	JavaType getReturnType();
+	@Nullable JavaType getReturnType();
 
-	@Nonnull
-	List<? extends JavaType> getParameters();
+	@NotNull List<? extends JavaType> getParameters();
 
-	@Nonnull
-	List<? extends JavaType> getExceptions();
+	@NotNull List<? extends JavaType> getExceptions();
 
-	@Nullable
-	String getBodyBlock();
+	@Nullable String getBodyBlock();
 
 	//endregion Getter & Setter
 

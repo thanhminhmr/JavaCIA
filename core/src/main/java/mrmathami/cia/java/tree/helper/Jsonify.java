@@ -18,11 +18,10 @@
 
 package mrmathami.cia.java.tree.helper;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface Jsonify {
 
-	@Nonnull
-	String toJson();
+	@NotNull String toJson();
 
 }

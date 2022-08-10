@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.tree.node.attribute;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.tree.JavaModifier;
 import mrmathami.cia.java.tree.node.JavaNode;
 
@@ -44,8 +44,7 @@ public interface JavaModifiedNode extends JavaNode {
 
 	int getModifiers();
 
-	@Nonnull
-	default Set<JavaModifier> getModifierSet() {
+	default @NotNull Set<JavaModifier> getModifierSet() {
 		final int modifiers = getModifiers();
 		final EnumSet<JavaModifier> modifierSet = EnumSet.noneOf(JavaModifier.class);
 		for (final JavaModifier modifier : VALUE_LIST) {
@@ -54,7 +53,7 @@ public interface JavaModifiedNode extends JavaNode {
 		return modifierSet;
 	}
 
-	default boolean isContainModifier(@Nonnull JavaModifier modifier) {
+	default boolean isContainModifier(@NotNull JavaModifier modifier) {
 		return isContainModifier(getModifiers(), modifier);
 	}
 
@@ -104,7 +103,7 @@ public interface JavaModifiedNode extends JavaNode {
 
 	//endregion Getter & Setter
 
-	private static boolean isContainModifier(int modifiers, @Nonnull JavaModifier modifier) {
+	private static boolean isContainModifier(int modifiers, @NotNull JavaModifier modifier) {
 		return (modifiers & (1 << modifier.ordinal())) != 0;
 	}
 

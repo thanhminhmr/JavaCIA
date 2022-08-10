@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.tree.node.attribute;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
 import mrmathami.cia.java.tree.node.JavaNode;
 
@@ -28,8 +28,7 @@ public interface JavaAnnotatedNode extends JavaNode {
 
 	//region Getter & Setter
 
-	@Nonnull
-	List<? extends JavaAnnotate> getAnnotates();
+	@NotNull List<? extends JavaAnnotate> getAnnotates();
 
 	//endregion Getter & Setter
 

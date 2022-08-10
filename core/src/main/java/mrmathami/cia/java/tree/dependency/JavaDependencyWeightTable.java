@@ -18,15 +18,14 @@
 
 package mrmathami.cia.java.tree.dependency;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 public interface JavaDependencyWeightTable {
 
-	@Nonnull
-	static JavaDependencyWeightTable of(@Nonnull Map<JavaDependency, Double> map) {
+	static @NotNull JavaDependencyWeightTable of(@NotNull Map<@NotNull JavaDependency, @NotNull Double> map) {
 		final EnumMap<JavaDependency, Double> enumMap = new EnumMap<>(map);
 		return key -> {
 			final Double value = enumMap.get(key);
@@ -34,6 +33,6 @@ public interface JavaDependencyWeightTable {
 		};
 	}
 
-	double getWeight(@Nonnull JavaDependency dependencyType);
+	double getWeight(@NotNull JavaDependency dependencyType);
 
 }

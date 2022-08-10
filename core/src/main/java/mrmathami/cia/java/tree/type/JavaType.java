@@ -18,22 +18,21 @@
 
 package mrmathami.cia.java.tree.type;
 
-import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.annotate.JavaAnnotate;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public interface JavaType extends JavaIdentifiedEntity {
 
-	@Nonnull String ID_CLASS = "JavaType";
+	@NotNull String ID_CLASS = "JavaType";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getIdClass() {
+	default @NotNull String getIdClass() {
 		return ID_CLASS;
 	}
 
@@ -41,11 +40,9 @@ public interface JavaType extends JavaIdentifiedEntity {
 
 	//region Getter & Setter
 
-	@Nonnull
-	String getDescription();
+	@NotNull String getDescription();
 
-	@Nonnull
-	List<? extends JavaAnnotate> getAnnotates();
+	@NotNull List<? extends JavaAnnotate> getAnnotates();
 
 	//endregion Getter & Setter
 

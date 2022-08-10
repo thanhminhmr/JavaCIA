@@ -18,15 +18,14 @@
 
 package mrmathami.cia.java.tree.node.attribute;
 
-import mrmathami.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 import mrmathami.cia.java.tree.node.JavaNode;
 
 public interface JavaTypeNode extends JavaNode {
 
 	//region Getter & Setter
 
-	@Nullable
-	String getBinaryName();
+	@Nullable String getBinaryName();
 
 	//endregion Getter & Setter
 

@@ -18,31 +18,29 @@
 
 package mrmathami.cia.java.tree.annotate;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.JavaEntity;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.node.JavaNode;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
 public interface JavaAnnotate extends JavaIdentifiedEntity {
 
-	@Nonnull String OBJECT_CLASS = "JavaAnnotate";
-	@Nonnull String ID_CLASS = "JavaAnnotate";
+	@NotNull String OBJECT_CLASS = "JavaAnnotate";
+	@NotNull String ID_CLASS = "JavaAnnotate";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
-	@Nonnull
 	@Override
-	default String getIdClass() {
+	default @NotNull String getIdClass() {
 		return ID_CLASS;
 	}
 
@@ -50,14 +48,11 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 	//region Getter & Setter
 
-	@Nonnull
-	String getName();
+	@NotNull String getName();
 
-	@Nullable
-	JavaNode getNode();
+	@Nullable JavaNode getNode();
 
-	@Nonnull
-	List<? extends Parameter> getParameters();
+	@NotNull List<? extends Parameter> getParameters();
 
 	//endregion Getter & Setter
 
@@ -65,9 +60,8 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Basic Getter
 
-		@Nonnull
 		@Override
-		default String getEntityClass() {
+		default @NotNull String getEntityClass() {
 			return "JavaAnnotate.Parameter";
 		}
 
@@ -75,14 +69,11 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Getter & Setter
 
-		@Nonnull
-		String getName();
+		@NotNull String getName();
 
-		@Nullable
-		JavaNode getNode();
+		@Nullable JavaNode getNode();
 
-		@Nullable
-		Value getValue();
+		@Nullable Value getValue();
 
 		//endregion Getter & Setter
 
@@ -95,9 +86,8 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Basic Getter
 
-		@Nonnull
 		@Override
-		default String getEntityClass() {
+		default @NotNull String getEntityClass() {
 			return "JavaAnnotate.ArrayValue";
 		}
 
@@ -105,8 +95,7 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Getter & Setter
 
-		@Nonnull
-		List<? extends NonArrayValue> getValues();
+		@NotNull List<? extends NonArrayValue> getValues();
 
 		//endregion Getter & Setter
 
@@ -119,9 +108,8 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Basic Getter
 
-		@Nonnull
 		@Override
-		default String getEntityClass() {
+		default @NotNull String getEntityClass() {
 			return "JavaAnnotate.SimpleValue";
 		}
 
@@ -129,17 +117,15 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Getter & Setter
 
-		@Nonnull
-		String getValueType();
+		@NotNull String getValueType();
 
-		@Nonnull
-		Object getValue();
+		@NotNull Object getValue();
 
 		//endregion Getter & Setter
 
 		//region Helper
 
-		static boolean isValidValueType(@Nonnull Object value) {
+		static boolean isValidValueType(@NotNull Object value) {
 			return value instanceof String || value instanceof Boolean || value instanceof Byte
 					|| value instanceof Short || value instanceof Integer || value instanceof Long
 					|| value instanceof Character || value instanceof Float || value instanceof Double;
@@ -153,9 +139,8 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Basic Getter
 
-		@Nonnull
 		@Override
-		default String getEntityClass() {
+		default @NotNull String getEntityClass() {
 			return "JavaAnnotate.NodeValue";
 		}
 
@@ -163,11 +148,9 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Getter & Setter
 
-		@Nonnull
-		String getDescribe();
+		@NotNull String getDescribe();
 
-		@Nullable
-		JavaNode getNode();
+		@Nullable JavaNode getNode();
 
 		//endregion Getter & Setter
 
@@ -177,9 +160,8 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Basic Getter
 
-		@Nonnull
 		@Override
-		default String getEntityClass() {
+		default @NotNull String getEntityClass() {
 			return "JavaAnnotate.AnnotateValue";
 		}
 
@@ -187,8 +169,7 @@ public interface JavaAnnotate extends JavaIdentifiedEntity {
 
 		//region Getter & Setter
 
-		@Nullable
-		JavaAnnotate getAnnotate();
+		@Nullable JavaAnnotate getAnnotate();
 
 		//endregion Getter & Setter
 

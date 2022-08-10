@@ -18,16 +18,15 @@
 
 package mrmathami.cia.java.tree.type;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface JavaSimpleType extends JavaType {
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return "JavaSimpleType";
 	}
 
@@ -35,8 +34,7 @@ public interface JavaSimpleType extends JavaType {
 
 	//region Getter & Setter
 
-	@Nullable
-	JavaType getInnerType();
+	@Nullable JavaType getInnerType();
 
 	//endregion Getter & Setter
 

@@ -18,8 +18,8 @@
 
 package mrmathami.cia.java.project;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import mrmathami.cia.java.tree.dependency.JavaDependencyWeightTable;
 import mrmathami.cia.java.tree.node.JavaRootNode;
 
@@ -27,16 +27,12 @@ import java.io.Serializable;
 
 public interface JavaProjectSnapshot {
 
-	@Nonnull
-	String getName();
+	@NotNull String getName();
 
-	@Nonnull
-	JavaRootNode getRootNode();
+	@NotNull JavaRootNode getRootNode();
 
-	@Nonnull
-	JavaDependencyWeightTable getDependencyWeightTable();
+	@NotNull JavaDependencyWeightTable getDependencyWeightTable();
 
-	@Nonnull
-	JavaNodeWeightTable getNodeWeightTable();
+	@NotNull JavaNodeWeightTable getNodeWeightTable();
 
 }

@@ -18,15 +18,14 @@
 
 package mrmathami.cia.java.tree.dependency;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.EnumMap;
 import java.util.Map;
 
 public interface JavaDependencyCountTable {
 
-	@Nonnull
-	static JavaDependencyCountTable of(@Nonnull Map<JavaDependency, Integer> map) {
+	static @NotNull JavaDependencyCountTable of(@NotNull Map<@NotNull JavaDependency, @NotNull Integer> map) {
 		final EnumMap<JavaDependency, Integer> enumMap = new EnumMap<>(map);
 		return key -> {
 			final Integer value = enumMap.get(key);
@@ -34,6 +33,6 @@ public interface JavaDependencyCountTable {
 		};
 	}
 
-	int getCount(@Nonnull JavaDependency dependencyType);
+	int getCount(@NotNull JavaDependency dependencyType);
 
 }

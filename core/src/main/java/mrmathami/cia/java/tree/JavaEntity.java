@@ -18,15 +18,14 @@
 
 package mrmathami.cia.java.tree;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.tree.helper.Jsonify;
 
 public interface JavaEntity extends Jsonify {
 
 	//region Basic Getter
 
-	@Nonnull
-	String getEntityClass();
+	@NotNull String getEntityClass();
 
 	//endregion Basic Getter
 

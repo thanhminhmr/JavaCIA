@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaTypeNode;
@@ -26,14 +26,13 @@ import mrmathami.cia.java.tree.node.attribute.JavaTypeNode;
 public interface JavaAnnotationNode extends
 		JavaNode, JavaAnnotatedNode, JavaModifiedNode, JavaTypeNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaAnnotationNode";
+	@NotNull String OBJECT_CLASS = "JavaAnnotationNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 

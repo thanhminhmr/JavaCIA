@@ -18,23 +18,22 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
 import mrmathami.cia.java.tree.type.JavaType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public interface JavaFieldNode extends JavaNode,
 		JavaAnnotatedNode, JavaModifiedNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaFieldNode";
+	@NotNull String OBJECT_CLASS = "JavaFieldNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
@@ -42,11 +41,9 @@ public interface JavaFieldNode extends JavaNode,
 
 	//region Getter & Setter
 
-	@Nullable
-	JavaType getType();
-	
-	@Nullable
-	String getValue();
+	@Nullable JavaType getType();
+
+	@Nullable String getValue();
 
 	//endregion Getter & Setter
 

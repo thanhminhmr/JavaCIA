@@ -18,13 +18,13 @@
 
 package mrmathami.cia.java.tree.dependency;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public enum JavaDependency {
 	USE, MEMBER, INHERITANCE, INVOCATION, OVERRIDE;
 
-	@Nonnull public static final List<JavaDependency> VALUE_LIST = List.of(values());
+	public static final @NotNull List<@NotNull JavaDependency> VALUE_LIST = List.of(values());
 
 }

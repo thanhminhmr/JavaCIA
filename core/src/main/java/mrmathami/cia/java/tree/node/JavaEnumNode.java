@@ -18,26 +18,24 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
 import mrmathami.cia.java.tree.node.attribute.JavaAnnotatedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaModifiedNode;
-import mrmathami.cia.java.tree.node.attribute.JavaParameterizedNode;
 import mrmathami.cia.java.tree.node.attribute.JavaTypeNode;
 import mrmathami.cia.java.tree.type.JavaType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
 public interface JavaEnumNode extends JavaNode,
 		JavaAnnotatedNode, JavaModifiedNode, JavaTypeNode {
 
-	@Nonnull String OBJECT_CLASS = "JavaEnumNode";
+	@NotNull String OBJECT_CLASS = "JavaEnumNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getEntityClass() {
+	default @NotNull String getEntityClass() {
 		return OBJECT_CLASS;
 	}
 
@@ -45,8 +43,7 @@ public interface JavaEnumNode extends JavaNode,
 
 	//region Getter & Setter
 
-	@Nonnull
-	List<? extends JavaType> getImplementsInterfaces();
+	@NotNull List<? extends JavaType> getImplementsInterfaces();
 
 	//endregion Getter & Setter
 

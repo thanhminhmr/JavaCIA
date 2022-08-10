@@ -18,14 +18,13 @@
 
 package mrmathami.cia.java.tree;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 
 public interface JavaIdentifiedEntity extends JavaEntity {
 
 	//region Basic Getter
 
-	@Nonnull
-	String getIdClass();
+	@NotNull String getIdClass();
 
 	/**
 	 * Return entity id. Guarantee to be continuous, start from 0.

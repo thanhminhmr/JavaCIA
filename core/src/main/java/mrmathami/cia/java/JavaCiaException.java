@@ -18,15 +18,17 @@
 
 package mrmathami.cia.java;
 
+import org.jetbrains.annotations.NotNull;
+
 public class JavaCiaException extends Exception {
 
-	private static final long serialVersionUID = 3408562274810899935L;
+	private static final long serialVersionUID = -1L;
 
-	public JavaCiaException(String message) {
+	public JavaCiaException(@NotNull String message) {
 		super(message);
 	}
 
-	public JavaCiaException(String message, Throwable cause) {
+	public JavaCiaException(@NotNull String message, @NotNull Throwable cause) {
 		super(message, cause);
 	}
 

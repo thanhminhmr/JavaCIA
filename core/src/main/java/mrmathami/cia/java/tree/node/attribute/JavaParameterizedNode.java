@@ -18,7 +18,7 @@
 
 package mrmathami.cia.java.tree.node.attribute;
 
-import mrmathami.annotations.Nonnull;
+import org.jetbrains.annotations.NotNull;
 import mrmathami.cia.java.tree.node.JavaNode;
 import mrmathami.cia.java.tree.type.JavaType;
 
@@ -28,8 +28,7 @@ public interface JavaParameterizedNode extends JavaNode {
 
 	//region Getter & Setter
 
-	@Nonnull
-	List<? extends JavaType> getTypeParameters();
+	@NotNull List<? extends JavaType> getTypeParameters();
 
 	//endregion Getter & Setter
 

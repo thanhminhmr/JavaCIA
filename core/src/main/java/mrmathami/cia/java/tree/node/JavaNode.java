@@ -18,12 +18,12 @@
 
 package mrmathami.cia.java.tree.node;
 
-import mrmathami.annotations.Nonnull;
-import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.project.JavaModule;
 import mrmathami.cia.java.project.JavaSourceFile;
 import mrmathami.cia.java.tree.JavaIdentifiedEntity;
 import mrmathami.cia.java.tree.dependency.JavaDependencyCountTable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.List;
@@ -33,14 +33,13 @@ import java.util.Stack;
 
 public interface JavaNode extends JavaIdentifiedEntity {
 
-	@Nonnull String ID_CLASS = "JavaNode";
+	@NotNull String ID_CLASS = "JavaNode";
 
 
 	//region Basic Getter
 
-	@Nonnull
 	@Override
-	default String getIdClass() {
+	default @NotNull String getIdClass() {
 		return ID_CLASS;
 	}
 
@@ -55,29 +54,21 @@ public interface JavaNode extends JavaIdentifiedEntity {
 
 	boolean isRoot();
 
-	@Nonnull
-	JavaRootNode getRoot();
+	@NotNull JavaRootNode getRoot();
 
-	@Nonnull
-	JavaNode getParent();
+	@NotNull JavaNode getParent();
 
-	@Nonnull
-	List<? extends JavaNode> getChildren();
+	@NotNull List<? extends JavaNode> getChildren();
 
-	@Nonnull
-	String getSimpleName();
+	@NotNull String getSimpleName();
 
-	@Nonnull
-	String getQualifiedName();
+	@NotNull String getQualifiedName();
 
-	@Nonnull
-	String getUniqueName();
+	@NotNull String getUniqueName();
 
-	@Nullable
-	JavaSourceFile getSourceFile();
+	@Nullable JavaSourceFile getSourceFile();
 
-	@Nullable
-	default JavaModule getModule() {
+	default @Nullable JavaModule getModule() {
 		final JavaSourceFile sourceFile = getSourceFile();
 		return sourceFile != null ? sourceFile.getModule() : null;
 	}
@@ -86,32 +77,27 @@ public interface JavaNode extends JavaIdentifiedEntity {
 
 	//region Dependency
 
-	@Nonnull
-	Map<? extends JavaNode, ? extends JavaDependencyCountTable> getDependencyFrom();
+	@NotNull Map<? extends JavaNode, ? extends JavaDependencyCountTable> getDependencyFrom();
 
-	@Nonnull
-	Map<? extends JavaNode, ? extends JavaDependencyCountTable> getDependencyTo();
+	@NotNull Map<? extends JavaNode, ? extends JavaDependencyCountTable> getDependencyTo();
 
-	@Nonnull
-	Set<? extends JavaNode> getDependencyFromNodes();
+	@NotNull Set<? extends JavaNode> getDependencyFromNodes();
 
-	@Nonnull
-	Set<? extends JavaNode> getDependencyToNodes();
+	@NotNull Set<? extends JavaNode> getDependencyToNodes();
 
 	//endregion Dependency
 
 	//region Visit Iterator
 
-	@Nonnull
-	default Iterator<? extends JavaNode> getVisitIterator() {
+	default @NotNull Iterator<? extends JavaNode> getVisitIterator() {
 		return new VisitIterator(this);
 	}
 
 	final class VisitIterator implements Iterator<JavaNode> {
-		@Nonnull private final Stack<Iterator<? extends JavaNode>> stack = new Stack<>();
-		@Nullable private JavaNode current;
+		private final @NotNull Stack<@NotNull Iterator<? extends JavaNode>> stack = new Stack<>();
+		private @Nullable JavaNode current;
 
-		private VisitIterator(@Nullable JavaNode current) {
+		private VisitIterator(@NotNull JavaNode current) {
 			this.current = current;
 		}
 
@@ -127,7 +113,7 @@ public interface JavaNode extends JavaIdentifiedEntity {
 		}
 
 		@Override
-		public JavaNode next() {
+		public @NotNull JavaNode next() {
 			if (current != null) stack.push(current.getChildren().iterator());
 			return this.current = stack.peek().next();
 		}
