@@ -22,7 +22,7 @@ import mrmathami.annotations.Nonnull;
 import mrmathami.annotations.Nullable;
 import mrmathami.cia.java.jdt.project.SourceFile;
 import mrmathami.cia.java.jdt.tree.AbstractIdentifiedEntity;
-import mrmathami.cia.java.jdt.tree.node.attribute.AbstractParameterizedModifiedAnnotatedNode;
+import mrmathami.cia.java.jdt.tree.node.attribute.AbstractModifiedAnnotatedNode;
 import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.node.JavaEnumNode;
 
@@ -33,7 +33,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-public final class EnumNode extends AbstractParameterizedModifiedAnnotatedNode implements JavaEnumNode {
+public final class EnumNode extends AbstractModifiedAnnotatedNode implements JavaEnumNode {
 
 	private static final long serialVersionUID = -1L;
 

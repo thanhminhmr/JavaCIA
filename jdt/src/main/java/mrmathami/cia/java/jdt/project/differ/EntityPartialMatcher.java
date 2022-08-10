@@ -234,7 +234,7 @@ enum EntityPartialMatcher {
 			assert entity instanceof JavaInitializerNode;
 			final JavaInitializerNode node = (JavaInitializerNode) entity;
 			int matchCode = node.isStatic() ? 1 : 0;
-			return matchCode * 31 + (identicalMatch ? node.getInitializers().size() : -1);
+			return matchCode * 31 + (node.getBodyBlock() != null ? 1 : 0);
 		}
 
 		@Override
@@ -242,35 +242,8 @@ enum EntityPartialMatcher {
 				@Nonnull EntityMatcher matcher, boolean identicalMatch) {
 			assert entityA instanceof JavaInitializerNode && entityB instanceof JavaInitializerNode;
 			final JavaInitializerNode nodeA = (JavaInitializerNode) entityA, nodeB = (JavaInitializerNode) entityB;
-			return nodeA.isStatic() == nodeB.isStatic() && (!identicalMatch ||
-					internalMatchInitializer(nodeA.getInitializers(), nodeB.getInitializers(), matcher));
-		}
-
-		private boolean internalMatchInitializer(
-				@Nonnull List<? extends JavaInitializerNode.Initializer> initializersA,
-				@Nonnull List<? extends JavaInitializerNode.Initializer> initializersB,
-				@Nonnull EntityMatcher matcher) {
-			if (initializersA.size() != initializersB.size()) return false;
-
-			final Iterator<? extends JavaInitializerNode.Initializer> iteratorA = initializersA.iterator();
-			final Iterator<? extends JavaInitializerNode.Initializer> iteratorB = initializersB.iterator();
-			while (iteratorA.hasNext()/* && iteratorB.hasNext()*/) {
-				final JavaInitializerNode.Initializer initializerA = iteratorA.next();
-				final JavaInitializerNode.Initializer initializerB = iteratorB.next();
-				if (initializerA instanceof JavaInitializerNode.BlockInitializer) {
-					return initializerB instanceof JavaInitializerNode.BlockInitializer
-							&& ((JavaInitializerNode.BlockInitializer) initializerA).getBodyBlock()
-							.equals(((JavaInitializerNode.BlockInitializer) initializerB).getBodyBlock());
-				} else if (initializerA instanceof JavaInitializerNode.FieldInitializer) {
-					if (!(initializerB instanceof JavaInitializerNode.FieldInitializer)) return false;
-					final JavaInitializerNode.FieldInitializer
-							fieldInitA = (JavaInitializerNode.FieldInitializer) initializerA,
-							fieldInitB = (JavaInitializerNode.FieldInitializer) initializerB;
-					return matcher.match(fieldInitA.getFieldNode(), fieldInitB.getFieldNode(), true)
-							&& Objects.equals(fieldInitA.getInitialExpression(), fieldInitB.getInitialExpression());
-				}
-			}
-			return false;
+			return nodeA.isStatic() == nodeB.isStatic()
+					&& Objects.equals(nodeA.getBodyBlock(), nodeB.getBodyBlock());
 		}
 	},
 

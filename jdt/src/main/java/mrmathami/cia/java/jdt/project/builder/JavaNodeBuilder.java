@@ -28,7 +28,6 @@ import mrmathami.cia.java.jdt.tree.node.ClassNode;
 import mrmathami.cia.java.jdt.tree.node.EnumNode;
 import mrmathami.cia.java.jdt.tree.node.FieldNode;
 import mrmathami.cia.java.jdt.tree.node.InitializerNode;
-import mrmathami.cia.java.jdt.tree.node.InitializerNode.InitializerImpl;
 import mrmathami.cia.java.jdt.tree.node.InterfaceNode;
 import mrmathami.cia.java.jdt.tree.node.MethodNode;
 import mrmathami.cia.java.jdt.tree.node.PackageNode;
@@ -37,7 +36,6 @@ import mrmathami.cia.java.jdt.tree.type.AbstractType;
 import mrmathami.cia.java.tree.JavaModifier;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.utils.Pair;
-import mrmathami.utils.Triple;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -78,7 +76,6 @@ import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import java.util.ArrayList;
-import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -98,10 +95,6 @@ final class JavaNodeBuilder extends FileASTRequestor {
 
 	@Nonnull private final JavaAnnotateBuilder annotates = new JavaAnnotateBuilder(this);
 	@Nonnull private final JavaTypeBuilder types = new JavaTypeBuilder(this, annotates);
-
-	@Nonnull private final Map<AbstractNode, Triple<Pair<InitializerNode, List<InitializerImpl>>,
-			Pair<InitializerNode, List<InitializerImpl>>, List<MethodNode>>> classInitializerMap
-			= new IdentityHashMap<>();
 
 	@Nonnull private final Map<AbstractNode, Map<IBinding, int[]>> delayedDependencies = new LinkedHashMap<>();
 	@Nonnull private final List<Pair<ASTNode, AbstractNode>> delayedDependencyWalkers = new LinkedList<>();
@@ -179,20 +172,29 @@ final class JavaNodeBuilder extends FileASTRequestor {
 		}
 
 		// set class initializers
-		for (Triple<Pair<InitializerNode, List<InitializerImpl>>, Pair<InitializerNode, List<InitializerImpl>>,
-				List<MethodNode>> triple : classInitializerMap.values()) {
-			// get non-static init block
-			final Pair<InitializerNode, List<InitializerImpl>> pair = triple.getB();
-			if (pair == null) continue;
-			// get method list
-			final List<MethodNode> constructors = triple.getC();
-			if (constructors == null) continue;
-			// create call from method to init block
-			for (final MethodNode constructor : constructors) {
-				parser.createDependencyToNode(constructor, pair.getA(), JavaDependency.INVOCATION);
+		for (final AbstractNode node : bindingNodeMap.values()) {
+			if (node instanceof ClassNode) {
+				final ClassNode classNode = (ClassNode) node;
+				final List<AbstractNode> children = classNode.getChildren();
+				final List<InitializerNode> initializerNodes = new ArrayList<>();
+				final List<MethodNode> constructorNodes = new ArrayList<>();
+				for (final AbstractNode childNode : children) {
+					if (childNode instanceof InitializerNode) {
+						initializerNodes.add((InitializerNode) childNode);
+					} else if (childNode instanceof MethodNode) {
+						final MethodNode methodNode = (MethodNode) childNode;
+						if (methodNode.isConstructor()) constructorNodes.add(methodNode);
+					}
+				}
+				if (initializerNodes.size() > 0 && constructorNodes.size() > 0) {
+					for (final MethodNode constructorNode : constructorNodes) {
+						for (final InitializerNode initializerNode : initializerNodes) {
+							parser.createDependencyToNode(constructorNode, initializerNode, JavaDependency.INVOCATION);
+						}
+					}
+				}
 			}
 		}
-		classInitializerMap.clear();
 	}
 
 
@@ -303,39 +305,6 @@ final class JavaNodeBuilder extends FileASTRequestor {
 	}
 
 	//endregion Modifier
-
-	//region Initializer
-
-	@Nonnull
-	private Pair<InitializerNode, List<InitializerImpl>> internalCreateOrGetInitializerNode(
-			@Nonnull AbstractNode parentNode, boolean isStatic) {
-		final Triple<Pair<InitializerNode, List<InitializerImpl>>, Pair<InitializerNode, List<InitializerImpl>>,
-				List<MethodNode>> triple
-				= classInitializerMap.computeIfAbsent(parentNode, JavaParser::createMutableTriple);
-		final Pair<InitializerNode, List<InitializerImpl>> oldPair = isStatic ? triple.getA() : triple.getB();
-		if (oldPair != null) return oldPair;
-		final InitializerNode initializer = parentNode.addChild(new InitializerNode(sourceFile, parentNode, isStatic));
-		final List<InitializerImpl> initializerList = new ArrayList<>();
-		initializer.setInitializers(initializerList);
-		final Pair<InitializerNode, List<InitializerImpl>> pair = Pair.immutableOf(initializer, initializerList);
-		if (isStatic) {
-			triple.setA(pair);
-		} else {
-			triple.setB(pair);
-		}
-		return pair;
-	}
-
-	private void internalCreateDelayCallToInitializer(@Nonnull AbstractNode parentNode,
-			@Nonnull MethodNode methodNode) {
-		final Triple<Pair<InitializerNode, List<InitializerImpl>>, Pair<InitializerNode, List<InitializerImpl>>,
-				List<MethodNode>> triple
-				= classInitializerMap.computeIfAbsent(parentNode, JavaParser::createMutableTriple);
-		if (triple.getC() == null) triple.setC(new ArrayList<>());
-		triple.getC().add(methodNode);
-	}
-
-	//endregion Initializer
 
 	//region Parser
 
@@ -495,10 +464,6 @@ final class JavaNodeBuilder extends FileASTRequestor {
 
 		// set modifier
 		enumNode.setModifiers(processModifiersFromBindingModifiers(typeBinding.getModifiers()));
-
-		// set type parameter
-		enumNode.setTypeParameters(types.createTypesFromTypeBindings(typeBinding.getTypeParameters(),
-				enumNode, JavaDependency.USE));
 
 		// set implements interfaces
 		enumNode.setImplementsInterfaces(types.createTypesFromTypeBindings(typeBinding.getInterfaces(),
@@ -667,14 +632,8 @@ final class JavaNodeBuilder extends FileASTRequestor {
 				// put delayed variable initializer
 				final Expression variableInitializer = variableDeclaration.getInitializer();
 				if (variableInitializer != null) {
-					final Pair<InitializerNode, List<InitializerImpl>> pair
-							= internalCreateOrGetInitializerNode(parentNode, fieldNode.isStatic());
-					final InitializerNode initializerNode = pair.getA();
-
-					final List<InitializerImpl> initializerList = pair.getB();
-					initializerList.add(new InitializerNode.FieldInitializerImpl(fieldNode,
-							format(variableInitializer.toString(), CodeFormatter.K_EXPRESSION)));
-					walkDeclaration(variableInitializer, fieldNode, initializerNode);
+					fieldNode.setValue(format(variableInitializer.toString(), CodeFormatter.K_EXPRESSION));
+					walkDeclaration(variableInitializer, fieldNode, fieldNode);
 				}
 			}
 		}
@@ -683,17 +642,14 @@ final class JavaNodeBuilder extends FileASTRequestor {
 	private void parseInitializer(@Nonnull AbstractNode parentNode, @Nonnull Initializer initializer)
 			throws JavaCiaException {
 		// create node and containment dependency
-		final Pair<InitializerNode, List<InitializerImpl>> pair = internalCreateOrGetInitializerNode(
-				parentNode, (initializer.getModifiers() & Modifier.STATIC) != 0);
-		final InitializerNode initializerNode = pair.getA();
+		final InitializerNode initializerNode = parentNode.addChild(new InitializerNode(sourceFile, parentNode,
+				(initializer.getModifiers() & Modifier.STATIC) != 0));
 		parser.createDependencyToNode(parentNode, initializerNode, JavaDependency.MEMBER);
 
 		// put delayed initializer body
 		final Block initializerBody = initializer.getBody();
 		if (initializerBody != null) {
-			final List<InitializerImpl> initializerList = pair.getB();
-			initializerList.add(new InitializerNode.BlockInitializerImpl(
-					format(initializerBody.toString(), CodeFormatter.K_STATEMENTS)));
+			initializerNode.setBodyBlock(format(initializerBody.toString(), CodeFormatter.K_STATEMENTS));
 			walkDeclaration(initializerBody, initializerNode, initializerNode);
 		}
 	}
@@ -751,9 +707,6 @@ final class JavaNodeBuilder extends FileASTRequestor {
 			methodNode.setBodyBlock(format(methodDeclarationBody.toString(), CodeFormatter.K_STATEMENTS));
 			walkDeclaration(methodDeclarationBody, methodNode, methodNode);
 		}
-
-		// put delayed call to initializer block if this is a constructor
-		if (methodNode.isConstructor()) internalCreateDelayCallToInitializer(parentNode, methodNode);
 	}
 
 	//endregion Parser

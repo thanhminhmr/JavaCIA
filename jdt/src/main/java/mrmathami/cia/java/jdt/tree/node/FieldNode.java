@@ -34,6 +34,7 @@ public final class FieldNode extends AbstractModifiedAnnotatedNode implements Ja
 	private static final long serialVersionUID = -1L;
 
 	@Nullable private AbstractType type;
+	@Nullable private String value;
 
 
 	public FieldNode(@Nullable SourceFile sourceFile, @Nonnull AbstractNode parent, @Nonnull String simpleName) {
@@ -54,6 +55,17 @@ public final class FieldNode extends AbstractModifiedAnnotatedNode implements Ja
 	public void setType(@Nullable AbstractType type) {
 		assertNonFrozen();
 		this.type = type;
+	}
+
+	@Override
+	@Nullable
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(@Nullable String value) {
+		assertNonFrozen();
+		this.value = value;
 	}
 
 	//endregion Getter & Setter

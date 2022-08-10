@@ -18,13 +18,13 @@
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<packaging>jar</packaging>
 
 	<groupId>mrmathami.cia.java</groupId>
 	<artifactId>mrmathami.cia.java.jdt</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 
 	<name>Java CIA Implementation</name>
 	<description>Implementation for Java Change Impact Analysis.</description>
@@ -54,13 +54,13 @@
 		<dependency>
 			<groupId>mrmathami.cia.java</groupId>
 			<artifactId>mrmathami.cia.java.core</artifactId>
-			<version>1.0.4</version>
+			<version>1.0.5</version>
 		</dependency>
 
 		<dependency>
 			<groupId>org.eclipse.jdt</groupId>
 			<artifactId>org.eclipse.jdt.core</artifactId>
-			<version>3.25.0</version>
+			<version>3.30.0</version>
 		</dependency>
 	</dependencies>
 </project>

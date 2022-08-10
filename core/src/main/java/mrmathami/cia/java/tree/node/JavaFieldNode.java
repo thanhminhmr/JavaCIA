@@ -44,6 +44,9 @@ public interface JavaFieldNode extends JavaNode,
 
 	@Nullable
 	JavaType getType();
+	
+	@Nullable
+	String getValue();
 
 	//endregion Getter & Setter
 

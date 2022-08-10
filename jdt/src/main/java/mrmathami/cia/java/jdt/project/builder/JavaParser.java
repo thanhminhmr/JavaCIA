@@ -28,7 +28,6 @@ import mrmathami.cia.java.jdt.tree.node.PackageNode;
 import mrmathami.cia.java.jdt.tree.node.RootNode;
 import mrmathami.cia.java.tree.dependency.JavaDependency;
 import mrmathami.cia.java.tree.node.JavaRootNode;
-import mrmathami.utils.Triple;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
@@ -52,7 +51,7 @@ final class JavaParser {
 	@Nonnull private final Map<IBinding, AbstractNode> bindingNodeMap;
 
 	@Nonnull private final Map<String, PackageNode> packageNodeMap = new HashMap<>();
-	@Nonnull private final Map<AbstractNode, Map<AbstractNode, int[]>> nodeDependencies = new LinkedHashMap<>();;
+	@Nonnull private final Map<AbstractNode, Map<AbstractNode, int[]>> nodeDependencies = new LinkedHashMap<>();
 
 
 	private JavaParser(@Nonnull RootNode rootNode, @Nonnull Map<IBinding, AbstractNode> bindingNodeMap) {
@@ -66,9 +65,10 @@ final class JavaParser {
 			@Nonnull String[] classPathArray, @Nonnull Map<String, SourceFile> sourceNameMap, boolean recoveryEnabled)
 			throws JavaCiaException {
 
-		final ASTParser astParser = ASTParser.newParser(AST.JLS15);
+		final ASTParser astParser = ASTParser.newParser(AST.getJLSLatest());
 		final Map<String, String> options = JavaCore.getOptions();
-		JavaCore.setComplianceOptions(JavaCore.VERSION_15, options);
+		JavaCore.setComplianceOptions(JavaCore.latestSupportedJavaVersion(), options);
+		options.put(JavaCore.COMPILER_PB_ENABLE_PREVIEW_FEATURES, JavaCore.ENABLED);
 		astParser.setCompilerOptions(options);
 		astParser.setKind(ASTParser.K_COMPILATION_UNIT);
 		astParser.setResolveBindings(true);
@@ -186,11 +186,6 @@ final class JavaParser {
 	@Nonnull
 	static <R> int[] createDependencyCounts(@Nullable R any) {
 		return new int[JavaDependency.VALUE_LIST.size()];
-	}
-
-	@Nonnull
-	static <A, B, C, R> Triple<A, B, C> createMutableTriple(@Nullable R any) {
-		return Triple.mutableOf(null, null, null);
 	}
 
 	@Nonnull

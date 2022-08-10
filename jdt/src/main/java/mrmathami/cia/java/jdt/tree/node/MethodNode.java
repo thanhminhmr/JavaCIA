@@ -104,8 +104,7 @@ public final class MethodNode extends AbstractParameterizedModifiedAnnotatedNode
 		this.returnType = returnType;
 	}
 
-	@Nullable(
-	)
+	@Nullable
 	@Override
 	public String getBodyBlock() {
 		return bodyBlock;

@@ -24,7 +24,7 @@
 
 	<groupId>mrmathami.cia.java</groupId>
 	<artifactId>mrmathami.cia.java.core</artifactId>
-	<version>1.0.4</version>
+	<version>1.0.5</version>
 
 	<name>Java CIA API</name>
 	<description>API for Java Change Impact Analysis.</description>

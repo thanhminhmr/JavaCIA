@@ -28,7 +28,7 @@ import mrmathami.cia.java.tree.type.JavaType;
 import java.util.List;
 
 public interface JavaEnumNode extends JavaNode,
-		JavaAnnotatedNode, JavaParameterizedNode, JavaModifiedNode, JavaTypeNode {
+		JavaAnnotatedNode, JavaModifiedNode, JavaTypeNode {
 
 	@Nonnull String OBJECT_CLASS = "JavaEnumNode";
 

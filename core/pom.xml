@@ -24,7 +24,7 @@
 
     <groupId>mrmathami.cia.java</groupId>
     <artifactId>mrmathami.cia.java.core</artifactId>
-    <version>1.0.4</version>
+    <version>1.0.5</version>
 
     <dependencies>
         <dependency>
@@ -87,7 +87,7 @@
 							<file>${project.build.directory}/${project.build.finalName}.jar</file>
 							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
 
-							<pomFile>${project.basedir}/pom-no-build.txt</pomFile>
+							<pomFile>pom-no-build.xml</pomFile>
 
 							<localRepositoryPath>repository</localRepositoryPath>
 						</configuration>
@@ -102,7 +102,7 @@
 							<file>${project.build.directory}/${project.build.finalName}.jar</file>
 							<sources>${project.build.directory}/${project.build.finalName}-sources.jar</sources>
 
-							<pomFile>${project.basedir}/pom-no-build.txt</pomFile>
+							<pomFile>pom-no-build.xml</pomFile>
 						</configuration>
 					</execution>
 				</executions>

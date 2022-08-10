@@ -33,8 +33,8 @@ public class Y {
 		Utils.getFileList(inputSources.createModule("jdt", jdtPath), jdtPath);
 
 		final List<Path> classPaths = List.of(
-				Path.of("/home/meo/.m2/repository/org/eclipse/jdt/org.eclipse.jdt.core/3.25.0/org.eclipse.jdt.core-3.25.0.jar"),
-				Path.of("/home/meo/.m2/repository/org/eclipse/platform/org.eclipse.text/3.11.0/org.eclipse.text-3.11.0.jar"),
+				Path.of("/home/meo/.m2/repository/org/eclipse/jdt/org.eclipse.jdt.core/3.30.0/org.eclipse.jdt.core-3.30.0.jar"),
+				Path.of("/home/meo/.m2/repository/org/eclipse/platform/org.eclipse.text/3.12.0/org.eclipse.text-3.12.0.jar"),
 				Path.of("/home/meo/.m2/repository/mrmathami/mrmathami.utils/1.0.6/mrmathami.utils-1.0.6.jar")
 		);
 

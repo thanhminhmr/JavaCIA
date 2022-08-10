@@ -19,9 +19,7 @@
 package mrmathami.cia.java.tree.node;
 
 import mrmathami.annotations.Nonnull;
-import mrmathami.cia.java.tree.JavaEntity;
-
-import java.util.List;
+import mrmathami.annotations.Nullable;
 
 public interface JavaInitializerNode extends JavaNode {
 
@@ -42,57 +40,9 @@ public interface JavaInitializerNode extends JavaNode {
 
 	boolean isStatic();
 
-	@Nonnull
-	List<? extends Initializer> getInitializers();
+	@Nullable
+	String getBodyBlock();
 
 	//endregion Getter & Setter
-
-	interface Initializer extends JavaEntity {
-	}
-
-	interface BlockInitializer extends Initializer {
-
-		//region Basic Getter
-
-		@Nonnull
-		@Override
-		default String getEntityClass() {
-			return "JavaClassNode.BlockInitializer";
-		}
-
-		//endregion Basic Getter
-
-		//region Getter & Setter
-
-		@Nonnull
-		String getBodyBlock();
-
-		//endregion Getter & Setter
-
-	}
-
-	interface FieldInitializer extends Initializer {
-
-		//region Basic Getter
-
-		@Nonnull
-		@Override
-		default String getEntityClass() {
-			return "JavaClassNode.FieldInitializer";
-		}
-
-		//endregion Basic Getter
-
-		//region Getter & Setter
-
-		@Nonnull
-		JavaFieldNode getFieldNode();
-
-		@Nonnull
-		String getInitialExpression();
-
-		//endregion Getter & Setter
-
-	}
 
 }
